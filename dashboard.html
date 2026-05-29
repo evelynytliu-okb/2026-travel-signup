@@ -86,21 +86,18 @@ let PW = "";
 let SHOW_ID = false;
 const fmt = n => Number(n||0).toLocaleString("en-US");
 
-function jsonp(params){
-  return new Promise((resolve)=>{
-    const cb = "__dash" + Math.random().toString(36).slice(2,9);
-    const s = document.createElement("script");
-    window[cb] = function(res){ resolve(res); delete window[cb]; s.remove(); };
-    s.onerror = function(){ resolve({ok:false,error:"連線失敗，請稍後再試。"}); delete window[cb]; s.remove(); };
-    const q = Object.keys(params).map(k=>k+"="+encodeURIComponent(params[k])).join("&");
-    s.src = ENDPOINT + "?action=dashboard&callback=" + cb + "&" + q + "&_=" + Date.now();
-    document.body.appendChild(s);
-  });
+/* 用 credentials:"omit" 取資料：不送 Google cookie，避免多帳號被導去 /u/N 而失敗 */
+async function fetchData(params){
+  const q = Object.keys(params).map(k=>k+"="+encodeURIComponent(params[k])).join("&");
+  try{
+    const r = await fetch(ENDPOINT + "?action=dashboard&" + q + "&_=" + Date.now(), {credentials:"omit"});
+    return await r.json();
+  }catch(e){ return {ok:false, error:"連線失敗，請稍後再試。"}; }
 }
 
 async function load(){
   document.getElementById("content").innerHTML = '<div class="loading">載入中…</div>';
-  const res = await jsonp({ pw:PW, showId: SHOW_ID ? 1 : 0 });
+  const res = await fetchData({ pw:PW, showId: SHOW_ID ? 1 : 0 });
   if(!res || !res.ok){
     // back to gate if auth problem
     if(res && /密碼/.test(res.error||"")){
