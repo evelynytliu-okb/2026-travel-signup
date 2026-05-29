@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2026 員工旅遊報名表 ｜ 溪頭森林遊樂區・車埕二日遊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     設定區：部署 Google Apps Script 後，把網址貼到這裡
+     ============================================================ */
+  /* （見隨附的 Code.gs 與設定說明） */
+
+  :root{
+    --forest-900:#13301f;
+    --forest-800:#1c4029;
+    --forest-700:#265237;
+    --forest-600:#357250;
+    --moss:#6f9b5c;
+    --sage:#a9c49a;
+    --cream:#f6f2e7;
+    --paper:#fffdf8;
+    --bark:#5b4636;
+    --gold:#c79a3b;
+    --rust:#b5532f;
+    --line:#ddd5c2;
+    --ink:#23291f;
+    --muted:#7a7866;
+    --shadow:0 12px 40px -18px rgba(19,48,31,.55);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:"Noto Sans TC",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 500px at 80% -10%, rgba(111,155,92,.18), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, rgba(53,114,80,.14), transparent 55%),
+      var(--cream);
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* subtle paper grain */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 18px 64px;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    margin:22px 0 26px;border-radius:26px;overflow:hidden;
+    background:linear-gradient(160deg,var(--forest-800),var(--forest-600) 130%);
+    color:#f3f0e3;box-shadow:var(--shadow);position:relative;
+  }
+  .hero::after{
+    content:"";position:absolute;inset:0;opacity:.18;mix-blend-mode:soft-light;
+    background:
+      radial-gradient(closest-side, rgba(255,255,255,.7), transparent) 12% 120%/220px 220px no-repeat,
+      radial-gradient(closest-side, rgba(255,255,255,.5), transparent) 95% -20%/260px 260px no-repeat;
+  }
+  .hero-inner{position:relative;padding:30px 26px 28px;}
+  .ribbon{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:13px;letter-spacing:.14em;font-weight:700;
+    background:rgba(255,253,248,.14);border:1px solid rgba(255,253,248,.28);
+    padding:6px 14px;border-radius:999px;backdrop-filter:blur(4px);
+  }
+  .hero h1{
+    font-family:"Noto Serif TC",serif;font-weight:900;
+    font-size:clamp(26px,6vw,40px);line-height:1.25;margin:16px 0 6px;letter-spacing:.01em;
+  }
+  .hero .sub{font-size:clamp(15px,3.6vw,18px);font-weight:500;opacity:.92;}
+  .hero .meta{
+    display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:18px;font-size:14px;opacity:.95;
+  }
+  .hero .meta span{display:inline-flex;align-items:center;gap:7px;}
+  .hero .meta b{font-weight:700;color:#fff;}
+  .leaf{width:18px;height:18px;flex:none;}
+
+  /* ---------- Cards ---------- */
+  .card{
+    background:var(--paper);border:1px solid var(--line);border-radius:20px;
+    padding:22px 20px;margin:16px 0;box-shadow:0 6px 24px -20px rgba(19,48,31,.5);
+  }
+  .card h2{
+    font-family:"Noto Serif TC",serif;font-size:20px;font-weight:700;color:var(--forest-800);
+    margin:0 0 4px;display:flex;align-items:center;gap:10px;
+  }
+  .card h2 .num{
+    font-family:"Noto Sans TC";font-size:14px;font-weight:900;color:#fff;
+    background:var(--forest-600);width:26px;height:26px;border-radius:50%;
+    display:grid;place-items:center;flex:none;
+  }
+  .card .hint{font-size:13px;color:var(--muted);margin:0 0 16px;padding-left:36px;}
+
+  /* ---------- Fields ---------- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:560px){.grid{grid-template-columns:1fr;}}
+  label.f{display:block;font-size:13.5px;font-weight:700;color:var(--bark);margin-bottom:6px;}
+  label.f .req{color:var(--rust);margin-left:3px;}
+  input,select{
+    width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);
+    background:#fff;border:1.5px solid var(--line);border-radius:12px;
+    padding:11px 13px;transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus,select:focus{
+    outline:none;border-color:var(--forest-600);
+    box-shadow:0 0 0 4px rgba(53,114,80,.14);
+  }
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23357250' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
+
+  /* ---------- Room type ---------- */
+  .rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  @media(max-width:560px){.rooms{grid-template-columns:1fr;}}
+  .room{
+    position:relative;border:1.5px solid var(--line);border-radius:16px;
+    padding:16px 14px;cursor:pointer;background:#fff;transition:.18s;text-align:center;
+  }
+  .room input{position:absolute;opacity:0;pointer-events:none;}
+  .room .big{font-family:"Noto Serif TC";font-size:22px;font-weight:900;color:var(--forest-800);}
+  .room .small{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .room:hover{border-color:var(--moss);transform:translateY(-2px);}
+  .room.on{border-color:var(--forest-600);background:linear-gradient(180deg,#fff,#f1f6ec);box-shadow:0 8px 22px -16px rgba(53,114,80,.8);}
+  .room.on::after{content:"✓";position:absolute;top:8px;right:10px;color:var(--forest-600);font-weight:900;}
+
+  /* ---------- Participants ---------- */
+  .person{
+    border:1.5px solid var(--line);border-radius:16px;padding:16px 14px 14px;margin-bottom:14px;
+    background:linear-gradient(180deg,#fffefb,#fbf8f0);position:relative;
+  }
+  .person .ptag{
+    position:absolute;top:-10px;left:14px;background:var(--forest-700);color:#fff;
+    font-size:12px;font-weight:700;padding:2px 12px;border-radius:999px;letter-spacing:.04em;
+  }
+  .person .price{
+    margin-top:10px;font-size:14px;color:var(--forest-700);font-weight:700;
+    display:flex;justify-content:space-between;align-items:center;
+    border-top:1px dashed var(--line);padding-top:10px;
+  }
+  .person .price b{font-family:"Noto Serif TC";font-size:20px;}
+  .rm{
+    position:absolute;top:12px;right:12px;border:none;background:#f0e7d8;color:var(--rust);
+    width:30px;height:30px;border-radius:9px;font-size:18px;cursor:pointer;line-height:1;
+    transition:.15s;
+  }
+  .rm:hover{background:var(--rust);color:#fff;}
+  .add{
+    width:100%;border:1.5px dashed var(--moss);background:#f3f7ee;color:var(--forest-700);
+    font-family:inherit;font-size:15px;font-weight:700;padding:13px;border-radius:14px;cursor:pointer;
+    transition:.15s;
+  }
+  .add:hover{background:var(--forest-600);color:#fff;border-style:solid;}
+
+  /* ---------- Total bar ---------- */
+  .totalbar{
+    position:sticky;bottom:14px;margin-top:20px;z-index:5;
+    background:linear-gradient(135deg,var(--forest-800),var(--forest-600));
+    color:#fff;border-radius:18px;padding:16px 20px;box-shadow:var(--shadow);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  .totalbar .breakdown{flex:1;min-width:200px;}
+  .totalbar .brow{display:flex;justify-content:space-between;gap:14px;font-size:13.5px;opacity:.92;padding:1px 0;}
+  .totalbar .brow b{font-weight:700;}
+  .totalbar .brow.sub{color:#f3d98c;}
+  .totalbar .brow.main{margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.25);align-items:baseline;font-size:15px;opacity:1;font-weight:700;}
+  .totalbar .amt{font-family:"Noto Serif TC";font-size:28px;font-weight:900;line-height:1;}
+  .totalbar .amt small{font-size:14px;font-weight:500;opacity:.85;margin-left:3px;}
+  .submit{
+    background:var(--gold);color:#23200f;border:none;font-family:inherit;font-weight:900;
+    font-size:16px;padding:13px 26px;border-radius:12px;cursor:pointer;letter-spacing:.04em;
+    transition:.15s;box-shadow:0 6px 16px -8px rgba(0,0,0,.5);
+  }
+  .submit:hover{transform:translateY(-2px);background:#d8a945;}
+  .submit:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+
+  /* ---------- Notes ---------- */
+  .notes{font-size:13px;color:var(--bark);background:#fbf4e3;border:1px solid #ecdcb6;border-radius:14px;padding:14px 16px;margin-top:16px;}
+  .notes b{color:var(--rust);}
+  .notes ul{margin:8px 0 0;padding-left:20px;}
+  .notes li{margin-bottom:5px;}
+
+  .foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:26px;}
+
+  /* ---------- Success overlay ---------- */
+  .overlay{
+    position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:24px;
+    background:rgba(19,48,31,.55);backdrop-filter:blur(6px);
+  }
+  .overlay.show{display:grid;animation:fade .3s ease;}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{
+    background:var(--paper);border-radius:22px;max-width:420px;width:100%;padding:34px 28px;
+    text-align:center;box-shadow:var(--shadow);animation:pop .35s cubic-bezier(.2,.8,.3,1.2);
+  }
+  @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal .ic{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:#eaf3e3;display:grid;place-items:center;}
+  .modal h3{font-family:"Noto Serif TC";color:var(--forest-800);font-size:24px;margin:0 0 8px;}
+  .modal p{color:var(--muted);font-size:14.5px;margin:0 0 20px;}
+  .modal .sum{background:#f4f7ef;border-radius:12px;padding:14px;font-size:14px;margin-bottom:18px;text-align:left;}
+  .modal .mhead{font-size:15px;margin-bottom:8px;line-height:1.5;}
+  .modal .mlist{border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);padding:6px 0;margin-bottom:6px;}
+  .modal .mp{display:flex;justify-content:space-between;gap:10px;padding:2px 0;font-size:13.5px;}
+  .modal .mp.tot{padding-top:6px;font-weight:700;}
+  .modal .mp.bal{margin-top:4px;padding-top:6px;border-top:1px solid var(--line);font-weight:900;color:var(--rust);font-size:16px;}
+  .modal button{background:var(--forest-700);color:#fff;border:none;font-family:inherit;font-weight:700;font-size:15px;padding:11px 22px;border-radius:11px;cursor:pointer;}
+
+  .err{display:none;background:#fbe6df;border:1px solid #e7a78f;color:#9a3414;border-radius:12px;padding:11px 14px;font-size:14px;margin-top:12px;font-weight:600;}
+  .err.show{display:block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="ribbon">🌲 2026 員工旅遊・歡渡員工親子逍遙遊</span>
+      <h1>溪頭森林遊樂區<br/>車埕火車站 二日遊</h1>
+      <div class="sub">訊映光電 ｜ 報名費用分攤表</div>
+      <div class="meta">
+        <span><svg class="leaf" viewBox="0 0 24 24" fill="none"><path d="M3 12c0-5 4-9 9-9 5 0 9 4 9 9 0 5-4 9-9 9-5 0-9-4-9-9Z" stroke="#fff" stroke-opacity=".6"/><path d="M8 13c2-3 5-4 8-4" stroke="#fff" stroke-linecap="round"/></svg> 出發日期 <b>115/10/17（六）～10/18（日）</b></span>
+        <span>🚆 含遊覽車・住宿・二日保險</span>
+      </div>
+    </div>
+  </header>
+
+  <form id="form" novalidate>
+
+    <!-- ===== 1 報名人資料 ===== -->
+    <section class="card">
+      <h2><span class="num">1</span>報名人資料</h2>
+      <p class="hint">填寫此份報名表的聯絡窗口（通常為員工本人）。</p>
+      <div class="grid">
+        <div>
+          <label class="f">員工姓名<span class="req">*</span></label>
+          <input name="emp_name" id="emp_name" autocomplete="name" placeholder="請輸入您的姓名" />
+        </div>
+        <div>
+          <label class="f">工號<span class="req">*</span></label>
+          <input name="emp_id" id="emp_id" placeholder="公司補助依工號帶入" />
+        </div>
+        <div>
+          <label class="f">部門 / 單位<span class="req">*</span></label>
+          <input name="dept" id="dept" placeholder="例：生產部" />
+        </div>
+        <div>
+          <label class="f">聯絡手機<span class="req">*</span></label>
+          <input name="phone" id="phone" type="tel" inputmode="numeric" placeholder="09xx-xxx-xxx" />
+        </div>
+        <div>
+          <label class="f">Email（選填）</label>
+          <input name="email" id="email" type="email" placeholder="收報名確認用" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 2 房型 ===== -->
+    <section class="card">
+      <h2><span class="num">2</span>選擇房型</h2>
+      <p class="hint">房型會影響每人費用，可先填寫期望房型，後續由承辦同事依實際分房微調。</p>
+      <div class="rooms" id="rooms">
+        <label class="room"><input type="radio" name="room" value="2" /><div class="big">2 人房</div><div class="small">每人費用較高</div></label>
+        <label class="room"><input type="radio" name="room" value="3" /><div class="big">3 人房</div><div class="small">適合小家庭</div></label>
+        <label class="room"><input type="radio" name="room" value="4" /><div class="big">4 人房</div><div class="small">最划算</div></label>
+      </div>
+    </section>
+
+    <!-- ===== 3 同行人員 ===== -->
+    <section class="card">
+      <h2><span class="num">3</span>同行人員與身分</h2>
+      <p class="hint">請新增每一位參加者（含本人與眷屬），系統將依房型與身分自動計算費用。</p>
+      <div id="people"></div>
+      <button type="button" class="add" id="addBtn">＋ 新增一位同行者</button>
+
+      <div class="notes">
+        <b>注意事項：</b>
+        <ul>
+          <li>持證件貴賓（長者榮譽志工證／身心障礙手冊／學生證），<b>當天需攜帶正本驗證</b>；未帶正本視同成人全票。</li>
+          <li>2-5 歲不佔床、均含餐；如身高超過 100cm，飯店自助早餐費用請自行於現場處理。</li>
+          <li>未滿 2 歲含車資／二日保險／小費／飯店嬰兒備品，<b>不含餐及住宿</b>，如需要請自行處理。</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="err" id="err"></div>
+
+    <!-- ===== Total ===== -->
+    <div class="totalbar">
+      <div class="breakdown">
+        <div class="brow"><span>合計 <b id="cnt">0</b> 位 · 總金額</span><span>NT$ <b id="total">0</b></span></div>
+        <div class="brow sub"><span>公司補助（依工號）</span><span>− NT$ <b id="subsidy">0</b></span></div>
+        <div class="brow main"><span>應補差額</span><span class="amt">NT$ <span id="balance">0</span><small>元</small></span></div>
+      </div>
+      <button type="submit" class="submit" id="submitBtn">送出報名</button>
+    </div>
+  </form>
+
+  <p class="foot">訊映光電股份有限公司 ｜ 2026 員工旅遊報名系統</p>
+</div>
+
+<!-- ===== Success ===== -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="ic">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="#357250" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h3>報名成功！</h3>
+    <p>您的報名資料已送出，承辦同事會收到通知。</p>
+    <div class="sum" id="modalSum"></div>
+    <button type="button" id="closeBtn">再報名一筆</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   1) 部署後請填入你的 Google Apps Script 網址：
+   ============================================================ */
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbzGE46TFzPMXlfBvT88mLjobexmgnpSlWf_U_Rl2PBzWMUca7_mUc5-pI64F75Kx8ymKg/exec";
+
+/* ============================================================
+   2) 公司補助
+   ------------------------------------------------------------
+   補助名單「不在這裡改」，改在 Google 試算表的「補助設定」分頁。
+   員工輸入工號時，網頁會自動向後端查詢該工號的補助金額。
+   下面的 DEFAULT_SUBSIDY 只是「查不到後端時」的備援預設值。
+   ============================================================ */
+const DEFAULT_SUBSIDY = 10000;
+let currentSubsidy = DEFAULT_SUBSIDY;   // 目前工號對應的補助（由後端帶入）
+function getSubsidy(){ return currentSubsidy; }
+
+/* 依工號向後端查補助（JSONP，避開跨網域限制） */
+let _subSeq = 0, _subTimer = null;
+function fetchSubsidy(empId){
+  const id = (empId||"").trim();
+  if(!ENDPOINT.startsWith("http") || !id){
+    currentSubsidy = DEFAULT_SUBSIDY; recalc(); return;
+  }
+  const cb = "__sub" + (++_subSeq);
+  const s = document.createElement("script");
+  window[cb] = function(res){
+    currentSubsidy = (res && res.ok && typeof res.subsidy === "number") ? res.subsidy : DEFAULT_SUBSIDY;
+    recalc();
+    delete window[cb]; s.remove();
+  };
+  s.onerror = function(){ currentSubsidy = DEFAULT_SUBSIDY; recalc(); delete window[cb]; s.remove(); };
+  s.src = ENDPOINT + "?callback=" + cb + "&empId=" + encodeURIComponent(id) + "&_=" + Date.now();
+  document.body.appendChild(s);
+}
+
+/* 費用表：房型 → 身分 → 金額 */
+const PRICES = {
+  "2": {adult:6725, student:6655, senior:6565, disabled:6525, child25:3000, baby:1500},
+  "3": {adult:6525, student:6455, senior:6365, disabled:6325, child25:2800, baby:1500},
+  "4": {adult:6325, student:6255, senior:6165, disabled:6125, child25:2600, baby:1500},
+};
+const AGE_LABELS = {
+  adult:"成人",
+  student:"6-12歲 學生及兒童",
+  senior:"65歲以上長者（持榮譽志工證）",
+  disabled:"持身心障礙手冊（含一位陪同）",
+  child25:"2-5歲（不佔床・含餐）",
+  baby:"未滿 2 歲（不足2歲）",
+};
+const REL = ["本人","配偶","子女","父母","其他親友"];
+
+const peopleEl = document.getElementById("people");
+const fmt = n => n.toLocaleString("en-US");
+
+function ageOptions(){
+  return Object.entries(AGE_LABELS).map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+}
+function relOptions(first){
+  return REL.map((r,i)=>`<option ${ (first&&i===0)?"selected":"" } value="${r}">${r}</option>`).join("");
+}
+
+let idx = 0;
+function addPerson(first=false){
+  idx++;
+  const div = document.createElement("div");
+  div.className = "person";
+  div.dataset.id = idx;
+  div.innerHTML = `
+    <span class="ptag">第 ${peopleEl.children.length+1} 位</span>
+    ${ first ? "" : '<button type="button" class="rm" title="移除">×</button>' }
+    <div class="grid">
+      <div>
+        <label class="f">姓名<span class="req">*</span></label>
+        <input class="p-name" placeholder="同行者姓名" />
+      </div>
+      <div>
+        <label class="f">與報名人關係</label>
+        <select class="p-rel">${relOptions(first)}</select>
+      </div>
+      <div style="grid-column:1/-1">
+        <label class="f">年齡 / 身分<span class="req">*</span></label>
+        <select class="p-age">${ageOptions()}</select>
+      </div>
+    </div>
+    <div class="price"><span>本人費用</span><span><b class="p-amt">—</b> 元</span></div>
+  `;
+  peopleEl.appendChild(div);
+  div.querySelector(".p-name")?.addEventListener("input", recalc);
+  div.querySelector(".p-age").addEventListener("change", recalc);
+  const rm = div.querySelector(".rm");
+  if(rm) rm.addEventListener("click", ()=>{ div.remove(); renumber(); recalc(); });
+  recalc();
+}
+function renumber(){
+  [...peopleEl.children].forEach((p,i)=> p.querySelector(".ptag").textContent = `第 ${i+1} 位`);
+}
+
+function selectedRoom(){
+  const r = document.querySelector('input[name="room"]:checked');
+  return r ? r.value : null;
+}
+
+function recalc(){
+  const room = selectedRoom();
+  let total = 0, count = 0;
+  [...peopleEl.children].forEach(p=>{
+    const age = p.querySelector(".p-age").value;
+    const amtEl = p.querySelector(".p-amt");
+    count++;
+    if(room){
+      const v = PRICES[room][age];
+      total += v;
+      amtEl.textContent = fmt(v);
+    } else {
+      amtEl.textContent = "—";
+    }
+  });
+  const subsidy = getSubsidy();
+  const balance = Math.max(0, total - subsidy);
+  document.getElementById("total").textContent = fmt(total);
+  document.getElementById("subsidy").textContent = fmt(subsidy);
+  document.getElementById("balance").textContent = fmt(balance);
+  document.getElementById("cnt").textContent = count;
+}
+/* 工號變動：稍候 0.4 秒再查補助，避免邊打邊查 */
+document.getElementById("emp_id").addEventListener("input", (e)=>{
+  clearTimeout(_subTimer);
+  const v = e.target.value;
+  _subTimer = setTimeout(()=>fetchSubsidy(v), 400);
+});
+
+/* room selection visuals */
+document.querySelectorAll('input[name="room"]').forEach(r=>{
+  r.addEventListener("change", ()=>{
+    document.querySelectorAll(".room").forEach(x=>x.classList.remove("on"));
+    r.closest(".room").classList.add("on");
+    recalc();
+  });
+});
+
+document.getElementById("addBtn").addEventListener("click", ()=>addPerson(false));
+document.getElementById("closeBtn").addEventListener("click", ()=>{
+  document.getElementById("overlay").classList.remove("show");
+});
+
+/* init with one person (本人) */
+addPerson(true);
+
+/* ---------- submit ---------- */
+const errEl = document.getElementById("err");
+function showErr(m){ errEl.textContent = m; errEl.classList.add("show"); errEl.scrollIntoView({behavior:"smooth",block:"center"}); }
+function clearErr(){ errEl.classList.remove("show"); }
+
+document.getElementById("form").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  clearErr();
+
+  const get = id => document.getElementById(id).value.trim();
+  const emp_name = get("emp_name"), emp_id = get("emp_id"), dept = get("dept"), phone = get("phone"), email = get("email");
+  const room = selectedRoom();
+
+  if(!emp_name) return showErr("請填寫員工姓名。");
+  if(!emp_id) return showErr("請填寫工號（公司補助依工號計算）。");
+  if(!dept) return showErr("請填寫部門 / 單位。");
+  if(!phone) return showErr("請填寫聯絡手機。");
+  if(!room) return showErr("請選擇房型。");
+
+  const people = [];
+  let valid = true;
+  [...peopleEl.children].forEach(p=>{
+    const name = p.querySelector(".p-name").value.trim();
+    const rel = p.querySelector(".p-rel").value;
+    const age = p.querySelector(".p-age").value;
+    if(!name) valid = false;
+    people.push({name, rel, age, ageLabel:AGE_LABELS[age], price:PRICES[room][age]});
+  });
+  if(!valid) return showErr("請填寫每一位同行者的姓名。");
+  if(people.length===0) return showErr("請至少新增一位同行者。");
+
+  const total = people.reduce((s,p)=>s+p.price,0);
+  const subsidy = getSubsidy();
+  const balance = Math.max(0, total - subsidy);
+  const payload = {
+    timestamp:new Date().toISOString(),
+    emp_name, emp_id, dept, phone, email,
+    room, roomLabel:room+"人房",
+    headcount:people.length,
+    total, subsidy, balance,
+    people,
+  };
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true; btn.textContent = "送出中…";
+
+  try{
+    if(ENDPOINT.startsWith("http")){
+      await fetch(ENDPOINT, {
+        method:"POST",
+        mode:"no-cors",
+        headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify(payload),
+      });
+    } else {
+      console.warn("尚未設定 ENDPOINT，僅本機預覽。", payload);
+      await new Promise(r=>setTimeout(r,500));
+    }
+    // success
+    const peopleRows = people.map(p=>`<div class="mp"><span>${p.name}（${p.rel}・${p.ageLabel}）</span><span>${fmt(p.price)}</span></div>`).join("");
+    document.getElementById("modalSum").innerHTML =
+      `<div class="mhead"><b>${emp_name}</b> ・ 工號 ${emp_id}<br/><span style="color:#7a7866">${dept} ｜ ${room} 人房 ｜ 共 ${people.length} 位</span></div>
+       <div class="mlist">${peopleRows}</div>
+       <div class="mp tot"><span>總金額</span><span>NT$ ${fmt(total)}</span></div>
+       <div class="mp"><span>公司補助</span><span>− NT$ ${fmt(subsidy)}</span></div>
+       <div class="mp bal"><span>應補差額</span><span>NT$ ${fmt(balance)} 元</span></div>`;
+    document.getElementById("overlay").classList.add("show");
+    // reset form for next entry
+    document.getElementById("form").reset();
+    document.querySelectorAll(".room").forEach(x=>x.classList.remove("on"));
+    peopleEl.innerHTML = ""; addPerson(true);
+    recalc();
+  }catch(err){
+    showErr("送出失敗，請檢查網路後再試一次，或聯絡承辦人員。");
+  }finally{
+    btn.disabled = false; btn.textContent = "送出報名";
+  }
+});
+</script>
+</body>
+</html>
