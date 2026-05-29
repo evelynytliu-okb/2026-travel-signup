@@ -109,9 +109,9 @@ function ageShort(a){
   if(a.indexOf("未滿")>=0||a.indexOf("2 歲")>=0) return "未滿2歲";
   return a;
 }
-function occShort(o){
+function occDisplay(o, surcharge){
   if(o==="公司安排合住人") return "公司合住";
-  if(o==="獨住加價") return "獨住+";
+  if(o==="獨住加價") return "獨住 +" + fmt(surcharge||0);
   return o||"";
 }
 
@@ -168,7 +168,7 @@ function render(res){
       <td class="nowrap">${r.idNumber||""}</td>
       <td class="nowrap">${r.dob||""}</td>
       <td class="nowrap">${r.room||""}</td>
-      <td class="nowrap">${occShort(r.occupancy)}</td>
+      <td class="nowrap">${occDisplay(r.occupancy, r.surcharge)}</td>
       <td class="num">${fmt(r.price)}</td>
       <td class="num">${r.subsidy!==""&&r.subsidy!=null?fmt(r.subsidy):"—"}</td>
     </tr>`).join("");
