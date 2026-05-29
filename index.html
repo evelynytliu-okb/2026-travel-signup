@@ -265,6 +265,7 @@
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbzGE46TFzPMXlfBvT88mLjobexmgnpSlWf_U_Rl2PBzWMUca7_mUc5-pI64F75Kx8ymKg/exec";
 
 const DEFAULT_SUBSIDY = 10000;        // 查不到後端時的備援預設補助
+const SUBSIDY_CAP = 10000;            // 每位員工補助上限（整筆再封頂在總費用）
 const SINGLE_SURCHARGE = 1600;        // 雙人房獨住加價（不列入補助）
 
 /* 費用表：房型 → 身分 → 金額 */
@@ -445,19 +446,32 @@ function renderRooming(headcount){
   return occupancy==="single" ? SINGLE_SURCHARGE : 0;
 }
 
+/* 公司補助：每位員工上限 SUBSIDY_CAP，整筆封頂在總費用（與後端一致） */
+function computeSubsidy(people, total){
+  let remaining = total, subsidy = 0;
+  people.forEach(p=>{
+    if(p.type==="employee"){
+      const ent = Math.min(SUBSIDY_CAP, subsidyOf(p.empId));
+      const give = Math.max(0, Math.min(ent, remaining));
+      subsidy += give; remaining -= give;
+    }
+  });
+  return subsidy;
+}
+
 /* ---- 計算 ---- */
 function recalc(){
   const room = selectedRoom();
   const people = readPeople();
-  let total=0, subsidy=0;
+  let total=0;
   people.forEach(p=>{
     if(room){
       const v = PRICES[room][p.age];
       total += v;
       if(p.el) p.el.textContent = fmt(v);
-      if(p.type==="employee") subsidy += subsidyOf(p.empId);
     } else if(p.el){ p.el.textContent = "—"; }
   });
+  const subsidy = room ? computeSubsidy(people, total) : 0;
   const surcharge = renderRooming(people.length);
   const balance = Math.max(0, total - subsidy) + surcharge;
   document.getElementById("cnt").textContent = people.length;
@@ -549,15 +563,21 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
 
   const surcharge = occupancy==="single" ? SINGLE_SURCHARGE : 0;
   const occLabel = occupancy==="single" ? "獨住加價" : (occupancy==="company" ? "公司安排合住人" : "住滿");
-  let total=0, subsidy=0;
+  let total=0;
+  people.forEach(p=>{ total += PRICES[room][p.age]; });
+  // 每位員工上限 SUBSIDY_CAP，整筆封頂在總費用（與後端一致）
+  let remaining = total, subsidy = 0;
   const outPeople = people.map(p=>{
     const price = PRICES[room][p.age];
-    total += price;
-    let psub = 0;
-    if(p.type==="employee"){ psub = subsidyOf(p.empId); subsidy += psub; }
+    let psub = "";
+    if(p.type==="employee"){
+      const ent = Math.min(SUBSIDY_CAP, subsidyOf(p.empId));
+      psub = Math.max(0, Math.min(ent, remaining));
+      subsidy += psub; remaining -= psub;
+    }
     return {type:p.type, name:p.name, relationship:p.relationship, empId:p.empId,
             age:p.age, ageLabel:AGE_LABELS[p.age], idNumber:p.idNumber, dob:p.dob,
-            price, subsidy:p.type==="employee"?psub:""};
+            price, subsidy:psub};
   });
   const balance = Math.max(0, total - subsidy) + surcharge;
 
