@@ -11,61 +11,61 @@
   :root{--forest-800:#1c4029;--forest-700:#265237;--forest-600:#357250;--moss:#6f9b5c;--cream:#f6f2e7;--paper:#fffdf8;--bark:#5b4636;--gold:#c79a3b;--rust:#b5532f;--line:#ddd5c2;--ink:#23291f;--muted:#7a7866;--shadow:0 12px 40px -18px rgba(19,48,31,.55);}
   *{box-sizing:border-box;}
   body{margin:0;font-family:"Noto Sans TC",sans-serif;color:var(--ink);background:radial-gradient(1200px 500px at 80% -10%,rgba(111,155,92,.18),transparent 60%),var(--cream);line-height:1.6;-webkit-font-smoothing:antialiased;}
-  .wrap{max-width:1080px;margin:0 auto;padding:24px 18px 64px;}
+  .wrap{max-width:1240px;margin:0 auto;padding:24px 18px 64px;}
   h1{font-family:"Noto Serif TC",serif;font-size:clamp(22px,4vw,30px);color:var(--forest-800);margin:6px 0 2px;}
-  .lead{color:var(--muted);font-size:14px;margin:0 0 20px;}
+  .lead{color:var(--muted);font-size:14px;margin:0 0 14px;}
 
-  /* gate */
-  .gate{max-width:380px;margin:8vh auto;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:32px 26px;box-shadow:var(--shadow);text-align:center;}
-  .gate h1{margin-bottom:6px;}
-  .gate p{color:var(--muted);font-size:14px;margin:0 0 18px;}
   input{width:100%;font-family:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;}
   input:focus{outline:none;border-color:var(--forest-600);box-shadow:0 0 0 4px rgba(53,114,80,.14);}
-  .btn{background:var(--forest-700);color:#fff;border:none;font-family:inherit;font-weight:700;font-size:15px;padding:12px 22px;border-radius:12px;cursor:pointer;transition:.15s;}
+  .btn{background:var(--forest-700);color:#fff;border:none;font-family:inherit;font-weight:700;font-size:15px;padding:10px 18px;border-radius:11px;cursor:pointer;transition:.15s;}
   .btn:hover{background:var(--forest-600);}
   .btn.gold{background:var(--gold);color:#23200f;}
   .btn.ghost{background:#eef4e8;color:var(--forest-700);}
-  .gerr{display:none;color:#9a3414;background:#fbe6df;border:1px solid #e7a78f;border-radius:10px;padding:9px 12px;font-size:13.5px;margin-top:12px;}
-  .gerr.show{display:block;}
 
-  /* stats */
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:8px;}
-  .stat{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:0 6px 24px -20px rgba(19,48,31,.5);}
+  /* groups */
+  .section-t{font-family:"Noto Serif TC";font-weight:700;color:var(--forest-800);font-size:17px;margin:22px 0 10px;display:flex;align-items:center;gap:8px;}
+  .section-t::before{content:"";width:6px;height:18px;border-radius:3px;background:var(--moss);display:inline-block;}
+  .grid{display:grid;gap:12px;}
+  .g4{grid-template-columns:repeat(4,1fr);}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  @media(max-width:760px){.g4,.g3{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 6px 24px -20px rgba(19,48,31,.5);}
   .stat .k{font-size:13px;color:var(--muted);}
-  .stat .v{font-family:"Noto Serif TC";font-size:30px;font-weight:900;color:var(--forest-800);line-height:1.1;margin-top:4px;}
-  .stat .v small{font-size:14px;color:var(--muted);font-weight:400;margin-left:3px;}
-  .stat.money .v{color:var(--rust);font-size:24px;}
-  .section-t{font-family:"Noto Serif TC";font-weight:700;color:var(--forest-800);font-size:18px;margin:24px 0 10px;}
+  .stat .v{font-family:"Noto Serif TC";font-size:28px;font-weight:900;color:var(--forest-800);line-height:1.1;margin-top:4px;}
+  .stat .v small{font-size:13px;color:var(--muted);font-weight:400;margin-left:3px;}
+  .stat.money .v{color:var(--rust);font-size:23px;}
 
-  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0 14px;}
-  .pill{background:#eef4e8;color:var(--forest-700);border-radius:999px;padding:5px 13px;font-size:13.5px;font-weight:700;}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
+  .idnote{font-size:12.5px;color:var(--muted);margin:0 0 8px;}
 
-  .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--paper);}
-  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:860px;}
-  th,td{padding:9px 11px;text-align:left;border-bottom:1px solid #eee4d2;white-space:nowrap;}
-  th{background:var(--forest-700);color:#fff;position:sticky;top:0;font-weight:700;}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--paper);}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;table-layout:auto;}
+  th,td{padding:7px 8px;text-align:left;border-bottom:1px solid #eee4d2;vertical-align:top;}
+  th{background:var(--forest-700);color:#fff;font-weight:700;white-space:nowrap;}
+  td{word-break:break-word;}
+  td.num{text-align:right;white-space:nowrap;}
+  td.nowrap{white-space:nowrap;}
   tr:nth-child(even) td{background:#fbf8f0;}
   td.emp{color:var(--forest-700);font-weight:700;}
   td.fam{color:var(--bark);}
-  .reg{font-family:monospace;font-size:12px;color:var(--muted);}
-  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
-  .idnote{font-size:12.5px;color:var(--muted);}
+  .reg{font-family:monospace;font-size:11px;color:var(--muted);}
   .loading{text-align:center;color:var(--muted);padding:30px;}
+
+  /* password modal */
+  .overlay{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:24px;background:rgba(19,48,31,.5);backdrop-filter:blur(5px);}
+  .overlay.show{display:grid;}
+  .modal{background:var(--paper);border-radius:18px;max-width:360px;width:100%;padding:26px 24px;box-shadow:var(--shadow);text-align:center;}
+  .modal h3{font-family:"Noto Serif TC";color:var(--forest-800);margin:0 0 6px;font-size:20px;}
+  .modal p{color:var(--muted);font-size:13.5px;margin:0 0 16px;}
+  .modal .row{display:flex;gap:8px;margin-top:14px;}
+  .modal .row .btn{flex:1;}
+  .merr{display:none;color:#9a3414;background:#fbe6df;border:1px solid #e7a78f;border-radius:10px;padding:8px 11px;font-size:13px;margin-top:10px;}
+  .merr.show{display:block;}
 </style>
 </head>
 <body>
 
-<!-- 密碼閘門 -->
-<div id="gate" class="gate">
-  <h1>報名後台</h1>
-  <p>請輸入後台密碼以查看統計與名單。</p>
-  <input id="pw" type="password" placeholder="後台密碼" autocomplete="off" />
-  <div style="margin-top:14px;"><button class="btn gold" id="enterBtn" style="width:100%;">進入</button></div>
-  <div class="gerr" id="gerr"></div>
-</div>
-
-<!-- 主畫面 -->
-<div id="app" class="wrap" style="display:none;">
+<div class="wrap">
   <div class="topbar">
     <div>
       <h1>2026 員工旅遊 報名後台</h1>
@@ -76,15 +76,44 @@
       <button class="btn" id="idBtn">顯示身分證</button>
     </div>
   </div>
-
   <div id="content"><div class="loading">載入中…</div></div>
+</div>
+
+<!-- 密碼 modal（只在「顯示身分證」時出現） -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3>顯示身分證</h3>
+    <p>身分證為個資，請輸入後台密碼才能顯示完整號碼。</p>
+    <input id="pw" type="password" placeholder="後台密碼" autocomplete="off" />
+    <div class="merr" id="merr"></div>
+    <div class="row">
+      <button class="btn ghost" id="pwCancel">取消</button>
+      <button class="btn gold" id="pwOk">確認顯示</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbzGE46TFzPMXlfBvT88mLjobexmgnpSlWf_U_Rl2PBzWMUca7_mUc5-pI64F75Kx8ymKg/exec";
-let PW = "";
 let SHOW_ID = false;
 const fmt = n => Number(n||0).toLocaleString("en-US");
+
+/* 年齡身分簡稱（表格用） */
+function ageShort(a){
+  a = a || "";
+  if(a.indexOf("成人")===0) return "成人";
+  if(a.indexOf("6-12")===0) return "學生/兒童";
+  if(a.indexOf("65")===0) return "長者";
+  if(a.indexOf("身心")>=0||a.indexOf("障")>=0) return "身障";
+  if(a.indexOf("2-5")===0||a.indexOf("2-5")>=0) return "2-5歲";
+  if(a.indexOf("未滿")>=0||a.indexOf("2 歲")>=0) return "未滿2歲";
+  return a;
+}
+function occShort(o){
+  if(o==="公司安排合住人") return "公司合住";
+  if(o==="獨住加價") return "獨住+";
+  return o||"";
+}
 
 /* 用 credentials:"omit" 取資料：不送 Google cookie，避免多帳號被導去 /u/N 而失敗 */
 async function fetchData(params){
@@ -95,92 +124,109 @@ async function fetchData(params){
   }catch(e){ return {ok:false, error:"連線失敗，請稍後再試。"}; }
 }
 
-async function load(){
+async function load(pw){
   document.getElementById("content").innerHTML = '<div class="loading">載入中…</div>';
-  const res = await fetchData({ pw:PW, showId: SHOW_ID ? 1 : 0 });
+  const params = { showId: SHOW_ID ? 1 : 0 };
+  if(SHOW_ID && pw) params.pw = pw;
+  const res = await fetchData(params);
   if(!res || !res.ok){
-    // back to gate if auth problem
-    if(res && /密碼/.test(res.error||"")){
-      document.getElementById("app").style.display="none";
-      document.getElementById("gate").style.display="block";
-      showGateErr(res.error);
-      return;
-    }
     document.getElementById("content").innerHTML = '<div class="loading">'+((res&&res.error)||"載入失敗")+'</div>';
     return;
   }
   render(res);
 }
 
+function statCard(k,v,unit,money){
+  return `<div class="stat${money?' money':''}"><div class="k">${k}</div><div class="v">${money?'NT$ ':''}${fmt(v)}${unit?`<small>${unit}</small>`:''}</div></div>`;
+}
+
 function render(res){
   const s = res.stats;
-  const cards = [
-    ['報名單數', s.regCount, '筆'],
-    ['總人數', s.totalPeople, '人'],
-    ['員工', s.empCount, '人'],
-    ['眷屬', s.famCount, '人'],
-    ['2人房', s.room2, '人'],
-    ['3人房', s.room3, '人'],
-    ['4人房', s.room4, '人'],
-    ['公司安排合住', s.companyCount, '筆'],
-    ['獨住加價', s.singleCount, '筆'],
-  ].map(c=>`<div class="stat"><div class="k">${c[0]}</div><div class="v">${fmt(c[1])}<small>${c[2]}</small></div></div>`).join("");
-  const money = [
-    ['總費用', s.totalCost],
-    ['公司補助合計', s.totalSubsidy],
-    ['獨住加價合計', s.totalSurcharge],
-    ['應補差額合計', s.totalBalance],
-  ].map(c=>`<div class="stat money"><div class="k">${c[0]}</div><div class="v">NT$ ${fmt(c[1])}</div></div>`).join("");
+  SHOW_ID = !!res.showId;
+  document.getElementById("idBtn").textContent = SHOW_ID ? "隱藏身分證" : "顯示身分證";
+
+  const overview =
+    statCard("報名單數", s.regCount, "筆") + statCard("總人數", s.totalPeople, "人") +
+    statCard("員工", s.empCount, "人") + statCard("眷屬", s.famCount, "人");
+  const rooms =
+    statCard("2 人房", s.room2, "人") + statCard("3 人房", s.room3, "人") + statCard("4 人房", s.room4, "人");
+  const occ =
+    statCard("公司安排合住", s.companyCount, "筆") + statCard("獨住加價", s.singleCount, "筆");
+  const money =
+    statCard("總費用", s.totalCost, "", true) + statCard("公司補助合計", s.totalSubsidy, "", true) +
+    statCard("獨住加價合計", s.totalSurcharge, "", true) + statCard("應補差額合計", s.totalBalance, "", true);
 
   const rows = res.roster.map(r=>`
     <tr>
-      <td class="reg">${r.regId}</td>
+      <td class="reg nowrap">${r.regId||""}</td>
       <td>${r.contact||""}</td>
-      <td class="${r.type==='員工'?'emp':'fam'}">${r.type}</td>
+      <td class="${r.type==='員工'?'emp':'fam'} nowrap">${r.type||""}</td>
       <td>${r.name||""}</td>
       <td>${r.relationship||""}</td>
-      <td>${r.empId||""}</td>
-      <td>${r.age||""}</td>
-      <td>${r.idNumber||""}</td>
-      <td>${r.dob||""}</td>
-      <td>${r.room||""}</td>
-      <td>${r.occupancy||""}</td>
-      <td style="text-align:right">${fmt(r.price)}</td>
-      <td style="text-align:right">${r.subsidy!==""&&r.subsidy!=null?fmt(r.subsidy):"—"}</td>
+      <td class="nowrap">${r.empId||""}</td>
+      <td class="nowrap">${ageShort(r.age)}</td>
+      <td class="nowrap">${r.idNumber||""}</td>
+      <td class="nowrap">${r.dob||""}</td>
+      <td class="nowrap">${r.room||""}</td>
+      <td class="nowrap">${occShort(r.occupancy)}</td>
+      <td class="num">${fmt(r.price)}</td>
+      <td class="num">${r.subsidy!==""&&r.subsidy!=null?fmt(r.subsidy):"—"}</td>
     </tr>`).join("");
 
-  document.getElementById("idBtn").textContent = res.showId ? "隱藏身分證" : "顯示身分證";
-  SHOW_ID = !!res.showId;
-
   document.getElementById("content").innerHTML = `
-    <div class="grid">${cards}</div>
+    <div class="section-t">報名概況</div>
+    <div class="grid g4">${overview}</div>
+    <div class="section-t">房型分布（人數）</div>
+    <div class="grid g3">${rooms}</div>
+    <div class="section-t">住宿安排</div>
+    <div class="grid g3">${occ}</div>
     <div class="section-t">金額統計</div>
-    <div class="grid">${money}</div>
+    <div class="grid g4">${money}</div>
     <div class="section-t">報名名單（每人一列）</div>
-    <div class="idnote" style="margin-bottom:8px;">${res.showId ? "⚠️ 目前顯示完整身分證，請注意保密；看完可按「隱藏身分證」。" : "身分證已遮蔽，需要時按右上「顯示身分證」。"}</div>
+    <div class="idnote">${SHOW_ID ? "⚠️ 目前顯示完整身分證，請注意保密；看完可按右上「隱藏身分證」。" : "身分證已遮蔽，需要時按右上「顯示身分證」並輸入密碼。"}</div>
     <div class="tablewrap"><table>
       <thead><tr>
         <th>報名單</th><th>聯絡窗口</th><th>身分別</th><th>姓名</th><th>關係</th><th>工號</th>
-        <th>年齡身分</th><th>身分證字號</th><th>出生年月日</th><th>房型</th><th>住宿安排</th>
+        <th>年齡身分</th><th>身分證</th><th>出生年月日</th><th>房型</th><th>住宿</th>
         <th style="text-align:right">費用</th><th style="text-align:right">補助</th>
       </tr></thead>
       <tbody>${rows || '<tr><td colspan="13" class="loading">目前沒有報名資料</td></tr>'}</tbody>
     </table></div>`;
 }
 
-function showGateErr(m){ const g=document.getElementById("gerr"); g.textContent=m; g.classList.add("show"); }
-function enter(){
-  const v = document.getElementById("pw").value.trim();
-  if(!v){ showGateErr("請輸入密碼。"); return; }
-  PW = v; SHOW_ID = false;
-  document.getElementById("gate").style.display="none";
-  document.getElementById("app").style.display="block";
-  load();
+/* 顯示身分證：開密碼 modal；隱藏：直接重載遮蔽版 */
+const overlay = document.getElementById("overlay");
+const merr = document.getElementById("merr");
+function openPw(){ merr.classList.remove("show"); document.getElementById("pw").value=""; overlay.classList.add("show"); document.getElementById("pw").focus(); }
+function closePw(){ overlay.classList.remove("show"); }
+async function confirmPw(){
+  const pw = document.getElementById("pw").value.trim();
+  if(!pw){ merr.textContent="請輸入密碼。"; merr.classList.add("show"); return; }
+  document.getElementById("content").innerHTML = '<div class="loading">驗證中…</div>';
+  SHOW_ID = true;
+  const res = await fetchData({ showId:1, pw:pw });
+  if(res && res.ok && res.showId){ closePw(); render(res); }
+  else {
+    SHOW_ID = false;
+    overlay.classList.add("show");
+    merr.textContent = (res && res.idError) || (res && res.error) || "密碼錯誤。";
+    merr.classList.add("show");
+    document.getElementById("content").innerHTML = "";
+    load();   // 重新顯示遮蔽版統計
+  }
 }
-document.getElementById("enterBtn").addEventListener("click", enter);
-document.getElementById("pw").addEventListener("keydown", e=>{ if(e.key==="Enter") enter(); });
+
+document.getElementById("idBtn").addEventListener("click", ()=>{
+  if(SHOW_ID){ SHOW_ID=false; load(); }    // 隱藏
+  else openPw();                            // 顯示 → 要密碼
+});
+document.getElementById("pwOk").addEventListener("click", confirmPw);
+document.getElementById("pwCancel").addEventListener("click", closePw);
+document.getElementById("pw").addEventListener("keydown", e=>{ if(e.key==="Enter") confirmPw(); });
 document.getElementById("refreshBtn").addEventListener("click", ()=>load());
-document.getElementById("idBtn").addEventListener("click", ()=>{ SHOW_ID=!SHOW_ID; load(); });
+
+/* 進入即載入（免密碼，遮蔽版） */
+load();
 </script>
 </body>
 </html>
