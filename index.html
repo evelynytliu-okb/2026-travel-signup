@@ -8,118 +8,60 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet" />
 <style>
-  /* ============================================================
-     設定區：部署 Google Apps Script 後，把網址貼到這裡
-     ============================================================ */
-  /* （見隨附的 Code.gs 與設定說明） */
-
   :root{
-    --forest-900:#13301f;
-    --forest-800:#1c4029;
-    --forest-700:#265237;
-    --forest-600:#357250;
-    --moss:#6f9b5c;
-    --sage:#a9c49a;
-    --cream:#f6f2e7;
-    --paper:#fffdf8;
-    --bark:#5b4636;
-    --gold:#c79a3b;
-    --rust:#b5532f;
-    --line:#ddd5c2;
-    --ink:#23291f;
-    --muted:#7a7866;
+    --forest-900:#13301f; --forest-800:#1c4029; --forest-700:#265237; --forest-600:#357250;
+    --moss:#6f9b5c; --sage:#a9c49a; --cream:#f6f2e7; --paper:#fffdf8; --bark:#5b4636;
+    --gold:#c79a3b; --rust:#b5532f; --line:#ddd5c2; --ink:#23291f; --muted:#7a7866;
     --shadow:0 12px 40px -18px rgba(19,48,31,.55);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{
-    margin:0;
-    font-family:"Noto Sans TC",sans-serif;
-    color:var(--ink);
+    margin:0; font-family:"Noto Sans TC",sans-serif; color:var(--ink);
     background:
       radial-gradient(1200px 500px at 80% -10%, rgba(111,155,92,.18), transparent 60%),
       radial-gradient(900px 500px at -10% 10%, rgba(53,114,80,.14), transparent 55%),
       var(--cream);
-    line-height:1.7;
-    -webkit-font-smoothing:antialiased;
+    line-height:1.7; -webkit-font-smoothing:antialiased;
   }
-  /* subtle paper grain */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
   }
   .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 18px 64px;}
 
-  /* ---------- Hero ---------- */
-  .hero{
-    margin:22px 0 26px;border-radius:26px;overflow:hidden;
-    background:linear-gradient(160deg,var(--forest-800),var(--forest-600) 130%);
-    color:#f3f0e3;box-shadow:var(--shadow);position:relative;
-  }
-  .hero::after{
-    content:"";position:absolute;inset:0;opacity:.18;mix-blend-mode:soft-light;
-    background:
-      radial-gradient(closest-side, rgba(255,255,255,.7), transparent) 12% 120%/220px 220px no-repeat,
-      radial-gradient(closest-side, rgba(255,255,255,.5), transparent) 95% -20%/260px 260px no-repeat;
-  }
+  /* Hero */
+  .hero{margin:22px 0 26px;border-radius:26px;overflow:hidden;background:linear-gradient(160deg,var(--forest-800),var(--forest-600) 130%);color:#f3f0e3;box-shadow:var(--shadow);position:relative;}
+  .hero::after{content:"";position:absolute;inset:0;opacity:.18;mix-blend-mode:soft-light;background:radial-gradient(closest-side, rgba(255,255,255,.7), transparent) 12% 120%/220px 220px no-repeat,radial-gradient(closest-side, rgba(255,255,255,.5), transparent) 95% -20%/260px 260px no-repeat;}
   .hero-inner{position:relative;padding:30px 26px 28px;}
-  .ribbon{
-    display:inline-flex;align-items:center;gap:8px;
-    font-size:13px;letter-spacing:.14em;font-weight:700;
-    background:rgba(255,253,248,.14);border:1px solid rgba(255,253,248,.28);
-    padding:6px 14px;border-radius:999px;backdrop-filter:blur(4px);
-  }
-  .hero h1{
-    font-family:"Noto Serif TC",serif;font-weight:900;
-    font-size:clamp(26px,6vw,40px);line-height:1.25;margin:16px 0 6px;letter-spacing:.01em;
-  }
+  .ribbon{display:inline-flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.14em;font-weight:700;background:rgba(255,253,248,.14);border:1px solid rgba(255,253,248,.28);padding:6px 14px;border-radius:999px;backdrop-filter:blur(4px);}
+  .hero h1{font-family:"Noto Serif TC",serif;font-weight:900;font-size:clamp(26px,6vw,40px);line-height:1.25;margin:16px 0 6px;letter-spacing:.01em;}
   .hero .sub{font-size:clamp(15px,3.6vw,18px);font-weight:500;opacity:.92;}
-  .hero .meta{
-    display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:18px;font-size:14px;opacity:.95;
-  }
+  .hero .meta{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:18px;font-size:14px;opacity:.95;}
   .hero .meta span{display:inline-flex;align-items:center;gap:7px;}
   .hero .meta b{font-weight:700;color:#fff;}
   .leaf{width:18px;height:18px;flex:none;}
 
-  /* ---------- Cards ---------- */
-  .card{
-    background:var(--paper);border:1px solid var(--line);border-radius:20px;
-    padding:22px 20px;margin:16px 0;box-shadow:0 6px 24px -20px rgba(19,48,31,.5);
-  }
-  .card h2{
-    font-family:"Noto Serif TC",serif;font-size:20px;font-weight:700;color:var(--forest-800);
-    margin:0 0 4px;display:flex;align-items:center;gap:10px;
-  }
-  .card h2 .num{
-    font-family:"Noto Sans TC";font-size:14px;font-weight:900;color:#fff;
-    background:var(--forest-600);width:26px;height:26px;border-radius:50%;
-    display:grid;place-items:center;flex:none;
-  }
+  /* Cards */
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:22px 20px;margin:16px 0;box-shadow:0 6px 24px -20px rgba(19,48,31,.5);}
+  .card h2{font-family:"Noto Serif TC",serif;font-size:20px;font-weight:700;color:var(--forest-800);margin:0 0 4px;display:flex;align-items:center;gap:10px;}
+  .card h2 .num{font-family:"Noto Sans TC";font-size:14px;font-weight:900;color:#fff;background:var(--forest-600);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;}
   .card .hint{font-size:13px;color:var(--muted);margin:0 0 16px;padding-left:36px;}
 
-  /* ---------- Fields ---------- */
+  /* Fields */
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   @media(max-width:560px){.grid{grid-template-columns:1fr;}}
+  .col-full{grid-column:1/-1;}
   label.f{display:block;font-size:13.5px;font-weight:700;color:var(--bark);margin-bottom:6px;}
   label.f .req{color:var(--rust);margin-left:3px;}
-  input,select{
-    width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);
-    background:#fff;border:1.5px solid var(--line);border-radius:12px;
-    padding:11px 13px;transition:border-color .15s, box-shadow .15s;
-  }
-  input:focus,select:focus{
-    outline:none;border-color:var(--forest-600);
-    box-shadow:0 0 0 4px rgba(53,114,80,.14);
-  }
+  input,select{width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;transition:border-color .15s, box-shadow .15s;}
+  input:focus,select:focus{outline:none;border-color:var(--forest-600);box-shadow:0 0 0 4px rgba(53,114,80,.14);}
   select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23357250' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
 
-  /* ---------- Room type ---------- */
+  /* Room type */
   .rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
   @media(max-width:560px){.rooms{grid-template-columns:1fr;}}
-  .room{
-    position:relative;border:1.5px solid var(--line);border-radius:16px;
-    padding:16px 14px;cursor:pointer;background:#fff;transition:.18s;text-align:center;
-  }
+  .room{position:relative;border:1.5px solid var(--line);border-radius:16px;padding:16px 14px;cursor:pointer;background:#fff;transition:.18s;text-align:center;}
   .room input{position:absolute;opacity:0;pointer-events:none;}
   .room .big{font-family:"Noto Serif TC";font-size:22px;font-weight:900;color:var(--forest-800);}
   .room .small{font-size:12.5px;color:var(--muted);margin-top:2px;}
@@ -127,75 +69,59 @@
   .room.on{border-color:var(--forest-600);background:linear-gradient(180deg,#fff,#f1f6ec);box-shadow:0 8px 22px -16px rgba(53,114,80,.8);}
   .room.on::after{content:"✓";position:absolute;top:8px;right:10px;color:var(--forest-600);font-weight:900;}
 
-  /* ---------- Participants ---------- */
-  .person{
-    border:1.5px solid var(--line);border-radius:16px;padding:16px 14px 14px;margin-bottom:14px;
-    background:linear-gradient(180deg,#fffefb,#fbf8f0);position:relative;
-  }
-  .person .ptag{
-    position:absolute;top:-10px;left:14px;background:var(--forest-700);color:#fff;
-    font-size:12px;font-weight:700;padding:2px 12px;border-radius:999px;letter-spacing:.04em;
-  }
-  .person .price{
-    margin-top:10px;font-size:14px;color:var(--forest-700);font-weight:700;
-    display:flex;justify-content:space-between;align-items:center;
-    border-top:1px dashed var(--line);padding-top:10px;
-  }
+  /* Person cards */
+  .person{border:1.5px solid var(--line);border-radius:16px;padding:18px 14px 14px;margin-bottom:14px;background:linear-gradient(180deg,#fffefb,#fbf8f0);position:relative;}
+  .person .ptag{position:absolute;top:-10px;left:14px;background:var(--forest-700);color:#fff;font-size:12px;font-weight:700;padding:2px 12px;border-radius:999px;letter-spacing:.04em;}
+  .person .price{margin-top:10px;font-size:14px;color:var(--forest-700);font-weight:700;display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line);padding-top:10px;}
   .person .price b{font-family:"Noto Serif TC";font-size:20px;}
-  .rm{
-    position:absolute;top:12px;right:12px;border:none;background:#f0e7d8;color:var(--rust);
-    width:30px;height:30px;border-radius:9px;font-size:18px;cursor:pointer;line-height:1;
-    transition:.15s;
-  }
+  .rm{position:absolute;top:12px;right:12px;border:none;background:#f0e7d8;color:var(--rust);width:30px;height:30px;border-radius:9px;font-size:18px;cursor:pointer;line-height:1;transition:.15s;}
   .rm:hover{background:var(--rust);color:#fff;}
-  .add{
-    width:100%;border:1.5px dashed var(--moss);background:#f3f7ee;color:var(--forest-700);
-    font-family:inherit;font-size:15px;font-weight:700;padding:13px;border-radius:14px;cursor:pointer;
-    transition:.15s;
-  }
+  .add{width:100%;border:1.5px dashed var(--moss);background:#f3f7ee;color:var(--forest-700);font-family:inherit;font-size:15px;font-weight:700;padding:13px;border-radius:14px;cursor:pointer;transition:.15s;}
   .add:hover{background:var(--forest-600);color:#fff;border-style:solid;}
 
-  /* ---------- Total bar ---------- */
-  .totalbar{
-    position:sticky;bottom:14px;margin-top:20px;z-index:5;
-    background:linear-gradient(135deg,var(--forest-800),var(--forest-600));
-    color:#fff;border-radius:18px;padding:16px 20px;box-shadow:var(--shadow);
-    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-  }
+  /* segmented toggle 員工/眷屬 */
+  .seg{display:inline-flex;background:#eee4d2;border-radius:10px;padding:3px;margin-bottom:4px;}
+  .seg label{position:relative;cursor:pointer;}
+  .seg input{position:absolute;opacity:0;pointer-events:none;}
+  .seg span{display:block;padding:6px 16px;border-radius:8px;font-size:14px;font-weight:700;color:var(--bark);transition:.15s;}
+  .seg input:checked + span{background:var(--forest-600);color:#fff;}
+
+  /* Rooming */
+  .roomopt{border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;background:#fff;transition:.15s;}
+  .roomopt:hover{border-color:var(--moss);}
+  .roomopt.on{border-color:var(--forest-600);background:#f1f6ec;}
+  .roomopt input{margin-top:3px;width:auto;flex:none;}
+  .roomopt .ot{font-weight:700;color:var(--forest-800);}
+  .roomopt .od{font-size:13px;color:var(--muted);}
+  .roominfo{font-size:14px;border-radius:12px;padding:12px 14px;}
+  .roominfo.full{background:#eef4e8;color:var(--forest-700);}
+  .roominfo.over{background:#fbe6df;color:#9a3414;font-weight:700;}
+
+  /* Total bar */
+  .totalbar{position:sticky;bottom:14px;margin-top:20px;z-index:5;background:linear-gradient(135deg,var(--forest-800),var(--forest-600));color:#fff;border-radius:18px;padding:16px 20px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
   .totalbar .breakdown{flex:1;min-width:200px;}
   .totalbar .brow{display:flex;justify-content:space-between;gap:14px;font-size:13.5px;opacity:.92;padding:1px 0;}
   .totalbar .brow b{font-weight:700;}
   .totalbar .brow.sub{color:#f3d98c;}
+  .totalbar .brow.sur{color:#ffd0bf;}
   .totalbar .brow.main{margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.25);align-items:baseline;font-size:15px;opacity:1;font-weight:700;}
   .totalbar .amt{font-family:"Noto Serif TC";font-size:28px;font-weight:900;line-height:1;}
   .totalbar .amt small{font-size:14px;font-weight:500;opacity:.85;margin-left:3px;}
-  .submit{
-    background:var(--gold);color:#23200f;border:none;font-family:inherit;font-weight:900;
-    font-size:16px;padding:13px 26px;border-radius:12px;cursor:pointer;letter-spacing:.04em;
-    transition:.15s;box-shadow:0 6px 16px -8px rgba(0,0,0,.5);
-  }
+  .submit{background:var(--gold);color:#23200f;border:none;font-family:inherit;font-weight:900;font-size:16px;padding:13px 26px;border-radius:12px;cursor:pointer;letter-spacing:.04em;transition:.15s;box-shadow:0 6px 16px -8px rgba(0,0,0,.5);}
   .submit:hover{transform:translateY(-2px);background:#d8a945;}
   .submit:disabled{opacity:.55;cursor:not-allowed;transform:none;}
 
-  /* ---------- Notes ---------- */
   .notes{font-size:13px;color:var(--bark);background:#fbf4e3;border:1px solid #ecdcb6;border-radius:14px;padding:14px 16px;margin-top:16px;}
   .notes b{color:var(--rust);}
   .notes ul{margin:8px 0 0;padding-left:20px;}
   .notes li{margin-bottom:5px;}
-
   .foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:26px;}
 
-  /* ---------- Success overlay ---------- */
-  .overlay{
-    position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:24px;
-    background:rgba(19,48,31,.55);backdrop-filter:blur(6px);
-  }
+  /* Success overlay */
+  .overlay{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:24px;background:rgba(19,48,31,.55);backdrop-filter:blur(6px);overflow:auto;}
   .overlay.show{display:grid;animation:fade .3s ease;}
   @keyframes fade{from{opacity:0}to{opacity:1}}
-  .modal{
-    background:var(--paper);border-radius:22px;max-width:420px;width:100%;padding:34px 28px;
-    text-align:center;box-shadow:var(--shadow);animation:pop .35s cubic-bezier(.2,.8,.3,1.2);
-  }
+  .modal{background:var(--paper);border-radius:22px;max-width:440px;width:100%;padding:34px 28px;text-align:center;box-shadow:var(--shadow);animation:pop .35s cubic-bezier(.2,.8,.3,1.2);margin:auto;}
   @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
   .modal .ic{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:#eaf3e3;display:grid;place-items:center;}
   .modal h3{font-family:"Noto Serif TC";color:var(--forest-800);font-size:24px;margin:0 0 8px;}
@@ -215,7 +141,6 @@
 <body>
 <div class="wrap">
 
-  <!-- ===== HERO ===== -->
   <header class="hero">
     <div class="hero-inner">
       <span class="ribbon">🌲 2026 員工旅遊・歡渡員工親子逍遙遊</span>
@@ -230,38 +155,51 @@
 
   <form id="form" novalidate>
 
-    <!-- ===== 1 報名人資料 ===== -->
+    <!-- 1 報名人(本人) -->
     <section class="card">
-      <h2><span class="num">1</span>報名人資料</h2>
-      <p class="hint">填寫此份報名表的聯絡窗口（通常為員工本人）。</p>
+      <h2><span class="num">1</span>報名人資料（本人）</h2>
+      <p class="hint">這份報名表的聯絡窗口，同時也是參加的員工本人。眷屬與同住同事請在下方新增。</p>
       <div class="grid">
         <div>
           <label class="f">員工姓名<span class="req">*</span></label>
-          <input name="emp_name" id="emp_name" autocomplete="name" placeholder="請輸入您的姓名" />
+          <input id="emp_name" autocomplete="name" placeholder="請輸入您的姓名" />
         </div>
         <div>
           <label class="f">工號<span class="req">*</span></label>
-          <input name="emp_id" id="emp_id" placeholder="公司補助依工號帶入" />
+          <input id="emp_id" placeholder="公司補助依工號帶入" />
         </div>
         <div>
           <label class="f">部門 / 單位<span class="req">*</span></label>
-          <input name="dept" id="dept" placeholder="例：生產部" />
+          <input id="dept" placeholder="例：生產部" />
         </div>
         <div>
           <label class="f">聯絡手機<span class="req">*</span></label>
-          <input name="phone" id="phone" type="tel" inputmode="numeric" placeholder="09xx-xxx-xxx" />
+          <input id="phone" type="tel" inputmode="numeric" placeholder="09xx-xxx-xxx" />
+        </div>
+        <div>
+          <label class="f">身分證字號<span class="req">*</span></label>
+          <input id="emp_idno" placeholder="投保用，例 A123456789" />
+        </div>
+        <div>
+          <label class="f">出生年月日<span class="req">*</span></label>
+          <input id="emp_dob" type="date" />
+        </div>
+        <div>
+          <label class="f">年齡 / 身分<span class="req">*</span></label>
+          <select id="emp_age"></select>
         </div>
         <div>
           <label class="f">Email（選填）</label>
-          <input name="email" id="email" type="email" placeholder="收報名確認用" />
+          <input id="email" type="email" placeholder="收報名確認用" />
         </div>
       </div>
+      <div class="price" style="margin-top:14px;"><span>本人費用</span><span><b class="p-amt" id="emp_amt">—</b> 元</span></div>
     </section>
 
-    <!-- ===== 2 房型 ===== -->
+    <!-- 2 房型 -->
     <section class="card">
       <h2><span class="num">2</span>選擇房型</h2>
-      <p class="hint">房型會影響每人費用，可先填寫期望房型，後續由承辦同事依實際分房微調。</p>
+      <p class="hint">房型會影響每人費用。若房間有空床，下方「住宿安排」會再請你選擇。</p>
       <div class="rooms" id="rooms">
         <label class="room"><input type="radio" name="room" value="2" /><div class="big">2 人房</div><div class="small">每人費用較高</div></label>
         <label class="room"><input type="radio" name="room" value="3" /><div class="big">3 人房</div><div class="small">適合小家庭</div></label>
@@ -269,30 +207,38 @@
       </div>
     </section>
 
-    <!-- ===== 3 同行人員 ===== -->
+    <!-- 3 其他同行者 -->
     <section class="card">
-      <h2><span class="num">3</span>同行人員與身分</h2>
-      <p class="hint">請新增每一位參加者（含本人與眷屬），系統將依房型與身分自動計算費用。</p>
+      <h2><span class="num">3</span>其他同行者（眷屬／同住同事）</h2>
+      <p class="hint">每位請選「眷屬」或「員工」。同住的另一位員工也請新增並選「員工」，系統會各自計算補助。只有本人時可不新增。</p>
       <div id="people"></div>
-      <button type="button" class="add" id="addBtn">＋ 新增一位同行者</button>
+      <button type="button" class="add" id="addBtn">＋ 新增同行者</button>
 
       <div class="notes">
         <b>注意事項：</b>
         <ul>
+          <li>有補助資格的眷屬：父母（直系）、子女（直系）、配偶、兄弟姊妹、情侶。</li>
+          <li>每位「員工」各自依工號計一份補助；眷屬不另計補助。</li>
           <li>持證件貴賓（長者榮譽志工證／身心障礙手冊／學生證），<b>當天需攜帶正本驗證</b>；未帶正本視同成人全票。</li>
-          <li>2-5 歲不佔床、均含餐；如身高超過 100cm，飯店自助早餐費用請自行於現場處理。</li>
-          <li>未滿 2 歲含車資／二日保險／小費／飯店嬰兒備品，<b>不含餐及住宿</b>，如需要請自行處理。</li>
+          <li>2-5 歲不佔床、均含餐；未滿 2 歲不含餐及住宿。投保需提供每位身分證字號與出生年月日。</li>
         </ul>
       </div>
     </section>
 
+    <!-- 4 住宿安排 -->
+    <section class="card" id="roomingCard" style="display:none;">
+      <h2><span class="num">4</span>住宿安排</h2>
+      <p class="hint" id="roomingHint"></p>
+      <div id="roomingBody"></div>
+    </section>
+
     <div class="err" id="err"></div>
 
-    <!-- ===== Total ===== -->
     <div class="totalbar">
       <div class="breakdown">
-        <div class="brow"><span>合計 <b id="cnt">0</b> 位 · 總金額</span><span>NT$ <b id="total">0</b></span></div>
-        <div class="brow sub"><span>公司補助（依工號）</span><span>− NT$ <b id="subsidy">0</b></span></div>
+        <div class="brow"><span>合計 <b id="cnt">1</b> 位 · 總金額</span><span>NT$ <b id="total">0</b></span></div>
+        <div class="brow sub"><span>公司補助（員工合計）</span><span>− NT$ <b id="subsidy">0</b></span></div>
+        <div class="brow sur" id="surRow" style="display:none;"><span>獨住加價</span><span>+ NT$ <b id="surcharge">0</b></span></div>
         <div class="brow main"><span>應補差額</span><span class="amt">NT$ <span id="balance">0</span><small>元</small></span></div>
       </div>
       <button type="submit" class="submit" id="submitBtn">送出報名</button>
@@ -302,12 +248,9 @@
   <p class="foot">訊映光電股份有限公司 ｜ 2026 員工旅遊報名系統</p>
 </div>
 
-<!-- ===== Success ===== -->
 <div class="overlay" id="overlay">
   <div class="modal">
-    <div class="ic">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="#357250" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
+    <div class="ic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="#357250" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <h3>報名成功！</h3>
     <p>您的報名資料已送出，承辦同事會收到通知。</p>
     <div class="sum" id="modalSum"></div>
@@ -317,39 +260,12 @@
 
 <script>
 /* ============================================================
-   1) 部署後請填入你的 Google Apps Script 網址：
+   部署後請填入你的 Google Apps Script 網址
    ============================================================ */
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbzGE46TFzPMXlfBvT88mLjobexmgnpSlWf_U_Rl2PBzWMUca7_mUc5-pI64F75Kx8ymKg/exec";
 
-/* ============================================================
-   2) 公司補助
-   ------------------------------------------------------------
-   補助名單「不在這裡改」，改在 Google 試算表的「補助設定」分頁。
-   員工輸入工號時，網頁會自動向後端查詢該工號的補助金額。
-   下面的 DEFAULT_SUBSIDY 只是「查不到後端時」的備援預設值。
-   ============================================================ */
-const DEFAULT_SUBSIDY = 10000;
-let currentSubsidy = DEFAULT_SUBSIDY;   // 目前工號對應的補助（由後端帶入）
-function getSubsidy(){ return currentSubsidy; }
-
-/* 依工號向後端查補助（JSONP，避開跨網域限制） */
-let _subSeq = 0, _subTimer = null;
-function fetchSubsidy(empId){
-  const id = (empId||"").trim();
-  if(!ENDPOINT.startsWith("http") || !id){
-    currentSubsidy = DEFAULT_SUBSIDY; recalc(); return;
-  }
-  const cb = "__sub" + (++_subSeq);
-  const s = document.createElement("script");
-  window[cb] = function(res){
-    currentSubsidy = (res && res.ok && typeof res.subsidy === "number") ? res.subsidy : DEFAULT_SUBSIDY;
-    recalc();
-    delete window[cb]; s.remove();
-  };
-  s.onerror = function(){ currentSubsidy = DEFAULT_SUBSIDY; recalc(); delete window[cb]; s.remove(); };
-  s.src = ENDPOINT + "?callback=" + cb + "&empId=" + encodeURIComponent(id) + "&_=" + Date.now();
-  document.body.appendChild(s);
-}
+const DEFAULT_SUBSIDY = 10000;        // 查不到後端時的備援預設補助
+const SINGLE_SURCHARGE = 1600;        // 雙人房獨住加價（不列入補助）
 
 /* 費用表：房型 → 身分 → 金額 */
 const PRICES = {
@@ -357,6 +273,7 @@ const PRICES = {
   "3": {adult:6525, student:6455, senior:6365, disabled:6325, child25:2800, baby:1500},
   "4": {adult:6325, student:6255, senior:6165, disabled:6125, child25:2600, baby:1500},
 };
+const CAP = {"2":2, "3":3, "4":4};
 const AGE_LABELS = {
   adult:"成人",
   student:"6-12歲 學生及兒童",
@@ -365,182 +282,292 @@ const AGE_LABELS = {
   child25:"2-5歲（不佔床・含餐）",
   baby:"未滿 2 歲（不足2歲）",
 };
-const REL = ["本人","配偶","子女","父母","其他親友"];
+const FAMILY_REL = ["配偶","子女（直系）","父母（直系）","兄弟姊妹","情侶"];
 
+function ageOptions(){ return Object.entries(AGE_LABELS).map(([v,l])=>`<option value="${v}">${l}</option>`).join(""); }
+const fmt = n => Number(n||0).toLocaleString("en-US");
 const peopleEl = document.getElementById("people");
-const fmt = n => n.toLocaleString("en-US");
 
-function ageOptions(){
-  return Object.entries(AGE_LABELS).map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+/* ---- 補助查詢（依工號，JSONP）---- */
+const subsidyCache = {};        // empId -> amount
+let _subSeq = 0;
+function fetchSubsidy(empId){
+  const id = (empId||"").trim();
+  if(!id || !ENDPOINT.startsWith("http")) { recalc(); return; }
+  if(subsidyCache.hasOwnProperty(id)) { recalc(); return; }
+  const cb = "__sub" + (++_subSeq);
+  const s = document.createElement("script");
+  window[cb] = function(res){
+    if(res && res.ok && typeof res.subsidy === "number") subsidyCache[id] = res.subsidy;
+    recalc(); delete window[cb]; s.remove();
+  };
+  s.onerror = function(){ recalc(); delete window[cb]; s.remove(); };
+  s.src = ENDPOINT + "?callback=" + cb + "&empId=" + encodeURIComponent(id) + "&_=" + Date.now();
+  document.body.appendChild(s);
 }
-function relOptions(first){
-  return REL.map((r,i)=>`<option ${ (first&&i===0)?"selected":"" } value="${r}">${r}</option>`).join("");
+function subsidyOf(empId){
+  const id=(empId||"").trim();
+  return subsidyCache.hasOwnProperty(id) ? subsidyCache[id] : DEFAULT_SUBSIDY;
 }
 
-let idx = 0;
-function addPerson(first=false){
-  idx++;
+/* ---- 其他同行者卡片 ---- */
+function addPerson(){
   const div = document.createElement("div");
   div.className = "person";
-  div.dataset.id = idx;
   div.innerHTML = `
-    <span class="ptag">第 ${peopleEl.children.length+1} 位</span>
-    ${ first ? "" : '<button type="button" class="rm" title="移除">×</button>' }
-    <div class="grid">
+    <span class="ptag">同行者</span>
+    <button type="button" class="rm" title="移除">×</button>
+    <div class="seg">
+      <label><input type="radio" name="t_${Date.now()}_${Math.random().toString(36).slice(2,6)}" class="p-type" value="family" checked /><span>眷屬</span></label>
+      <label><input type="radio" name="t_${Date.now()}_${Math.random().toString(36).slice(2,6)}b" class="p-type" value="employee" /><span>員工</span></label>
+    </div>
+    <div class="grid" style="margin-top:8px;">
       <div>
         <label class="f">姓名<span class="req">*</span></label>
         <input class="p-name" placeholder="同行者姓名" />
       </div>
-      <div>
-        <label class="f">與報名人關係</label>
-        <select class="p-rel">${relOptions(first)}</select>
+      <div class="cond-family">
+        <label class="f">與本人關係<span class="req">*</span></label>
+        <select class="p-rel">${FAMILY_REL.map(r=>`<option value="${r}">${r}</option>`).join("")}</select>
       </div>
-      <div style="grid-column:1/-1">
+      <div class="cond-emp" style="display:none;">
+        <label class="f">工號<span class="req">*</span></label>
+        <input class="p-empid" placeholder="員工工號（計補助用）" />
+      </div>
+      <div>
+        <label class="f">身分證字號<span class="req">*</span></label>
+        <input class="p-idno" placeholder="投保用" />
+      </div>
+      <div>
+        <label class="f">出生年月日<span class="req">*</span></label>
+        <input class="p-dob" type="date" />
+      </div>
+      <div class="col-full">
         <label class="f">年齡 / 身分<span class="req">*</span></label>
         <select class="p-age">${ageOptions()}</select>
       </div>
     </div>
-    <div class="price"><span>本人費用</span><span><b class="p-amt">—</b> 元</span></div>
+    <div class="price"><span>費用</span><span><b class="p-amt">—</b> 元</span></div>
   `;
   peopleEl.appendChild(div);
-  div.querySelector(".p-name")?.addEventListener("input", recalc);
+
+  // type toggle
+  div.querySelectorAll(".p-type").forEach(r=>r.addEventListener("change", ()=>{
+    const isEmp = div.querySelector(".p-type:checked").value === "employee";
+    div.querySelector(".cond-family").style.display = isEmp ? "none" : "";
+    div.querySelector(".cond-emp").style.display = isEmp ? "" : "none";
+    recalc();
+  }));
   div.querySelector(".p-age").addEventListener("change", recalc);
-  const rm = div.querySelector(".rm");
-  if(rm) rm.addEventListener("click", ()=>{ div.remove(); renumber(); recalc(); });
+  div.querySelector(".p-name").addEventListener("input", ()=>{});
+  let t=null;
+  div.querySelector(".p-empid").addEventListener("input", (e)=>{ clearTimeout(t); const v=e.target.value; t=setTimeout(()=>fetchSubsidy(v), 400); });
+  div.querySelector(".rm").addEventListener("click", ()=>{ div.remove(); renumber(); recalc(); });
+  renumber();
   recalc();
 }
-function renumber(){
-  [...peopleEl.children].forEach((p,i)=> p.querySelector(".ptag").textContent = `第 ${i+1} 位`);
+function renumber(){ [...peopleEl.children].forEach((p,i)=> p.querySelector(".ptag").textContent = `同行者 ${i+1}`); }
+
+function selectedRoom(){ const r=document.querySelector('input[name="room"]:checked'); return r?r.value:null; }
+
+/* ---- 讀取所有人 ---- */
+function readPeople(){
+  const out = [];
+  // 本人
+  out.push({
+    self:true, type:"employee", name:document.getElementById("emp_name").value.trim(),
+    relationship:"員工本人", empId:document.getElementById("emp_id").value.trim(),
+    age:document.getElementById("emp_age").value, idNumber:document.getElementById("emp_idno").value.trim(),
+    dob:document.getElementById("emp_dob").value, el:document.getElementById("emp_amt")
+  });
+  [...peopleEl.children].forEach(p=>{
+    const type = p.querySelector(".p-type:checked").value;
+    out.push({
+      self:false, type,
+      name:p.querySelector(".p-name").value.trim(),
+      relationship: type==="employee" ? "其他員工" : p.querySelector(".p-rel").value,
+      empId: type==="employee" ? p.querySelector(".p-empid").value.trim() : "",
+      age:p.querySelector(".p-age").value,
+      idNumber:p.querySelector(".p-idno").value.trim(),
+      dob:p.querySelector(".p-dob").value,
+      el:p.querySelector(".p-amt")
+    });
+  });
+  return out;
 }
 
-function selectedRoom(){
-  const r = document.querySelector('input[name="room"]:checked');
-  return r ? r.value : null;
+/* ---- 住宿安排 ---- */
+let occupancy = null;   // 'company' | 'single' | 'full' | null
+function renderRooming(headcount){
+  const room = selectedRoom();
+  const card = document.getElementById("roomingCard");
+  const body = document.getElementById("roomingBody");
+  const hint = document.getElementById("roomingHint");
+  if(!room){ card.style.display="none"; occupancy=null; return 0; }
+  const cap = CAP[room]; const empty = cap - headcount;
+  card.style.display = "";
+  if(headcount > cap){
+    occupancy = null;
+    hint.textContent = "";
+    body.innerHTML = `<div class="roominfo over">目前 ${headcount} 人超過所選 ${room} 人房（最多 ${cap} 人），請改選較大房型，或分成兩筆報名。</div>`;
+    return 0;
+  }
+  if(empty === 0){
+    occupancy = "full";
+    hint.textContent = "";
+    body.innerHTML = `<div class="roominfo full">✓ 此 ${room} 人房剛好住滿 ${cap} 人，無需加購。</div>`;
+    return 0;
+  }
+  // empty >= 1
+  hint.textContent = `所選 ${room} 人房尚有 ${empty} 個空床，請選擇空床如何處理。`;
+  let opts = `
+    <label class="roomopt" data-v="company">
+      <input type="radio" name="occ" value="company" />
+      <div><div class="ot">公司安排合住人</div><div class="od">空床由公司安排其他同仁同住，不加價。</div></div>
+    </label>`;
+  if(room === "2" && headcount === 1){
+    opts += `
+    <label class="roomopt" data-v="single">
+      <input type="radio" name="occ" value="single" />
+      <div><div class="ot">我要獨住整間雙人房</div><div class="od">加價 NT$ ${fmt(SINGLE_SURCHARGE)}（不列入公司補助）。</div></div>
+    </label>`;
+  }
+  body.innerHTML = opts;
+  // restore / wire
+  body.querySelectorAll('input[name="occ"]').forEach(r=>{
+    if(r.value === occupancy) r.checked = true;
+    r.addEventListener("change", ()=>{
+      occupancy = r.value;
+      body.querySelectorAll(".roomopt").forEach(o=>o.classList.toggle("on", o.dataset.v===occupancy));
+      recalc();
+    });
+  });
+  if(occupancy==="full" || occupancy===null || (occupancy==="single" && !(room==="2"&&headcount===1))) occupancy = null;
+  body.querySelectorAll(".roomopt").forEach(o=>o.classList.toggle("on", o.dataset.v===occupancy));
+  return occupancy==="single" ? SINGLE_SURCHARGE : 0;
 }
 
+/* ---- 計算 ---- */
 function recalc(){
   const room = selectedRoom();
-  let total = 0, count = 0;
-  [...peopleEl.children].forEach(p=>{
-    const age = p.querySelector(".p-age").value;
-    const amtEl = p.querySelector(".p-amt");
-    count++;
+  const people = readPeople();
+  let total=0, subsidy=0;
+  people.forEach(p=>{
     if(room){
-      const v = PRICES[room][age];
+      const v = PRICES[room][p.age];
       total += v;
-      amtEl.textContent = fmt(v);
-    } else {
-      amtEl.textContent = "—";
-    }
+      if(p.el) p.el.textContent = fmt(v);
+      if(p.type==="employee") subsidy += subsidyOf(p.empId);
+    } else if(p.el){ p.el.textContent = "—"; }
   });
-  const subsidy = getSubsidy();
-  const balance = Math.max(0, total - subsidy);
+  const surcharge = renderRooming(people.length);
+  const balance = Math.max(0, total - subsidy) + surcharge;
+  document.getElementById("cnt").textContent = people.length;
   document.getElementById("total").textContent = fmt(total);
   document.getElementById("subsidy").textContent = fmt(subsidy);
+  document.getElementById("surcharge").textContent = fmt(surcharge);
+  document.getElementById("surRow").style.display = surcharge>0 ? "" : "none";
   document.getElementById("balance").textContent = fmt(balance);
-  document.getElementById("cnt").textContent = count;
 }
-/* 工號變動：稍候 0.4 秒再查補助，避免邊打邊查 */
-document.getElementById("emp_id").addEventListener("input", (e)=>{
-  clearTimeout(_subTimer);
-  const v = e.target.value;
-  _subTimer = setTimeout(()=>fetchSubsidy(v), 400);
-});
 
-/* room selection visuals */
+/* room visuals */
 document.querySelectorAll('input[name="room"]').forEach(r=>{
   r.addEventListener("change", ()=>{
     document.querySelectorAll(".room").forEach(x=>x.classList.remove("on"));
     r.closest(".room").classList.add("on");
+    occupancy=null;
     recalc();
   });
 });
+document.getElementById("emp_age").innerHTML = ageOptions();
+["emp_name","dept","phone","emp_idno","emp_dob","emp_age"].forEach(id=>document.getElementById(id).addEventListener("input", recalc));
+document.getElementById("emp_age").addEventListener("change", recalc);
+let _et=null;
+document.getElementById("emp_id").addEventListener("input",(e)=>{ clearTimeout(_et); const v=e.target.value; _et=setTimeout(()=>fetchSubsidy(v),400); });
+document.getElementById("addBtn").addEventListener("click", addPerson);
+document.getElementById("closeBtn").addEventListener("click", ()=>document.getElementById("overlay").classList.remove("show"));
+recalc();
 
-document.getElementById("addBtn").addEventListener("click", ()=>addPerson(false));
-document.getElementById("closeBtn").addEventListener("click", ()=>{
-  document.getElementById("overlay").classList.remove("show");
-});
-
-/* init with one person (本人) */
-addPerson(true);
-
-/* ---------- submit ---------- */
+/* ---- submit ---- */
 const errEl = document.getElementById("err");
-function showErr(m){ errEl.textContent = m; errEl.classList.add("show"); errEl.scrollIntoView({behavior:"smooth",block:"center"}); }
+function showErr(m){ errEl.textContent=m; errEl.classList.add("show"); errEl.scrollIntoView({behavior:"smooth",block:"center"}); }
 function clearErr(){ errEl.classList.remove("show"); }
+function looseId(v){ return (v||"").trim().length>=8; }
 
 document.getElementById("form").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  clearErr();
-
-  const get = id => document.getElementById(id).value.trim();
-  const emp_name = get("emp_name"), emp_id = get("emp_id"), dept = get("dept"), phone = get("phone"), email = get("email");
+  e.preventDefault(); clearErr();
   const room = selectedRoom();
+  const people = readPeople();
+  const emp = people[0];
 
-  if(!emp_name) return showErr("請填寫員工姓名。");
-  if(!emp_id) return showErr("請填寫工號（公司補助依工號計算）。");
-  if(!dept) return showErr("請填寫部門 / 單位。");
-  if(!phone) return showErr("請填寫聯絡手機。");
+  if(!emp.name) return showErr("請填寫員工姓名。");
+  if(!emp.empId) return showErr("請填寫工號。");
+  if(!document.getElementById("dept").value.trim()) return showErr("請填寫部門 / 單位。");
+  if(!document.getElementById("phone").value.trim()) return showErr("請填寫聯絡手機。");
+  if(!looseId(emp.idNumber)) return showErr("請填寫本人身分證字號（投保用）。");
+  if(!emp.dob) return showErr("請填寫本人出生年月日。");
   if(!room) return showErr("請選擇房型。");
 
-  const people = [];
-  let valid = true;
-  [...peopleEl.children].forEach(p=>{
-    const name = p.querySelector(".p-name").value.trim();
-    const rel = p.querySelector(".p-rel").value;
-    const age = p.querySelector(".p-age").value;
-    if(!name) valid = false;
-    people.push({name, rel, age, ageLabel:AGE_LABELS[age], price:PRICES[room][age]});
-  });
-  if(!valid) return showErr("請填寫每一位同行者的姓名。");
-  if(people.length===0) return showErr("請至少新增一位同行者。");
+  for(let i=1;i<people.length;i++){
+    const p=people[i], n=`同行者 ${i}`;
+    if(!p.name) return showErr(`請填寫${n}的姓名。`);
+    if(p.type==="employee" && !p.empId) return showErr(`請填寫${n}的工號。`);
+    if(!looseId(p.idNumber)) return showErr(`請填寫${n}的身分證字號。`);
+    if(!p.dob) return showErr(`請填寫${n}的出生年月日。`);
+  }
 
-  const total = people.reduce((s,p)=>s+p.price,0);
-  const subsidy = getSubsidy();
-  const balance = Math.max(0, total - subsidy);
+  const cap = CAP[room];
+  if(people.length > cap) return showErr(`目前 ${people.length} 人超過所選 ${room} 人房（最多 ${cap} 人），請改選較大房型或分兩筆報名。`);
+  const empty = cap - people.length;
+  if(empty >= 1 && !occupancy) return showErr("請在「住宿安排」選擇空床如何處理。");
+
+  const surcharge = occupancy==="single" ? SINGLE_SURCHARGE : 0;
+  const occLabel = occupancy==="single" ? "獨住加價" : (occupancy==="company" ? "公司安排合住人" : "住滿");
+  let total=0, subsidy=0;
+  const outPeople = people.map(p=>{
+    const price = PRICES[room][p.age];
+    total += price;
+    let psub = 0;
+    if(p.type==="employee"){ psub = subsidyOf(p.empId); subsidy += psub; }
+    return {type:p.type, name:p.name, relationship:p.relationship, empId:p.empId,
+            age:p.age, ageLabel:AGE_LABELS[p.age], idNumber:p.idNumber, dob:p.dob,
+            price, subsidy:p.type==="employee"?psub:""};
+  });
+  const balance = Math.max(0, total - subsidy) + surcharge;
+
   const payload = {
+    regId: "R" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2,5).toUpperCase(),
     timestamp:new Date().toISOString(),
-    emp_name, emp_id, dept, phone, email,
-    room, roomLabel:room+"人房",
-    headcount:people.length,
-    total, subsidy, balance,
-    people,
+    contactName:emp.name, dept:document.getElementById("dept").value.trim(),
+    phone:document.getElementById("phone").value.trim(), email:document.getElementById("email").value.trim(),
+    room, roomLabel:room+"人房", occupancy:occLabel, surcharge,
+    headcount:people.length, total, subsidy, balance,
+    people:outPeople,
   };
 
-  const btn = document.getElementById("submitBtn");
-  btn.disabled = true; btn.textContent = "送出中…";
-
+  const btn=document.getElementById("submitBtn");
+  btn.disabled=true; btn.textContent="送出中…";
   try{
     if(ENDPOINT.startsWith("http")){
-      await fetch(ENDPOINT, {
-        method:"POST",
-        mode:"no-cors",
-        headers:{"Content-Type":"text/plain;charset=utf-8"},
-        body:JSON.stringify(payload),
-      });
-    } else {
-      console.warn("尚未設定 ENDPOINT，僅本機預覽。", payload);
-      await new Promise(r=>setTimeout(r,500));
-    }
-    // success
-    const peopleRows = people.map(p=>`<div class="mp"><span>${p.name}（${p.rel}・${p.ageLabel}）</span><span>${fmt(p.price)}</span></div>`).join("");
+      await fetch(ENDPOINT,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
+    } else { await new Promise(r=>setTimeout(r,400)); }
+    const rows = outPeople.map(p=>`<div class="mp"><span>${p.name}（${p.type==="employee"?"員工":p.relationship}・${p.ageLabel}）</span><span>${fmt(p.price)}</span></div>`).join("");
     document.getElementById("modalSum").innerHTML =
-      `<div class="mhead"><b>${emp_name}</b> ・ 工號 ${emp_id}<br/><span style="color:#7a7866">${dept} ｜ ${room} 人房 ｜ 共 ${people.length} 位</span></div>
-       <div class="mlist">${peopleRows}</div>
+      `<div class="mhead"><b>${emp.name}</b> ・ ${document.getElementById("dept").value.trim()}<br/>
+        <span style="color:#7a7866">${room} 人房 ｜ 共 ${people.length} 位 ｜ ${occLabel}</span></div>
+       <div class="mlist">${rows}</div>
        <div class="mp tot"><span>總金額</span><span>NT$ ${fmt(total)}</span></div>
-       <div class="mp"><span>公司補助</span><span>− NT$ ${fmt(subsidy)}</span></div>
+       <div class="mp"><span>公司補助（員工合計）</span><span>− NT$ ${fmt(subsidy)}</span></div>
+       ${surcharge>0?`<div class="mp"><span>獨住加價</span><span>+ NT$ ${fmt(surcharge)}</span></div>`:""}
        <div class="mp bal"><span>應補差額</span><span>NT$ ${fmt(balance)} 元</span></div>`;
     document.getElementById("overlay").classList.add("show");
-    // reset form for next entry
+    // reset
     document.getElementById("form").reset();
     document.querySelectorAll(".room").forEach(x=>x.classList.remove("on"));
-    peopleEl.innerHTML = ""; addPerson(true);
-    recalc();
-  }catch(err){
-    showErr("送出失敗，請檢查網路後再試一次，或聯絡承辦人員。");
-  }finally{
-    btn.disabled = false; btn.textContent = "送出報名";
-  }
+    document.getElementById("emp_age").innerHTML = ageOptions();
+    peopleEl.innerHTML=""; occupancy=null; recalc();
+  }catch(err){ showErr("送出失敗，請檢查網路後再試一次，或聯絡承辦人員。"); }
+  finally{ btn.disabled=false; btn.textContent="送出報名"; }
 });
 </script>
 </body>
