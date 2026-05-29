@@ -306,15 +306,17 @@ function subsidyOf(empId){
 }
 
 /* ---- 其他同行者卡片 ---- */
+let _personSeq = 0;
 function addPerson(){
   const div = document.createElement("div");
   div.className = "person";
+  const tName = "ptype_" + (++_personSeq);   // 同一張卡片兩顆 radio 共用 name 才會互斥
   div.innerHTML = `
     <span class="ptag">同行者</span>
     <button type="button" class="rm" title="移除">×</button>
     <div class="seg">
-      <label><input type="radio" name="t_${Date.now()}_${Math.random().toString(36).slice(2,6)}" class="p-type" value="family" checked /><span>眷屬</span></label>
-      <label><input type="radio" name="t_${Date.now()}_${Math.random().toString(36).slice(2,6)}b" class="p-type" value="employee" /><span>員工</span></label>
+      <label><input type="radio" name="${tName}" class="p-type" value="family" checked /><span>眷屬</span></label>
+      <label><input type="radio" name="${tName}" class="p-type" value="employee" /><span>員工</span></label>
     </div>
     <div class="grid" style="margin-top:8px;">
       <div>
