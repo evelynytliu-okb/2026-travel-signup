@@ -290,20 +290,15 @@ const peopleEl = document.getElementById("people");
 
 /* ---- 補助查詢（依工號，JSONP）---- */
 const subsidyCache = {};        // empId -> amount
-let _subSeq = 0;
+/* 用 credentials:"omit" 查補助：不送 Google cookie，避免多帳號被導去 /u/N 而失敗 */
 function fetchSubsidy(empId){
   const id = (empId||"").trim();
   if(!id || !ENDPOINT.startsWith("http")) { recalc(); return; }
   if(subsidyCache.hasOwnProperty(id)) { recalc(); return; }
-  const cb = "__sub" + (++_subSeq);
-  const s = document.createElement("script");
-  window[cb] = function(res){
-    if(res && res.ok && typeof res.subsidy === "number") subsidyCache[id] = res.subsidy;
-    recalc(); delete window[cb]; s.remove();
-  };
-  s.onerror = function(){ recalc(); delete window[cb]; s.remove(); };
-  s.src = ENDPOINT + "?callback=" + cb + "&empId=" + encodeURIComponent(id) + "&_=" + Date.now();
-  document.body.appendChild(s);
+  fetch(ENDPOINT + "?empId=" + encodeURIComponent(id) + "&_=" + Date.now(), {credentials:"omit"})
+    .then(r=>r.json())
+    .then(res=>{ if(res && res.ok && typeof res.subsidy === "number") subsidyCache[id] = res.subsidy; recalc(); })
+    .catch(()=>recalc());
 }
 function subsidyOf(empId){
   const id=(empId||"").trim();
@@ -549,7 +544,7 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
   btn.disabled=true; btn.textContent="送出中…";
   try{
     if(ENDPOINT.startsWith("http")){
-      await fetch(ENDPOINT,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
+      await fetch(ENDPOINT,{method:"POST",mode:"no-cors",credentials:"omit",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
     } else { await new Promise(r=>setTimeout(r,400)); }
     const rows = outPeople.map(p=>`<div class="mp"><span>${p.name}（${p.type==="employee"?"員工":p.relationship}・${p.ageLabel}）</span><span>${fmt(p.price)}</span></div>`).join("");
     document.getElementById("modalSum").innerHTML =
