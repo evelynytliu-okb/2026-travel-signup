@@ -9,18 +9,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --forest-900:#13301f; --forest-800:#1c4029; --forest-700:#265237; --forest-600:#357250;
-    --moss:#6f9b5c; --sage:#a9c49a; --cream:#f6f2e7; --paper:#fffdf8; --bark:#5b4636;
-    --gold:#c79a3b; --rust:#b5532f; --line:#ddd5c2; --ink:#23291f; --muted:#7a7866;
-    --shadow:0 12px 40px -18px rgba(19,48,31,.55);
+    --forest-900:#001f3a; --forest-800:#003057; --forest-700:#0c3a63; --forest-600:#1a4a73;
+    --moss:#3f7fb0; --sage:#9db8cf; --cream:#eef3f8; --paper:#ffffff; --bark:#39495a;
+    --gold:#ff5c39; --rust:#e0492a; --line:#d6e0ea; --ink:#1c2b3a; --muted:#6b7a89;
+    --shadow:0 12px 40px -18px rgba(0,31,58,.55);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{
     margin:0; font-family:"Noto Sans TC",sans-serif; color:var(--ink);
     background:
-      radial-gradient(1200px 500px at 80% -10%, rgba(111,155,92,.18), transparent 60%),
-      radial-gradient(900px 500px at -10% 10%, rgba(53,114,80,.14), transparent 55%),
+      radial-gradient(1200px 500px at 80% -10%, rgba(26,74,115,.18), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, rgba(0,48,87,.14), transparent 55%),
       var(--cream);
     line-height:1.7; -webkit-font-smoothing:antialiased;
   }
@@ -31,9 +31,10 @@
   .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 18px 64px;}
 
   /* Hero */
-  .hero{margin:22px 0 26px;border-radius:26px;overflow:hidden;background:linear-gradient(160deg,var(--forest-800),var(--forest-600) 130%);color:#f3f0e3;box-shadow:var(--shadow);position:relative;}
+  .hero{margin:22px 0 26px;border-radius:26px;overflow:hidden;background:linear-gradient(160deg,var(--forest-800),var(--forest-600) 130%);color:#eaf1f8;box-shadow:var(--shadow);position:relative;}
   .hero::after{content:"";position:absolute;inset:0;opacity:.18;mix-blend-mode:soft-light;background:radial-gradient(closest-side, rgba(255,255,255,.7), transparent) 12% 120%/220px 220px no-repeat,radial-gradient(closest-side, rgba(255,255,255,.5), transparent) 95% -20%/260px 260px no-repeat;}
   .hero-inner{position:relative;padding:30px 26px 28px;}
+  .okb-logo{height:44px;width:auto;display:block;margin-bottom:16px;}
   .ribbon{display:inline-flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.14em;font-weight:700;background:rgba(255,253,248,.14);border:1px solid rgba(255,253,248,.28);padding:6px 14px;border-radius:999px;backdrop-filter:blur(4px);}
   .hero h1{font-family:"Noto Serif TC",serif;font-weight:900;font-size:clamp(26px,6vw,40px);line-height:1.25;margin:16px 0 6px;letter-spacing:.01em;}
   .hero .sub{font-size:clamp(15px,3.6vw,18px);font-weight:500;opacity:.92;}
@@ -43,7 +44,7 @@
   .leaf{width:18px;height:18px;flex:none;}
 
   /* Cards */
-  .card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:22px 20px;margin:16px 0;box-shadow:0 6px 24px -20px rgba(19,48,31,.5);}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:22px 20px;margin:16px 0;box-shadow:0 6px 24px -20px rgba(0,31,58,.5);}
   .card h2{font-family:"Noto Serif TC",serif;font-size:20px;font-weight:700;color:var(--forest-800);margin:0 0 4px;display:flex;align-items:center;gap:10px;}
   .card h2 .num{font-family:"Noto Sans TC";font-size:14px;font-weight:900;color:#fff;background:var(--forest-600);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;}
   .card .hint{font-size:13px;color:var(--muted);margin:0 0 16px;padding-left:36px;}
@@ -55,8 +56,8 @@
   label.f{display:block;font-size:13.5px;font-weight:700;color:var(--bark);margin-bottom:6px;}
   label.f .req{color:var(--rust);margin-left:3px;}
   input,select{width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;transition:border-color .15s, box-shadow .15s;}
-  input:focus,select:focus{outline:none;border-color:var(--forest-600);box-shadow:0 0 0 4px rgba(53,114,80,.14);}
-  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23357250' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
+  input:focus,select:focus{outline:none;border-color:var(--forest-600);box-shadow:0 0 0 4px rgba(0,48,87,.14);}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ff5c39' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
 
   /* Room type */
   .rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
@@ -66,21 +67,21 @@
   .room .big{font-family:"Noto Serif TC";font-size:22px;font-weight:900;color:var(--forest-800);}
   .room .small{font-size:12.5px;color:var(--muted);margin-top:2px;}
   .room:hover{border-color:var(--moss);transform:translateY(-2px);}
-  .room.on{border-color:var(--forest-600);background:linear-gradient(180deg,#fff,#f1f6ec);box-shadow:0 8px 22px -16px rgba(53,114,80,.8);}
+  .room.on{border-color:var(--forest-600);background:linear-gradient(180deg,#fff,#e7f0f8);box-shadow:0 8px 22px -16px rgba(0,48,87,.8);}
   .room.on::after{content:"✓";position:absolute;top:8px;right:10px;color:var(--forest-600);font-weight:900;}
 
   /* Person cards */
-  .person{border:1.5px solid var(--line);border-radius:16px;padding:18px 14px 14px;margin-bottom:14px;background:linear-gradient(180deg,#fffefb,#fbf8f0);position:relative;}
+  .person{border:1.5px solid var(--line);border-radius:16px;padding:18px 14px 14px;margin-bottom:14px;background:linear-gradient(180deg,#ffffff,#f4f8fc);position:relative;}
   .person .ptag{position:absolute;top:-10px;left:14px;background:var(--forest-700);color:#fff;font-size:12px;font-weight:700;padding:2px 12px;border-radius:999px;letter-spacing:.04em;}
   .person .price{margin-top:10px;font-size:14px;color:var(--forest-700);font-weight:700;display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line);padding-top:10px;}
   .person .price b{font-family:"Noto Serif TC";font-size:20px;}
-  .rm{position:absolute;top:12px;right:12px;border:none;background:#f0e7d8;color:var(--rust);width:30px;height:30px;border-radius:9px;font-size:18px;cursor:pointer;line-height:1;transition:.15s;}
+  .rm{position:absolute;top:12px;right:12px;border:none;background:#e7eef5;color:var(--rust);width:30px;height:30px;border-radius:9px;font-size:18px;cursor:pointer;line-height:1;transition:.15s;}
   .rm:hover{background:var(--rust);color:#fff;}
-  .add{width:100%;border:1.5px dashed var(--moss);background:#f3f7ee;color:var(--forest-700);font-family:inherit;font-size:15px;font-weight:700;padding:13px;border-radius:14px;cursor:pointer;transition:.15s;}
+  .add{width:100%;border:1.5px dashed var(--moss);background:#eaf2fa;color:var(--forest-700);font-family:inherit;font-size:15px;font-weight:700;padding:13px;border-radius:14px;cursor:pointer;transition:.15s;}
   .add:hover{background:var(--forest-600);color:#fff;border-style:solid;}
 
   /* segmented toggle 員工/眷屬 */
-  .seg{display:inline-flex;background:#eee4d2;border-radius:10px;padding:3px;margin-bottom:4px;}
+  .seg{display:inline-flex;background:#e1e9f1;border-radius:10px;padding:3px;margin-bottom:4px;}
   .seg label{position:relative;cursor:pointer;}
   .seg input{position:absolute;opacity:0;pointer-events:none;}
   .seg span{display:block;padding:6px 16px;border-radius:8px;font-size:14px;font-weight:700;color:var(--bark);transition:.15s;}
@@ -89,12 +90,12 @@
   /* Rooming */
   .roomopt{border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;background:#fff;transition:.15s;}
   .roomopt:hover{border-color:var(--moss);}
-  .roomopt.on{border-color:var(--forest-600);background:#f1f6ec;}
+  .roomopt.on{border-color:var(--forest-600);background:#e7f0f8;}
   .roomopt input{margin-top:3px;width:auto;flex:none;}
   .roomopt .ot{font-weight:700;color:var(--forest-800);}
   .roomopt .od{font-size:13px;color:var(--muted);}
   .roominfo{font-size:14px;border-radius:12px;padding:12px 14px;}
-  .roominfo.full{background:#eef4e8;color:var(--forest-700);}
+  .roominfo.full{background:#e7f0f8;color:var(--forest-700);}
   .roominfo.over{background:#fbe6df;color:#9a3414;font-weight:700;}
 
   /* Total bar */
@@ -102,31 +103,31 @@
   .totalbar .breakdown{flex:1;min-width:200px;}
   .totalbar .brow{display:flex;justify-content:space-between;gap:14px;font-size:13.5px;opacity:.92;padding:1px 0;}
   .totalbar .brow b{font-weight:700;}
-  .totalbar .brow.sub{color:#f3d98c;}
-  .totalbar .brow.sur{color:#ffd0bf;}
+  .totalbar .brow.sub{color:#ffd9b0;}
+  .totalbar .brow.sur{color:#ffd9cb;}
   .totalbar .brow.main{margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.25);align-items:baseline;font-size:15px;opacity:1;font-weight:700;}
   .totalbar .amt{font-family:"Noto Serif TC";font-size:28px;font-weight:900;line-height:1;}
   .totalbar .amt small{font-size:14px;font-weight:500;opacity:.85;margin-left:3px;}
   .submit{background:var(--gold);color:#23200f;border:none;font-family:inherit;font-weight:900;font-size:16px;padding:13px 26px;border-radius:12px;cursor:pointer;letter-spacing:.04em;transition:.15s;box-shadow:0 6px 16px -8px rgba(0,0,0,.5);}
-  .submit:hover{transform:translateY(-2px);background:#d8a945;}
+  .submit:hover{transform:translateY(-2px);background:#e64a28;}
   .submit:disabled{opacity:.55;cursor:not-allowed;transform:none;}
 
-  .notes{font-size:13px;color:var(--bark);background:#fbf4e3;border:1px solid #ecdcb6;border-radius:14px;padding:14px 16px;margin-top:16px;}
+  .notes{font-size:13px;color:var(--bark);background:#fff1ec;border:1px solid #ffd9cb;border-radius:14px;padding:14px 16px;margin-top:16px;}
   .notes b{color:var(--rust);}
   .notes ul{margin:8px 0 0;padding-left:20px;}
   .notes li{margin-bottom:5px;}
   .foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:26px;}
 
   /* Success overlay */
-  .overlay{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:24px;background:rgba(19,48,31,.55);backdrop-filter:blur(6px);overflow:auto;}
+  .overlay{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:24px;background:rgba(0,31,58,.55);backdrop-filter:blur(6px);overflow:auto;}
   .overlay.show{display:grid;animation:fade .3s ease;}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .modal{background:var(--paper);border-radius:22px;max-width:440px;width:100%;padding:34px 28px;text-align:center;box-shadow:var(--shadow);animation:pop .35s cubic-bezier(.2,.8,.3,1.2);margin:auto;}
   @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
-  .modal .ic{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:#eaf3e3;display:grid;place-items:center;}
+  .modal .ic{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:#e3eef8;display:grid;place-items:center;}
   .modal h3{font-family:"Noto Serif TC";color:var(--forest-800);font-size:24px;margin:0 0 8px;}
   .modal p{color:var(--muted);font-size:14.5px;margin:0 0 20px;}
-  .modal .sum{background:#f4f7ef;border-radius:12px;padding:14px;font-size:14px;margin-bottom:18px;text-align:left;}
+  .modal .sum{background:#eef4fa;border-radius:12px;padding:14px;font-size:14px;margin-bottom:18px;text-align:left;}
   .modal .mhead{font-size:15px;margin-bottom:8px;line-height:1.5;}
   .modal .mlist{border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);padding:6px 0;margin-bottom:6px;}
   .modal .mp{display:flex;justify-content:space-between;gap:10px;padding:2px 0;font-size:13.5px;}
@@ -143,6 +144,13 @@
 
   <header class="hero">
     <div class="hero-inner">
+      <svg class="okb-logo" viewBox="0 0 313.25 167.46" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="OKB 歐克">
+        <path fill="#ff5c39" d="M220.1,146.15v-19.25c-27.09,7.9-65.23,12.95-92.82,12.95s-60.2-3.32-92.82-12.95v19.25c25.58,7.38,62.57,12.4,92.82,12.4s66.77-3.63,92.82-12.4Z"/>
+        <path fill="#fff" d="M280.26,56.11c7.69.98,16.37,8.53,16.37,21.83,0,15.25-9.37,26.02-30.22,26.02h-46.31s0-93.74,0-93.74h46.17c16.93,0,27.7,10.35,27.7,26.02,0,11.89-8.11,18.33-13.71,19.31v.56ZM239.13,49.39h23.78c7.56,0,12.59-4.76,12.59-12.03,0-6.58-5.18-10.91-11.33-10.91h-25.04s0,22.95,0,22.95ZM264.31,87.73c8.53,0,12.87-4.62,12.87-11.61,0-7.14-5.04-11.61-12.17-11.61h-25.88s0,23.22,0,23.22h25.18Z"/>
+        <path fill="#fff" d="M182.74,103.96l-34.82-43.16h-.26v43.16s-22.11,0-22.11,0V10.22s22.11,0,22.11,0v38.13h.4s33.5-38.13,33.5-38.13h25.66s-40.38,43.16-40.38,43.16l42.76,50.58h-26.85Z"/>
+        <path fill="#fff" d="M60.05,6.81c-27.77,0-50.28,22.51-50.28,50.28,0,27.77,22.51,50.28,50.28,50.28,27.77,0,50.28-22.51,50.28-50.28,0-27.77-22.51-50.28-50.28-50.28ZM60.05,86.14c-16.05,0-29.05-13.01-29.05-29.05,0-16.05,13.01-29.05,29.05-29.05,16.05,0,29.05,13.01,29.05,29.05,0,16.05-13.01,29.05-29.05,29.05Z"/>
+        <circle fill="#ff5c39" cx="253.08" cy="133.3" r="13.95"/>
+      </svg>
       <span class="ribbon">🌲 2026 員工旅遊・歡渡員工親子逍遙遊</span>
       <h1>溪頭森林遊樂區<br/>車埕火車站 二日遊</h1>
       <div class="sub">訊映光電 ｜ 報名費用分攤表</div>
@@ -250,7 +258,7 @@
 
 <div class="overlay" id="overlay">
   <div class="modal">
-    <div class="ic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="#357250" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="ic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="#1a4a73" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <h3>報名成功！</h3>
     <p>您的報名資料已送出，承辦同事會收到通知。</p>
     <div class="sum" id="modalSum"></div>
@@ -600,7 +608,7 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     const rows = outPeople.map(p=>`<div class="mp"><span>${p.name}（${p.type==="employee"?"員工":p.relationship}・${p.ageLabel}）</span><span>${fmt(p.price)}</span></div>`).join("");
     document.getElementById("modalSum").innerHTML =
       `<div class="mhead"><b>${emp.name}</b> ・ ${document.getElementById("dept").value.trim()}<br/>
-        <span style="color:#7a7866">${room} 人房 ｜ 共 ${people.length} 位 ｜ ${occLabel}</span></div>
+        <span style="color:#6b7a89">${room} 人房 ｜ 共 ${people.length} 位 ｜ ${occLabel}</span></div>
        <div class="mlist">${rows}</div>
        <div class="mp tot"><span>總金額</span><span>NT$ ${fmt(total)}</span></div>
        <div class="mp"><span>公司補助（員工合計）</span><span>− NT$ ${fmt(subsidy)}</span></div>
