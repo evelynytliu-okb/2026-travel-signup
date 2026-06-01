@@ -62,6 +62,34 @@
   .modal .row .btn{flex:1;}
   .merr{display:none;color:#9a3414;background:#fbe6df;border:1px solid #e7a78f;border-radius:10px;padding:8px 11px;font-size:13px;margin-top:10px;}
   .merr.show{display:block;}
+
+  /* 房間分配 */
+  .roombar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:4px 0 12px;}
+  .rsum{font-size:13.5px;color:var(--muted);} .rsum b{color:var(--forest-800);font-family:"Noto Serif TC";}
+  .roomhint{font-size:12.5px;color:var(--muted);margin:0 0 10px;}
+  .pendwrap{display:flex;flex-wrap:wrap;gap:8px;min-height:24px;margin-bottom:6px;}
+  .pchip{border:1.5px solid var(--gold);background:#fff4f0;color:var(--forest-800);border-radius:12px;padding:7px 12px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;line-height:1.25;transition:.12s;}
+  .pchip small{font-weight:400;color:var(--muted);font-size:11px;margin-top:2px;}
+  .pchip:hover{background:var(--gold);color:#fff;} .pchip:hover small{color:#ffe;}
+  .roomgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:12px;}
+  .roomcard{border:1.5px solid var(--line);border-radius:14px;padding:12px;background:#fff;cursor:pointer;transition:.12s;}
+  .roomcard.sel{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,92,57,.18);}
+  .rhead{display:flex;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap;}
+  .rhead b{font-size:15px;color:var(--forest-800);}
+  .rcap{font-size:12px;padding:3px 6px;border:1px solid var(--line);border-radius:8px;width:auto;background:#fff;}
+  .rstatus{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;margin-left:auto;}
+  .rstatus.need{background:#fff4f0;color:var(--rust);} .rstatus.full{background:#e7f0f8;color:var(--forest-700);} .rstatus.over{background:#fbe6df;color:#9a3414;}
+  .rdel{border:none;background:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;}
+  .rmembers{display:flex;flex-wrap:wrap;gap:6px;}
+  .mchip{background:#e7f0f8;color:var(--forest-800);border-radius:9px;padding:5px 8px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;}
+  .mchip i{cursor:pointer;color:var(--rust);font-style:normal;font-size:12px;}
+  .addroom{border:1.5px dashed var(--moss);background:#eaf2fa;color:var(--forest-700);border-radius:14px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;min-height:84px;}
+  .addroom:hover{background:var(--forest-600);color:#fff;border-style:solid;}
+  .lockwrap{display:flex;flex-wrap:wrap;gap:8px;}
+  .lockcard{background:#f4f8fc;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--forest-800);}
+  .lockcard small{color:var(--muted);margin-left:6px;}
+  .muted2{color:var(--muted);font-size:13px;}
+  .roommsg{margin-top:14px;font-size:14px;font-weight:700;min-height:20px;}
 </style>
 </head>
 <body>
@@ -79,8 +107,9 @@
       <h1>2026 員工旅遊 報名後台</h1>
       <p class="lead">資料即時來自 Google 試算表。身分證預設遮蔽。</p>
     </div>
-    <div style="display:flex;gap:8px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn ghost" id="refreshBtn">↻ 重新整理</button>
+      <button class="btn ghost" id="roomBtn">🛏️ 房間分配</button>
       <button class="btn" id="idBtn">顯示身分證</button>
     </div>
   </div>
@@ -90,8 +119,8 @@
 <!-- 密碼 modal（只在「顯示身分證」時出現） -->
 <div class="overlay" id="overlay">
   <div class="modal">
-    <h3>顯示身分證</h3>
-    <p>身分證為個資，請輸入後台密碼才能顯示完整號碼。</p>
+    <h3 id="pwTitle">顯示身分證</h3>
+    <p id="pwSub">身分證為個資，請輸入後台密碼才能顯示完整號碼。</p>
     <input id="pw" type="password" placeholder="後台密碼" autocomplete="off" />
     <div class="merr" id="merr"></div>
     <div class="row">
@@ -202,36 +231,167 @@ function render(res){
     </table></div>`;
 }
 
-/* 顯示身分證：開密碼 modal；隱藏：直接重載遮蔽版 */
+/* ===== 通用密碼 modal（顯示身分證 / 進入房間分配共用）===== */
 const overlay = document.getElementById("overlay");
 const merr = document.getElementById("merr");
-function openPw(){ merr.classList.remove("show"); document.getElementById("pw").value=""; overlay.classList.add("show"); document.getElementById("pw").focus(); }
-function closePw(){ overlay.classList.remove("show"); }
-async function confirmPw(){
-  const pw = document.getElementById("pw").value.trim();
-  if(!pw){ merr.textContent="請輸入密碼。"; merr.classList.add("show"); return; }
-  document.getElementById("content").innerHTML = '<div class="loading">驗證中…</div>';
-  SHOW_ID = true;
-  const res = await fetchData({ showId:1, pw:pw });
-  if(res && res.ok && res.showId){ closePw(); render(res); }
-  else {
-    SHOW_ID = false;
-    overlay.classList.add("show");
-    merr.textContent = (res && res.idError) || (res && res.error) || "密碼錯誤。";
-    merr.classList.add("show");
-    document.getElementById("content").innerHTML = "";
-    load();   // 重新顯示遮蔽版統計
-  }
+let ADMIN_PW = "";        // 驗證成功後記住，供儲存併房用
+let ROOM_MODE = false;
+let pwCallback = null;
+function openPw(title, sub, btnText, cb){
+  document.getElementById("pwTitle").textContent = title;
+  document.getElementById("pwSub").textContent = sub;
+  document.getElementById("pwOk").textContent = btnText;
+  pwCallback = cb;
+  merr.classList.remove("show"); document.getElementById("pw").value="";
+  overlay.classList.add("show"); document.getElementById("pw").focus();
 }
+function closePw(){ overlay.classList.remove("show"); }
+function pwErr(m){ merr.textContent=m; merr.classList.add("show"); }
+function confirmPw(){ const pw=document.getElementById("pw").value.trim(); if(!pw){ pwErr("請輸入密碼。"); return; } if(pwCallback) pwCallback(pw); }
 
+/* 顯示身分證 */
+async function doShowId(pw){
+  document.getElementById("content").innerHTML='<div class="loading">驗證中…</div>';
+  SHOW_ID=true;
+  const res=await fetchData({showId:1, pw:pw});
+  if(res&&res.ok&&res.showId){ ADMIN_PW=pw; closePw(); render(res); }
+  else { SHOW_ID=false; pwErr((res&&res.idError)||(res&&res.error)||"密碼錯誤。"); load(); }
+}
 document.getElementById("idBtn").addEventListener("click", ()=>{
-  if(SHOW_ID){ SHOW_ID=false; load(); }    // 隱藏
-  else openPw();                            // 顯示 → 要密碼
+  if(SHOW_ID){ SHOW_ID=false; load(); }
+  else openPw("顯示身分證","身分證為個資，請輸入後台密碼才能顯示完整號碼。","確認顯示", doShowId);
+});
+
+/* 進入房間分配 */
+async function doRoomAuth(pw){
+  const res=await fetchData({showId:1, pw:pw});
+  if(res&&res.ok&&res.showId){ ADMIN_PW=pw; closePw(); enterRoomMode(res); }
+  else pwErr((res&&res.idError)||(res&&res.error)||"密碼錯誤。");
+}
+document.getElementById("roomBtn").addEventListener("click", ()=>{
+  if(ADMIN_PW) enterRoomMode();
+  else openPw("房間分配","併房屬個資操作，請輸入後台密碼進入。","進入併房", doRoomAuth);
 });
 document.getElementById("pwOk").addEventListener("click", confirmPw);
 document.getElementById("pwCancel").addEventListener("click", closePw);
 document.getElementById("pw").addEventListener("keydown", e=>{ if(e.key==="Enter") confirmPw(); });
-document.getElementById("refreshBtn").addEventListener("click", ()=>load());
+document.getElementById("refreshBtn").addEventListener("click", ()=>{ ROOM_MODE=false; load(); });
+
+/* ===== 房間分配 ===== */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function bedOf(s){var m=String(s).match(/(\d)/);return m?+m[1]:2;}
+let roomData=null;
+
+function buildRoomData(roster){
+  var byReg={};
+  roster.forEach(function(p){ (byReg[p.regId]=byReg[p.regId]||[]).push(p); });
+  var locked=[], companyPeople=[];
+  Object.keys(byReg).forEach(function(rid){
+    var grp=byReg[rid], occ=grp[0].occupancy;
+    if(occ==='公司安排合住人'){ grp.forEach(function(p){ companyPeople.push(p); }); }
+    else locked.push({contact:grp[0].contact, room:grp[0].room, occupancy:occ, members:grp});
+  });
+  var rooms=[], map={};
+  companyPeople.forEach(function(p){
+    var rm=String(p.assignedRoom||'').trim();
+    if(rm){ if(!map[rm]){ map[rm]={id:rm, cap:bedOf(p.room), members:[]}; rooms.push(map[rm]); }
+      map[rm].members.push(p); map[rm].cap=Math.max(map[rm].cap, bedOf(p.room)); }
+  });
+  return {locked:locked, companyPeople:companyPeople, rooms:rooms, selected:null};
+}
+function findRoom(id){return roomData.rooms.find(function(r){return r.id===id;});}
+function personByRow(row){return roomData.companyPeople.find(function(p){return p.row===row;});}
+function removeFromRooms(row){ roomData.rooms.forEach(function(r){ r.members=r.members.filter(function(m){return m.row!==row;}); }); }
+function nextId(){ var i=0; while(roomData.rooms.some(function(r){return r.id==='合住'+String.fromCharCode(65+i);})) i++; return '合住'+String.fromCharCode(65+i); }
+function addRoom(){ var id=nextId(); roomData.rooms.push({id:id,cap:4,members:[]}); roomData.selected=id; renderRooms(); }
+function delRoom(id){ roomData.rooms=roomData.rooms.filter(function(r){return r.id!==id;}); if(roomData.selected===id) roomData.selected=null; renderRooms(); }
+function addToSel(row){ if(!roomData.selected){ roomMsg("請先點一間房（或先按＋新增房間）"); return; } removeFromRooms(row); findRoom(roomData.selected).members.push(personByRow(row)); renderRooms(); }
+function roomMsg(t, ok){ var el=document.getElementById("roomMsg"); if(el){ el.textContent=t; el.style.color= ok?"var(--forest-700)":"var(--rust)"; } }
+
+async function enterRoomMode(res){
+  if(!res){ document.getElementById("content").innerHTML='<div class="loading">載入中…</div>'; res=await fetchData({showId:1, pw:ADMIN_PW}); if(!(res&&res.ok)){ document.getElementById("content").innerHTML='<div class="loading">讀取失敗</div>'; return; } }
+  roomData=buildRoomData(res.roster); ROOM_MODE=true; renderRooms();
+}
+function exitRoomMode(){ ROOM_MODE=false; load(); }
+
+function renderRooms(){
+  var d=roomData;
+  var inRoom={}; d.rooms.forEach(function(r){ r.members.forEach(function(m){ inRoom[m.row]=true; }); });
+  var pending=d.companyPeople.filter(function(p){ return !inRoom[p.row]; });
+  var usedRooms=d.rooms.filter(function(r){return r.members.length;}).length;
+  var totalRooms=d.locked.length+usedRooms;
+
+  var pendChips = pending.length
+    ? pending.map(function(p){ return '<button class="pchip" data-row="'+p.row+'">'+esc(p.name)+'<small>'+esc(p.contact)+'・'+bedOf(p.room)+'人房</small></button>'; }).join('')
+    : '<div class="muted2">（沒有待安排的人，全部已分配 👍）</div>';
+
+  var roomCards = d.rooms.map(function(r){
+    var n=r.members.length, gap=r.cap-n;
+    var st = gap>0?('還缺 '+gap):(gap===0?'✓ 已滿':('超額 '+(-gap))), cls=gap<0?'over':(gap===0?'full':'need');
+    var mem = r.members.length? r.members.map(function(m){ return '<span class="mchip">'+esc(m.name)+'<i data-rm="'+m.row+'">✕</i></span>'; }).join('') : '<span class="muted2">（空房，點上方待安排的人加入）</span>';
+    return '<div class="roomcard'+(d.selected===r.id?' sel':'')+'" data-rid="'+esc(r.id)+'">'
+      +'<div class="rhead"><b>'+esc(r.id)+'</b>'
+      +'<select class="rcap" data-rid="'+esc(r.id)+'">'+[2,3,4].map(function(c){return '<option value="'+c+'"'+(c===r.cap?' selected':'')+'>'+c+'人</option>';}).join('')+'</select>'
+      +'<span class="rstatus '+cls+'">'+n+'/'+r.cap+'・'+st+'</span>'
+      +'<button class="rdel" data-rid="'+esc(r.id)+'">刪除</button></div>'
+      +'<div class="rmembers">'+mem+'</div></div>';
+  }).join('');
+
+  var lockHtml = d.locked.length
+    ? '<div class="section-t">固定房間（住滿／獨住，自動成房）</div><div class="lockwrap">'
+      + d.locked.map(function(L){ return '<div class="lockcard"><b>'+bedOf(L.room)+'人房</b>　'+esc(L.contact)+'（'+L.members.length+'人）<small>'+(L.occupancy==='獨住加價'?'獨住':'住滿')+'</small></div>'; }).join('')
+      + '</div>'
+    : '';
+
+  document.getElementById("content").innerHTML =
+      '<div class="roombar">'
+    +   '<button class="btn ghost" id="exitRoom">← 返回統計</button>'
+    +   '<div class="rsum">固定房 <b>'+d.locked.length+'</b> 間 ・ 合住房 <b>'+usedRooms+'</b> 間 ・ 預估總房數 <b>'+totalRooms+'</b> 間 ・ 待安排 <b>'+pending.length+'</b> 人</div>'
+    +   '<button class="btn gold" id="saveRoom">💾 儲存分配</button>'
+    + '</div>'
+    + '<div class="section-t">待安排名單（公司安排合住）'+(d.selected?'　→ 點人加入「'+esc(d.selected)+'」':'')+'</div>'
+    + '<div class="pendwrap">'+pendChips+'</div>'
+    + '<div class="section-t">合住房間</div>'
+    + '<div class="roomhint">步驟：① 按「＋新增房間」並選人數 ② 點一下房間卡選取它 ③ 點上方待安排的人，即加入該房。點房內名字的 ✕ 可移回待安排。</div>'
+    + '<div class="roomgrid">'+roomCards+'<button class="addroom" id="addRoom">＋ 新增房間</button></div>'
+    + lockHtml
+    + '<div id="roomMsg" class="roommsg"></div>';
+
+  // 事件
+  var c=document.getElementById("content");
+  document.getElementById("exitRoom").onclick=exitRoomMode;
+  document.getElementById("saveRoom").onclick=saveRoomAssignments;
+  document.getElementById("addRoom").onclick=addRoom;
+  c.querySelectorAll(".pchip").forEach(function(b){ b.onclick=function(){ addToSel(Number(b.dataset.row)); }; });
+  c.querySelectorAll(".rcap").forEach(function(sel){ sel.onclick=function(e){e.stopPropagation();}; sel.onchange=function(e){ e.stopPropagation(); var r=findRoom(sel.dataset.rid); if(r){ r.cap=Number(sel.value); renderRooms(); } }; });
+  c.querySelectorAll(".roomcard").forEach(function(card){
+    card.onclick=function(e){
+      var t=e.target;
+      if(t.dataset && t.dataset.rm!=null){ removeFromRooms(Number(t.dataset.rm)); renderRooms(); return; }
+      if(t.classList.contains("rdel")){ delRoom(t.dataset.rid); return; }
+      if(t.classList.contains("rcap")) return;
+      roomData.selected = card.dataset.rid; renderRooms();
+    };
+  });
+}
+
+async function saveRoomAssignments(){
+  var assignments = roomData.companyPeople.map(function(p){
+    var r = roomData.rooms.find(function(rm){ return rm.members.some(function(m){return m.row===p.row;}); });
+    return { row:p.row, room: r ? r.id : '' };
+  });
+  roomMsg("儲存中…", true);
+  try{
+    await fetch(ENDPOINT, {method:"POST", mode:"no-cors", credentials:"omit",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({ action:"saveRooms", pw:ADMIN_PW, assignments:assignments })});
+    setTimeout(async function(){
+      var res=await fetchData({showId:1, pw:ADMIN_PW});
+      if(res&&res.ok){ roomData=buildRoomData(res.roster); renderRooms(); roomMsg("✓ 已儲存，並已寫回試算表", true); }
+      else roomMsg("已送出，但確認失敗，請按重新整理檢查。");
+    }, 1900);
+  }catch(e){ roomMsg("儲存失敗，請檢查網路後再試。"); }
+}
 
 /* 進入即載入（免密碼，遮蔽版） */
 load();
