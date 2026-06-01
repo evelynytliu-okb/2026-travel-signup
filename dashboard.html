@@ -46,11 +46,22 @@
   td{word-break:break-word;}
   td.num{text-align:right;white-space:nowrap;}
   td.nowrap{white-space:nowrap;}
-  tr:nth-child(even) td{background:#f4f8fc;}
   td.emp{color:var(--forest-700);font-weight:700;}
   td.fam{color:var(--bark);}
   .reg{font-family:monospace;font-size:11px;color:var(--muted);}
   .loading{text-align:center;color:var(--muted);padding:30px;}
+
+  /* 一張報名單一個視覺區塊：相鄰交替深淺＋第一列上方加綠線 */
+  tr.reg-band-0 td{background:#ffffff;}
+  tr.reg-band-1 td{background:#f4f8fc;}
+  tr.reg-first td{border-top:2px solid var(--moss);}
+  tr.reg-first td:first-child{box-shadow:inset 3px 0 0 var(--gold);}
+
+  /* 管理員模式：未進入前隱藏管理員專用元件 */
+  body:not(.admin-mode) .admin-only{display:none !important;}
+  .admin-badge{display:inline-flex;align-items:center;gap:6px;background:#e7f7ec;color:#1f7a44;border:1px solid #b6dec5;font-weight:700;font-size:13.5px;padding:8px 14px;border-radius:11px;}
+  .admin-badge .x{cursor:pointer;color:#1f7a44;opacity:.7;font-weight:900;margin-left:2px;}
+  .admin-badge .x:hover{opacity:1;}
 
   /* password modal */
   .overlay{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:24px;background:rgba(0,31,58,.5);backdrop-filter:blur(5px);}
@@ -119,12 +130,13 @@
       <h1>2026 員工旅遊 報名後台</h1>
       <p class="lead">資料即時來自 Google 試算表。身分證預設遮蔽。</p>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
       <button class="btn ghost" id="refreshBtn">↻ 重新整理</button>
-      <button class="btn ghost" id="signupBtn">報名狀態…</button>
-      <button class="btn ghost" id="subsidyBtn">💰 補助名單</button>
-      <button class="btn ghost" id="roomBtn">🛏️ 房間分配</button>
-      <button class="btn" id="idBtn">顯示身分證</button>
+      <button class="btn ghost admin-only" id="signupBtn">報名狀態…</button>
+      <button class="btn ghost admin-only" id="subsidyBtn">💰 補助名單</button>
+      <button class="btn ghost admin-only" id="roomBtn">🛏️ 房間分配</button>
+      <button class="btn ghost admin-only" id="idBtn">👁 顯示身分證</button>
+      <button class="btn gold" id="adminBtn">🔐 進入管理員模式</button>
     </div>
   </div>
   <div id="content"><div class="loading">載入中…</div></div>
@@ -239,6 +251,7 @@ const FILTER = { dept:"", q:"" };   // 名單篩選
 let rosterIndex = {};               // row -> roster 物件（目前顯示中）
 let editingRow = null;              // 正在編輯的列號
 let SUBSIDY_ROWS = [];              // 補助名單編輯暫存
+let ADMIN_MODE = false;             // 是否在管理員模式（一次登入、全功能解鎖）
 
 /* 年齡身分簡稱（表格用） */
 function ageShort(a){
@@ -298,8 +311,9 @@ function updateSignupBtn(){
   if(SIGNUP_OPEN){ b.textContent="🟢 報名開放中"; b.classList.add("openst"); }
   else { b.textContent="🔴 報名已關閉"; b.classList.add("closedst"); }
 }
-function rowHtml(r, firstOfReg){
-  return '<tr>'
+function rowHtml(r, firstOfReg, bandIdx){
+  const cls = 'reg-band-'+(bandIdx%2)+(firstOfReg?' reg-first':'');
+  return '<tr class="'+cls+'">'
     +'<td class="reg nowrap">'+esc(r.regId||"")+'</td>'
     +'<td class="nowrap">'+esc(r.dept||"")+'</td>'
     +'<td>'+esc(r.contact||"")+'</td>'
@@ -314,8 +328,8 @@ function rowHtml(r, firstOfReg){
     +'<td class="nowrap">'+esc(occDisplay(r.occupancy, r.surcharge))+'</td>'
     +'<td class="num">'+fmt(r.price)+'</td>'
     +'<td class="num">'+(r.subsidy!==""&&r.subsidy!=null?fmt(r.subsidy):"—")+'</td>'
-    +'<td class="nowrap"><button class="btn ghost edit-btn" data-row="'+r.row+'">✏️ 編輯</button>'
-      +(firstOfReg ? ' <button class="btn ghost edit-btn add-btn" data-row="'+r.row+'">＋ 加人</button>' : '')
+    +'<td class="nowrap"><button class="btn ghost edit-btn admin-only" data-row="'+r.row+'">✏️ 編輯</button>'
+      +(firstOfReg ? ' <button class="btn ghost edit-btn add-btn admin-only" data-row="'+r.row+'">＋ 加人</button>' : '')
     +'</td>'
     +'</tr>';
 }
@@ -333,8 +347,12 @@ function fillTable(){
   });
   rosterIndex = {}; list.forEach(function(r){ rosterIndex[r.row]=r; });
   const tb = document.getElementById("rosterBody");
-  const seenReg = {};
-  const bodyHtml = list.map(function(r){ const f = !seenReg[r.regId]; seenReg[r.regId]=true; return rowHtml(r, f); }).join("");
+  const regBand = {}; let bandIdx = -1;
+  const bodyHtml = list.map(function(r){
+    const f = !(r.regId in regBand);
+    if(f){ bandIdx++; regBand[r.regId] = bandIdx; }
+    return rowHtml(r, f, regBand[r.regId]);
+  }).join("");
   if(tb) tb.innerHTML = bodyHtml || '<tr><td colspan="15" class="loading">沒有符合條件的資料</td></tr>';
   const c = document.getElementById("fCount"); if(c) c.textContent = "顯示 "+list.length+" / "+CURRENT.roster.length+" 人";
 }
@@ -368,7 +386,7 @@ function render(res){
     <div class="section-t">金額統計</div>
     <div class="grid g4">${money}</div>
     <div class="section-t">報名名單（每人一列）</div>
-    <div class="idnote">${SHOW_ID ? "⚠️ 目前顯示完整身分證，請注意保密；看完可按右上「隱藏身分證」。" : "身分證已遮蔽，需要時按右上「顯示身分證」並輸入密碼。"}　編輯資料請按該列「✏️ 編輯」（需後台密碼）。</div>
+    <div class="idnote">${ADMIN_MODE ? (SHOW_ID ? "⚠️ 已進入管理員模式，目前顯示完整身分證，請注意保密。" : "已進入管理員模式。可按右上「顯示身分證」、或在名單按 ✏️編輯／＋加人。") : "目前為唯讀檢視（身分證已遮蔽）。如需編輯／加人／看身分證，請按右上「🔐 進入管理員模式」。"}</div>
     <div class="filterbar">
       <select id="fDept">${deptOptions(FILTER.dept)}</select>
       <input id="fSearch" placeholder="搜尋 姓名／工號／聯絡窗口" value="${esc(FILTER.q)}" />
@@ -412,33 +430,59 @@ function closePw(){ overlay.classList.remove("show"); }
 function pwErr(m){ merr.textContent=m; merr.classList.add("show"); }
 function confirmPw(){ const pw=document.getElementById("pw").value.trim(); if(!pw){ pwErr("請輸入密碼。"); return; } if(pwCallback) pwCallback(pw); }
 
-/* 顯示身分證 */
-async function doShowId(pw){
-  document.getElementById("content").innerHTML='<div class="loading">驗證中…</div>';
-  SHOW_ID=true;
-  const res=await fetchData({showId:1, pw:pw});
-  if(res&&res.ok&&res.showId){ ADMIN_PW=pw; closePw(); render(res); }
-  else { SHOW_ID=false; pwErr((res&&res.idError)||(res&&res.error)||"密碼錯誤。"); load(); }
+/* ===== 管理員模式（一次登入、所有管理功能解鎖）===== */
+function updateAdminUI(){
+  document.body.classList.toggle("admin-mode", ADMIN_MODE);
+  const btn = document.getElementById("adminBtn"); if(!btn) return;
+  if(ADMIN_MODE){
+    btn.innerHTML = '🟢 管理員模式 <span style="opacity:.7;margin-left:6px;font-weight:900;">✕</span>';
+    btn.classList.remove("gold"); btn.classList.add("ghost");
+    btn.title = "點此退出管理員模式";
+  } else {
+    btn.innerHTML = '🔐 進入管理員模式';
+    btn.classList.add("gold"); btn.classList.remove("ghost");
+    btn.title = "輸入密碼後解鎖編輯／加人／補助名單／房間分配／顯示身分證";
+  }
+  const idBtn = document.getElementById("idBtn");
+  if(idBtn) idBtn.textContent = SHOW_ID ? "🙈 隱藏身分證" : "👁 顯示身分證";
 }
-document.getElementById("idBtn").addEventListener("click", ()=>{
-  if(SHOW_ID){ SHOW_ID=false; load(); }
-  else openPw("顯示身分證","身分證為個資，請輸入後台密碼才能顯示完整號碼。","確認顯示", doShowId);
+async function enterAdminMode(pw){
+  document.getElementById("content").innerHTML='<div class="loading">驗證中…</div>';
+  const res = await fetchData({showId:1, pw:pw});
+  if(res && res.ok && res.showId){
+    ADMIN_PW = pw; ADMIN_MODE = true; SHOW_ID = true;
+    closePw(); updateAdminUI(); render(res);
+  } else {
+    pwErr((res&&res.idError)||(res&&res.error)||"密碼錯誤。"); load();
+  }
+}
+function exitAdminMode(){
+  ADMIN_PW = ""; ADMIN_MODE = false; SHOW_ID = false; ROOM_MODE = false;
+  updateAdminUI(); load();
+}
+document.getElementById("adminBtn").addEventListener("click", ()=>{
+  if(ADMIN_MODE){
+    if(confirm("確定要退出管理員模式嗎？\n身分證會自動隱藏。")) exitAdminMode();
+  } else {
+    openPw("進入管理員模式","輸入後台密碼後，編輯／加人／補助名單／房間分配／顯示身分證會一次解鎖。","進入", enterAdminMode);
+  }
 });
 
-/* 進入房間分配 */
-async function doRoomAuth(pw){
-  const res=await fetchData({showId:1, pw:pw});
-  if(res&&res.ok&&res.showId){ ADMIN_PW=pw; closePw(); enterRoomMode(res); }
-  else pwErr((res&&res.idError)||(res&&res.error)||"密碼錯誤。");
-}
+/* 顯示／隱藏身分證（已在管理員模式中，不用再驗密碼）*/
+document.getElementById("idBtn").addEventListener("click", ()=>{
+  if(!ADMIN_MODE) return;
+  SHOW_ID = !SHOW_ID; updateAdminUI(); load(ADMIN_PW);
+});
+
+/* 房間分配（已在管理員模式中，直接進入）*/
 document.getElementById("roomBtn").addEventListener("click", ()=>{
-  if(ADMIN_PW) enterRoomMode();
-  else openPw("房間分配","併房屬個資操作，請輸入後台密碼進入。","進入併房", doRoomAuth);
+  if(!ADMIN_MODE) return;
+  enterRoomMode();
 });
 document.getElementById("pwOk").addEventListener("click", confirmPw);
 document.getElementById("pwCancel").addEventListener("click", closePw);
 document.getElementById("pw").addEventListener("keydown", e=>{ if(e.key==="Enter") confirmPw(); });
-document.getElementById("refreshBtn").addEventListener("click", ()=>{ ROOM_MODE=false; load(); });
+document.getElementById("refreshBtn").addEventListener("click", ()=>{ ROOM_MODE=false; load(ADMIN_MODE?ADMIN_PW:undefined); });
 
 /* ===== 房間分配 ===== */
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -556,16 +600,6 @@ async function saveRoomAssignments(){
   }catch(e){ roomMsg("儲存失敗，請檢查網路後再試。"); }
 }
 
-/* ===== 確保已有後台密碼（沒有就先彈密碼框驗證）===== */
-function ensureAdminPw(title, sub, cb){
-  if(ADMIN_PW){ cb(); return; }
-  openPw(title, sub, "驗證密碼", async function(pw){
-    const res = await fetchData({showId:1, pw:pw});
-    if(res && res.ok && res.showId){ ADMIN_PW=pw; closePw(); cb(); }
-    else pwErr((res&&res.idError)||(res&&res.error)||"密碼錯誤。");
-  });
-}
-
 /* ===== 編輯報名資料（單一欄位）===== */
 const editOverlay = document.getElementById("editOverlay");
 const editErr = document.getElementById("editErr");
@@ -576,9 +610,7 @@ function curVal(r, key){
   if(key==="idNumber" && !SHOW_ID && /\*/.test(v)) v="";   // 遮蔽中不要把星號帶進去
   return v;
 }
-function startEdit(r){
-  ensureAdminPw("編輯報名資料","編輯報名屬個資操作，請先輸入後台密碼。", function(){ openEditModal(r); });
-}
+function startEdit(r){ if(ADMIN_MODE) openEditModal(r); }
 function openEditModal(r){
   editingRow = r.row;
   document.getElementById("editWho").innerHTML =
@@ -610,7 +642,7 @@ document.getElementById("editSave").addEventListener("click", function(){
       headers:{"Content-Type":"text/plain;charset=utf-8"},
       body: JSON.stringify({ action:"editRow", pw:ADMIN_PW, row:editingRow, field:field, value:value })})
     .finally(function(){
-      setTimeout(function(){ btn.disabled=false; btn.textContent="儲存修改"; closeEdit(); load(SHOW_ID?ADMIN_PW:undefined); }, 1500);
+      setTimeout(function(){ btn.disabled=false; btn.textContent="儲存修改"; closeEdit(); load(ADMIN_MODE?ADMIN_PW:undefined); }, 1500);
     });
 });
 
@@ -635,9 +667,7 @@ function fillAddPrice(){
     '費用試算：<b>NT$ '+fmt(addPriceNow())+'</b>　<span class="muted2">（'+esc(bedNum(ADD_REG&&ADD_REG.room))+'人房）加入後系統會自動重算補助與獨住加價</span>';
 }
 function addShowErr(m){ addErr.textContent=m; addErr.classList.add("show"); }
-function startAddPerson(r){
-  ensureAdminPw("加入同行成員","新增報名成員屬個資操作，請先輸入後台密碼。", function(){ openAddModal(r); });
-}
+function startAddPerson(r){ if(ADMIN_MODE) openAddModal(r); }
 function openAddModal(r){
   const grp = ((CURRENT&&CURRENT.roster)||[]).filter(function(x){ return x.regId===r.regId; });
   const cap = Number(bedNum(r.room));
@@ -689,13 +719,13 @@ document.getElementById("addSave").addEventListener("click", function(){
       headers:{"Content-Type":"text/plain;charset=utf-8"},
       body: JSON.stringify({ action:"addPerson", pw:ADMIN_PW, regId:ADD_REG.regId, person:person })})
     .finally(function(){
-      setTimeout(function(){ btn.disabled=false; btn.textContent="加入並重算"; closeAdd(); load(SHOW_ID?ADMIN_PW:undefined); }, 1800);
+      setTimeout(function(){ btn.disabled=false; btn.textContent="加入並重算"; closeAdd(); load(ADMIN_MODE?ADMIN_PW:undefined); }, 1800);
     });
 });
 
 /* ===== 補助名單編輯 ===== */
 document.getElementById("subsidyBtn").addEventListener("click", function(){
-  ensureAdminPw("補助名單","查看／編輯補助名單需要後台密碼。", enterSubsidyMode);
+  if(ADMIN_MODE) enterSubsidyMode();
 });
 async function enterSubsidyMode(){
   document.getElementById("content").innerHTML='<div class="loading">載入補助名單…</div>';
@@ -736,7 +766,7 @@ function renderSubsidy(){
     + '<tbody id="subBody">'+(body || '<tr><td colspan="4" class="muted2" style="padding:14px">目前沒有特例工號（全部都補助全額）。按下方「＋ 新增一列」加入。</td></tr>')+'</tbody></table></div>'
     + '<button class="btn ghost" id="addSub" style="margin-top:12px;">＋ 新增一列</button>'
     + '<div id="subMsg" class="roommsg"></div>';
-  document.getElementById("exitSub").onclick = function(){ load(SHOW_ID?ADMIN_PW:undefined); };
+  document.getElementById("exitSub").onclick = function(){ load(ADMIN_MODE?ADMIN_PW:undefined); };
   document.getElementById("addSub").onclick = function(){ SUBSIDY_ROWS=readSubsidyDOM(); SUBSIDY_ROWS.push({empId:"",amount:"",note:""}); renderSubsidy(); };
   document.getElementById("saveSub").onclick = saveSubsidyList;
   document.querySelectorAll("#subBody .s-del").forEach(function(b){
@@ -757,18 +787,17 @@ async function saveSubsidyList(){
 
 /* ===== 報名開關（手動截止／重新開放）===== */
 document.getElementById("signupBtn").addEventListener("click", function(){
-  if(SIGNUP_OPEN===null){ load(); return; }   // 還沒載到狀態，先重新載
-  ensureAdminPw("報名開關","切換報名「開放／關閉」需要後台密碼。", function(){
-    const next = !SIGNUP_OPEN;
-    const ok = confirm(next
-      ? "確定要「重新開放報名」嗎？\n員工將可重新在報名表送出。"
-      : "確定要「手動截止報名」嗎？\n報名表會擋下新的送出（已送出的資料不受影響）。");
-    if(!ok) return;
-    fetch(ENDPOINT, {method:"POST", mode:"no-cors", credentials:"omit",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body: JSON.stringify({ action:"toggleSignup", pw:ADMIN_PW, open:next })})
-      .finally(function(){ setTimeout(function(){ load(SHOW_ID?ADMIN_PW:undefined); }, 1400); });
-  });
+  if(!ADMIN_MODE) return;
+  if(SIGNUP_OPEN===null){ load(ADMIN_PW); return; }   // 還沒載到狀態，先重新載
+  const next = !SIGNUP_OPEN;
+  const ok = confirm(next
+    ? "確定要「重新開放報名」嗎？\n員工將可重新在報名表送出。"
+    : "確定要「手動截止報名」嗎？\n報名表會擋下新的送出（已送出的資料不受影響）。");
+  if(!ok) return;
+  fetch(ENDPOINT, {method:"POST", mode:"no-cors", credentials:"omit",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body: JSON.stringify({ action:"toggleSignup", pw:ADMIN_PW, open:next })})
+    .finally(function(){ setTimeout(function(){ load(ADMIN_PW); }, 1400); });
 });
 
 /* 進入即載入（免密碼，遮蔽版） */
