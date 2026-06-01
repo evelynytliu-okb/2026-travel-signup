@@ -161,6 +161,41 @@
   </div>
 </div>
 
+<!-- 加入同行成員 modal -->
+<div class="overlay" id="addOverlay">
+  <div class="modal" style="max-width:440px;">
+    <h3>＋ 加入同行成員</h3>
+    <div class="ewho" id="addWho"></div>
+    <label class="el">身分別</label>
+    <div style="display:flex;gap:8px;">
+      <label style="flex:1;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;background:#eef4fa;border-radius:10px;padding:9px 12px;cursor:pointer;"><input type="radio" name="addType" value="family" style="width:auto;" checked> 眷屬</label>
+      <label style="flex:1;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;background:#eef4fa;border-radius:10px;padding:9px 12px;cursor:pointer;"><input type="radio" name="addType" value="employee" style="width:auto;"> 員工</label>
+    </div>
+    <div id="addRelWrap">
+      <label class="el">關係</label>
+      <select id="addRel"></select>
+    </div>
+    <div id="addEmpWrap" style="display:none;">
+      <label class="el">工號</label>
+      <input id="addEmpId" autocomplete="off" placeholder="補助依工號計算" />
+    </div>
+    <label class="el">姓名</label>
+    <input id="addName" autocomplete="off" />
+    <label class="el">年齡身分</label>
+    <select id="addAge"></select>
+    <label class="el">身分證 / 居留證號</label>
+    <input id="addIdno" autocomplete="off" placeholder="投保用。外籍/移工請填居留證統一證號" />
+    <label class="el">出生年月日</label>
+    <input id="addDob" type="date" />
+    <div class="ewho" id="addPricePreview" style="background:#fff4f0;margin-top:14px;"></div>
+    <div class="merr" id="addErr"></div>
+    <div class="row">
+      <button class="btn ghost" id="addCancel">取消</button>
+      <button class="btn gold" id="addSave">加入並重算</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbzGE46TFzPMXlfBvT88mLjobexmgnpSlWf_U_Rl2PBzWMUca7_mUc5-pI64F75Kx8ymKg/exec";
 const DEFAULT_SUBSIDY = 10000;
@@ -175,6 +210,21 @@ const DEPT_GROUPS = {
   "品保處":["品檢一課","品檢二課"],
   "管理處":["行政部","財務部"],
 };
+/* 價目表／年齡分類／眷屬關係（與報名表一致，供「加人」計算費用）*/
+const PRICES = {
+  "2": {adult:6725, student:6655, senior:6565, disabled:6525, child25:3000, baby:1500},
+  "3": {adult:6525, student:6455, senior:6365, disabled:6325, child25:2800, baby:1500},
+  "4": {adult:6325, student:6255, senior:6165, disabled:6125, child25:2600, baby:1500},
+};
+const AGE_LABELS = {
+  adult:"成人",
+  student:"6-12歲 學生及兒童",
+  senior:"65歲以上長者（持榮譽志工證）",
+  disabled:"持身心障礙手冊（含一位陪同）",
+  child25:"2-5歲（不佔床・含餐）",
+  baby:"未滿 2 歲（不足2歲）",
+};
+const FAMILY_REL = ["配偶","子女（直系）","父母（直系）","兄弟姊妹","情侶"];
 /* 後台可編輯欄位（key 要與 Code.gs 的 EDIT_COLS 一致） */
 const EDIT_FIELDS = [
   {k:"name",label:"姓名"},{k:"relationship",label:"關係"},{k:"empId",label:"工號"},
@@ -248,7 +298,7 @@ function updateSignupBtn(){
   if(SIGNUP_OPEN){ b.textContent="🟢 報名開放中"; b.classList.add("openst"); }
   else { b.textContent="🔴 報名已關閉"; b.classList.add("closedst"); }
 }
-function rowHtml(r){
+function rowHtml(r, firstOfReg){
   return '<tr>'
     +'<td class="reg nowrap">'+esc(r.regId||"")+'</td>'
     +'<td class="nowrap">'+esc(r.dept||"")+'</td>'
@@ -264,7 +314,9 @@ function rowHtml(r){
     +'<td class="nowrap">'+esc(occDisplay(r.occupancy, r.surcharge))+'</td>'
     +'<td class="num">'+fmt(r.price)+'</td>'
     +'<td class="num">'+(r.subsidy!==""&&r.subsidy!=null?fmt(r.subsidy):"—")+'</td>'
-    +'<td class="nowrap"><button class="btn ghost edit-btn" data-row="'+r.row+'">✏️ 編輯</button></td>'
+    +'<td class="nowrap"><button class="btn ghost edit-btn" data-row="'+r.row+'">✏️ 編輯</button>'
+      +(firstOfReg ? ' <button class="btn ghost edit-btn add-btn" data-row="'+r.row+'">＋ 加人</button>' : '')
+    +'</td>'
     +'</tr>';
 }
 function fillTable(){
@@ -281,7 +333,9 @@ function fillTable(){
   });
   rosterIndex = {}; list.forEach(function(r){ rosterIndex[r.row]=r; });
   const tb = document.getElementById("rosterBody");
-  if(tb) tb.innerHTML = list.map(rowHtml).join("") || '<tr><td colspan="15" class="loading">沒有符合條件的資料</td></tr>';
+  const seenReg = {};
+  const bodyHtml = list.map(function(r){ const f = !seenReg[r.regId]; seenReg[r.regId]=true; return rowHtml(r, f); }).join("");
+  if(tb) tb.innerHTML = bodyHtml || '<tr><td colspan="15" class="loading">沒有符合條件的資料</td></tr>';
   const c = document.getElementById("fCount"); if(c) c.textContent = "顯示 "+list.length+" / "+CURRENT.roster.length+" 人";
 }
 
@@ -333,6 +387,8 @@ function render(res){
   document.getElementById("fDept").addEventListener("change", function(e){ FILTER.dept=e.target.value; fillTable(); });
   document.getElementById("fSearch").addEventListener("input", function(e){ FILTER.q=e.target.value; fillTable(); });
   document.getElementById("rosterTableWrap").addEventListener("click", function(e){
+    const ab = e.target.closest && e.target.closest(".add-btn");
+    if(ab){ const ra = rosterIndex[Number(ab.dataset.row)]; if(ra) startAddPerson(ra); return; }
     const b = e.target.closest && e.target.closest(".edit-btn"); if(!b) return;
     const r = rosterIndex[Number(b.dataset.row)]; if(r) startEdit(r);
   });
@@ -555,6 +611,85 @@ document.getElementById("editSave").addEventListener("click", function(){
       body: JSON.stringify({ action:"editRow", pw:ADMIN_PW, row:editingRow, field:field, value:value })})
     .finally(function(){
       setTimeout(function(){ btn.disabled=false; btn.textContent="儲存修改"; closeEdit(); load(SHOW_ID?ADMIN_PW:undefined); }, 1500);
+    });
+});
+
+/* ===== 加入同行成員（新增一列，後端自動重算整筆）===== */
+const addOverlay = document.getElementById("addOverlay");
+const addErr = document.getElementById("addErr");
+let ADD_REG = null;   // {regId, room, dept, contact, count, cap}
+function bedNum(room){ var m=String(room||"").match(/(\d)/); return m?m[1]:"2"; }
+function addTypeVal(){ const el=document.querySelector('input[name="addType"]:checked'); return el?el.value:"family"; }
+function toggleAddType(){
+  const emp = addTypeVal()==="employee";
+  document.getElementById("addEmpWrap").style.display = emp?"block":"none";
+  document.getElementById("addRelWrap").style.display = emp?"none":"block";
+}
+function addPriceNow(){
+  const room = bedNum(ADD_REG && ADD_REG.room);
+  const ageKey = document.getElementById("addAge").value;
+  return (PRICES[room] && PRICES[room][ageKey]) || 0;
+}
+function fillAddPrice(){
+  document.getElementById("addPricePreview").innerHTML =
+    '費用試算：<b>NT$ '+fmt(addPriceNow())+'</b>　<span class="muted2">（'+esc(bedNum(ADD_REG&&ADD_REG.room))+'人房）加入後系統會自動重算補助與獨住加價</span>';
+}
+function addShowErr(m){ addErr.textContent=m; addErr.classList.add("show"); }
+function startAddPerson(r){
+  ensureAdminPw("加入同行成員","新增報名成員屬個資操作，請先輸入後台密碼。", function(){ openAddModal(r); });
+}
+function openAddModal(r){
+  const grp = ((CURRENT&&CURRENT.roster)||[]).filter(function(x){ return x.regId===r.regId; });
+  const cap = Number(bedNum(r.room));
+  ADD_REG = { regId:r.regId, room:r.room, dept:r.dept, contact:r.contact, count:grp.length, cap:cap };
+  document.getElementById("addWho").innerHTML =
+    '加入到 <b>'+esc(r.contact||"")+'</b> 的報名單（<span class="reg">'+esc(r.regId||"")+'</span>）<br>'
+    +'<span class="muted2">'+esc(r.room||"")+'　·　'+esc(r.dept||"未填部門")+'　·　目前 '+grp.length+' / '+cap+' 人　·　新成員與本單同房型、同部門</span>';
+  document.getElementById("addRel").innerHTML = FAMILY_REL.map(function(x){ return '<option value="'+esc(x)+'">'+esc(x)+'</option>'; }).join("");
+  document.getElementById("addAge").innerHTML = Object.keys(AGE_LABELS).map(function(k){ return '<option value="'+k+'">'+esc(AGE_LABELS[k])+'</option>'; }).join("");
+  document.querySelector('input[name="addType"][value="family"]').checked = true;
+  toggleAddType();
+  document.getElementById("addName").value="";
+  document.getElementById("addEmpId").value="";
+  document.getElementById("addIdno").value="";
+  document.getElementById("addDob").value="";
+  fillAddPrice();
+  addErr.classList.remove("show");
+  const saveBtn = document.getElementById("addSave");
+  if(cap && grp.length>=cap){
+    addShowErr("這張報名單的"+esc(r.room)+"已住滿 "+grp.length+" 人，無法再加人。請改用「重新報名」整組重填，或先把房型改大。");
+    saveBtn.disabled = true;
+  } else { saveBtn.disabled = false; }
+  addOverlay.classList.add("show");
+  setTimeout(function(){ document.getElementById("addName").focus(); }, 50);
+}
+function closeAdd(){ addOverlay.classList.remove("show"); ADD_REG=null; }
+Array.prototype.forEach.call(document.querySelectorAll('input[name="addType"]'), function(rb){ rb.addEventListener("change", toggleAddType); });
+document.getElementById("addAge").addEventListener("change", fillAddPrice);
+document.getElementById("addCancel").addEventListener("click", closeAdd);
+document.getElementById("addSave").addEventListener("click", function(){
+  if(!ADD_REG) return;
+  if(ADD_REG.cap && ADD_REG.count>=ADD_REG.cap){ addShowErr("房間已滿，無法再加人。"); return; }
+  const type = addTypeVal();
+  const name = document.getElementById("addName").value.trim();
+  const empId = document.getElementById("addEmpId").value.trim();
+  const rel = document.getElementById("addRel").value;
+  const ageKey = document.getElementById("addAge").value;
+  const idno = document.getElementById("addIdno").value.trim();
+  const dob = document.getElementById("addDob").value.trim();
+  if(!name){ addShowErr("請填姓名。"); return; }
+  if(type==="employee" && !empId){ addShowErr("員工請填工號（補助依工號計算）。"); return; }
+  if(!idno){ addShowErr("請填身分證／居留證號（投保用）。"); return; }
+  if(!dob){ addShowErr("請填出生年月日（投保用）。"); return; }
+  const person = { type:type, name:name, relationship:type==="employee"?"":rel,
+                   empId:type==="employee"?empId:"", ageLabel:AGE_LABELS[ageKey],
+                   idNumber:idno, dob:dob, price:addPriceNow() };
+  const btn=document.getElementById("addSave"); btn.disabled=true; btn.textContent="加入中…"; addErr.classList.remove("show");
+  fetch(ENDPOINT, {method:"POST", mode:"no-cors", credentials:"omit",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({ action:"addPerson", pw:ADMIN_PW, regId:ADD_REG.regId, person:person })})
+    .finally(function(){
+      setTimeout(function(){ btn.disabled=false; btn.textContent="加入並重算"; closeAdd(); load(SHOW_ID?ADMIN_PW:undefined); }, 1800);
     });
 });
 
