@@ -137,6 +137,7 @@
 
   .err{display:none;background:#fbe6df;border:1px solid #e7a78f;color:#9a3414;border-radius:12px;padding:11px 14px;font-size:14px;margin-top:12px;font-weight:600;}
   .err.show{display:block;}
+  .closed-banner{display:none;background:#fbe6df;border:1px solid #e7a78f;color:#9a3414;border-radius:16px;padding:15px 18px;margin:0 0 10px;font-weight:700;text-align:center;box-shadow:0 6px 24px -20px rgba(0,31,58,.5);}
 </style>
 </head>
 <body>
@@ -157,9 +158,12 @@
       <div class="meta">
         <span><svg class="leaf" viewBox="0 0 24 24" fill="none"><path d="M3 12c0-5 4-9 9-9 5 0 9 4 9 9 0 5-4 9-9 9-5 0-9-4-9-9Z" stroke="#fff" stroke-opacity=".6"/><path d="M8 13c2-3 5-4 8-4" stroke="#fff" stroke-linecap="round"/></svg> 出發日期 <b>115/10/17（六）～10/18（日）</b></span>
         <span>🚆 含遊覽車・住宿・二日保險</span>
+        <span>⏰ 報名截止 <b>2026/06/10</b></span>
       </div>
     </div>
   </header>
+
+  <div class="closed-banner" id="closedBanner">本次報名已截止 ── 目前暫停線上報名，如需補報或修改資料，請聯絡承辦人員。</div>
 
   <form id="form" novalidate>
 
@@ -177,8 +181,8 @@
           <input id="emp_id" placeholder="公司補助依工號帶入" />
         </div>
         <div>
-          <label class="f">部門 / 單位<span class="req">*</span></label>
-          <input id="dept" placeholder="例：生產部" />
+          <label class="f">部門<span class="req">*</span></label>
+          <select id="dept"><option value="">請選擇部門</option></select>
         </div>
         <div>
           <label class="f">聯絡手機<span class="req">*</span></label>
@@ -292,6 +296,41 @@ const AGE_LABELS = {
   baby:"未滿 2 歲（不足2歲）",
 };
 const FAMILY_REL = ["配偶","子女（直系）","父母（直系）","兄弟姊妹","情侶"];
+
+/* 部門（依組織圖・部級，以「處」分組） */
+const DEPT_GROUPS = {
+  "業務處":["業務部","行銷設計部"],
+  "研發處":["研發一部","研發二部"],
+  "製造處":["生技設備部","生產部","資材部"],
+  "品保處":["品檢一課","品檢二課"],
+  "管理處":["行政部","財務部"],
+};
+(function(){
+  const sel = document.getElementById("dept");
+  let html = '<option value="">請選擇部門</option>';
+  Object.keys(DEPT_GROUPS).forEach(function(g){
+    html += '<optgroup label="'+g+'">';
+    DEPT_GROUPS[g].forEach(function(d){ html += '<option value="'+g+'／'+d+'">'+d+'</option>'; });
+    html += '</optgroup>';
+  });
+  sel.innerHTML = html;
+})();
+
+/* 報名截止日期（僅顯示，不自動關閉）＋ 報名開關狀態（由後台控制） */
+const DEADLINE = "2026/06/10";
+let SIGNUP_OPEN = true;
+function applyClosed(){
+  const b = document.getElementById("closedBanner"); if(b) b.style.display="block";
+  const btn = document.getElementById("submitBtn"); if(btn){ btn.disabled=true; btn.textContent="報名已截止"; }
+}
+(async function checkStatus(){
+  if(!ENDPOINT.startsWith("http")) return;
+  try{
+    const r = await fetch(ENDPOINT + "?action=status&_=" + Date.now(), {credentials:"omit"});
+    const res = await r.json();
+    if(res && res.ok && res.open === false){ SIGNUP_OPEN=false; applyClosed(); }
+  }catch(e){}
+})();
 
 function ageOptions(){ return Object.entries(AGE_LABELS).map(([v,l])=>`<option value="${v}">${l}</option>`).join(""); }
 const fmt = n => Number(n||0).toLocaleString("en-US");
@@ -542,13 +581,14 @@ function wireIdInput(el){
 
 document.getElementById("form").addEventListener("submit", async (e)=>{
   e.preventDefault(); clearErr();
+  if(!SIGNUP_OPEN) return showErr("報名已截止，如需補報或修改資料，請聯絡承辦人員。");
   const room = selectedRoom();
   const people = readPeople();
   const emp = people[0];
 
   if(!emp.name) return showErr("請填寫員工姓名。");
   if(!emp.empId) return showErr("請填寫工號。");
-  if(!document.getElementById("dept").value.trim()) return showErr("請填寫部門 / 單位。");
+  if(!document.getElementById("dept").value.trim()) return showErr("請選擇部門。");
   if(!document.getElementById("phone").value.trim()) return showErr("請填寫聯絡手機。");
   const empId = checkTwId(emp.idNumber);
   if(!empId.ok) return showErr("本人" + empId.reason);
