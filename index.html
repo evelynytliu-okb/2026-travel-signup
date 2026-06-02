@@ -163,7 +163,7 @@
       <div class="meta">
         <span><svg class="leaf" viewBox="0 0 24 24" fill="none"><path d="M3 12c0-5 4-9 9-9 5 0 9 4 9 9 0 5-4 9-9 9-5 0-9-4-9-9Z" stroke="#fff" stroke-opacity=".6"/><path d="M8 13c2-3 5-4 8-4" stroke="#fff" stroke-linecap="round"/></svg> 出發日期 <b>115/10/17（六）～10/18（日）</b></span>
         <span>🚆 含遊覽車・住宿・二日保險</span>
-        <span>⏰ 報名截止 <b>2026/06/10</b></span>
+        <span>⏰ 報名截止 <b id="deadlineLbl">2026/06/10</b></span>
       </div>
     </div>
   </header>
@@ -346,8 +346,14 @@ renderDeptSelect(DEFAULT_DEPT_GROUPS);   // 先用預設清單，避免網路慢
 })();
 
 /* 報名截止日期（僅顯示，不自動關閉）＋ 報名開關狀態（由後台控制） */
-const DEADLINE = "2026/06/10";
+let DEADLINE = "2026/06/10";   // 後台可在「設定」分頁 B3 或 dashboard 修改；開機時會以伺服器值覆寫
 let SIGNUP_OPEN = true;
+function applyDeadline(s){
+  if(!s) return;
+  DEADLINE = String(s);
+  const el = document.getElementById("deadlineLbl");
+  if(el) el.textContent = DEADLINE;
+}
 function applyClosed(){
   const b = document.getElementById("closedBanner"); if(b) b.style.display="block";
   const btn = document.getElementById("submitBtn"); if(btn){ btn.disabled=true; btn.textContent="報名已截止"; }
@@ -357,7 +363,10 @@ function applyClosed(){
   try{
     const r = await fetch(ENDPOINT + "?action=status&_=" + Date.now(), {credentials:"omit"});
     const res = await r.json();
-    if(res && res.ok && res.open === false){ SIGNUP_OPEN=false; applyClosed(); }
+    if(res && res.ok){
+      if(res.open === false){ SIGNUP_OPEN=false; applyClosed(); }
+      if(res.deadline) applyDeadline(res.deadline);
+    }
   }catch(e){}
 })();
 

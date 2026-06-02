@@ -85,7 +85,7 @@
       <div class="meta">
         📅 出發 <b>115/10/17（六）～10/18（日）</b><br/>
         🚆 含遊覽車・住宿・二日保險<br/>
-        ⏰ 報名截止 <b>2026/06/10</b>
+        ⏰ 報名截止 <b id="deadlineLbl">2026/06/10</b>
       </div>
     </div>
 
@@ -114,7 +114,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   var FORM_URL = "https://evelynytliu-okb.github.io/2026-travel-signup/";
+  var ENDPOINT = "https://script.google.com/macros/s/AKfycbzGE46TFzPMXlfBvT88mLjobexmgnpSlWf_U_Rl2PBzWMUca7_mUc5-pI64F75Kx8ymKg/exec";
   var box = document.getElementById("qr");
+
+  // 從後台讀截止日（管理員可在後台修改），失敗時保留 HTML 預設值
+  try {
+    fetch(ENDPOINT + "?action=status&_=" + Date.now(), {credentials:"omit"})
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if(res && res.ok && res.deadline){
+          var el = document.getElementById("deadlineLbl");
+          if(el) el.textContent = res.deadline;
+        }
+      })
+      .catch(function(){});
+  } catch(e){}
 
   function fallbackImg(){
     box.innerHTML = '<img alt="報名 QR Code" src="https://api.qrserver.com/v1/create-qr-code/?size=660x660&margin=0&data=' + encodeURIComponent(FORM_URL) + '">';

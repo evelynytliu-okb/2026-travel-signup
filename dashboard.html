@@ -178,6 +178,7 @@
       <button class="btn ghost" id="refreshBtn">↻ 重新整理</button>
       <button class="btn ghost admin-only" id="excelBtn">📥 下載 Excel</button>
       <button class="btn ghost admin-only" id="signupBtn">報名狀態…</button>
+      <button class="btn ghost admin-only" id="deadlineBtn">📅 截止日…</button>
       <button class="btn ghost admin-only" id="subsidyBtn">💰 補助名單</button>
       <button class="btn ghost admin-only" id="deptBtn">🏢 部門設定</button>
       <button class="btn ghost admin-only" id="roomBtn">🛏️ 房間分配</button>
@@ -344,6 +345,7 @@ const EDIT_FIELDS = [
 
 let CURRENT = null;                 // 最近一次後台資料（含 roster / signupOpen）
 let SIGNUP_OPEN = null;             // 報名開放狀態
+let DEADLINE = "";                  // 報名截止日（從 server 載入）
 const FILTER = { depts:[], q:"" };   // 名單篩選（depts 可複選）
 let rosterIndex = {};               // row -> roster 物件（目前顯示中）
 let editingRow = null;              // 正在編輯的列號
@@ -418,6 +420,10 @@ function updateSignupBtn(){
   if(SIGNUP_OPEN){ b.textContent="🟢 報名開放中"; b.classList.add("openst"); }
   else { b.textContent="🔴 報名已關閉"; b.classList.add("closedst"); }
 }
+function updateDeadlineBtn(){
+  const b = document.getElementById("deadlineBtn"); if(!b) return;
+  b.textContent = DEADLINE ? ("📅 截止 " + DEADLINE) : "📅 截止日…";
+}
 function rowHtml(r, firstOfReg, bandIdx, regBalance){
   const cls = 'reg-band-'+(bandIdx%2)+(firstOfReg?' reg-first':'');
   const balCell = firstOfReg
@@ -474,8 +480,10 @@ function render(res){
   const s = res.stats;
   SHOW_ID = !!res.showId;
   SIGNUP_OPEN = (typeof res.signupOpen === "boolean") ? res.signupOpen : SIGNUP_OPEN;
+  if(typeof res.deadline === "string") DEADLINE = res.deadline;
   document.getElementById("idBtn").textContent = SHOW_ID ? "隱藏身分證" : "顯示身分證";
   updateSignupBtn();
+  updateDeadlineBtn();
 
   const overview =
     statCard("報名單數", s.regCount, "筆") + statCard("總人數", s.totalPeople, "人") +
@@ -1477,6 +1485,28 @@ document.getElementById("signupBtn").addEventListener("click", function(){
   fetch(ENDPOINT, {method:"POST", mode:"no-cors", credentials:"omit",
     headers:{"Content-Type":"text/plain;charset=utf-8"},
     body: JSON.stringify({ action:"toggleSignup", pw:ADMIN_PW, open:next })})
+    .finally(function(){ setTimeout(function(){ load(ADMIN_PW); }, 1400); });
+});
+
+/* ===== 報名截止日（僅顯示用，由管理員修改）===== */
+document.getElementById("deadlineBtn").addEventListener("click", function(){
+  if(!ADMIN_MODE) return;
+  const cur = DEADLINE || "2026/06/10";
+  const input = prompt(
+    "請輸入新的報名截止日（YYYY/MM/DD）：\n\n" +
+    "・這個日期只會顯示在報名表與分享頁，不會自動關閉報名。\n" +
+    "・要真的關閉報名，請按上面「報名狀態」按鈕。\n" +
+    "・留白後按「確定」可清空截止日（不顯示）。",
+    cur);
+  if(input === null) return;  // 按取消
+  const val = String(input).trim();
+  if(val){
+    const m = val.replace(/-/g,"/").match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+    if(!m){ alert("日期格式錯誤，請用 YYYY/MM/DD（例：2026/06/10）。"); return; }
+  }
+  fetch(ENDPOINT, {method:"POST", mode:"no-cors", credentials:"omit",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body: JSON.stringify({ action:"setDeadline", pw:ADMIN_PW, deadline:val })})
     .finally(function(){ setTimeout(function(){ load(ADMIN_PW); }, 1400); });
 });
 
