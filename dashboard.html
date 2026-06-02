@@ -106,6 +106,14 @@
   .filterbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:2px 0 10px;}
   .filterbar select,.filterbar input{width:auto;flex:0 1 230px;font-size:14px;padding:9px 12px;}
   .filterbar .fcount{color:var(--muted);font-size:13px;margin-left:auto;white-space:nowrap;}
+  /* 部門複選 chips */
+  .deptfilter{display:flex;flex-wrap:wrap;gap:6px;align-items:center;width:100%;}
+  .deptfilter .flabel{font-size:13px;font-weight:700;color:var(--forest-800);margin-right:2px;}
+  .dgrp{font-size:11.5px;color:var(--muted);font-weight:700;margin-left:8px;}
+  .deptchip{border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:5px 12px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.12s;}
+  .deptchip:hover{border-color:var(--moss);}
+  .deptchip.on{background:var(--forest-700);border-color:var(--forest-700);color:#fff;}
+  .deptchip.all.on{background:var(--gold);border-color:var(--gold);color:#23200f;}
   .btn.openst{background:#e7f7ec;color:#1f7a44;}
   .btn.closedst{background:#fbe6df;color:#9a3414;}
   .edit-btn{white-space:nowrap;padding:4px 10px !important;font-size:12px !important;}
@@ -247,7 +255,7 @@ const EDIT_FIELDS = [
 
 let CURRENT = null;                 // 最近一次後台資料（含 roster / signupOpen）
 let SIGNUP_OPEN = null;             // 報名開放狀態
-const FILTER = { dept:"", q:"" };   // 名單篩選
+const FILTER = { depts:[], q:"" };   // 名單篩選（depts 可複選）
 let rosterIndex = {};               // row -> roster 物件（目前顯示中）
 let editingRow = null;              // 正在編輯的列號
 let SUBSIDY_ROWS = [];              // 補助名單編輯暫存
@@ -295,12 +303,16 @@ function statCard(k,v,unit,money){
   return `<div class="stat${money?' money':''}"><div class="k">${k}</div><div class="v">${money?'NT$ ':''}${fmt(v)}${unit?`<small>${unit}</small>`:''}</div></div>`;
 }
 
-function deptOptions(sel){
-  let html = '<option value="">全部部門</option>';
+function deptChips(){
+  const sel = FILTER.depts || [];
+  let html = '<span class="flabel">部門：</span>'
+    + '<button class="deptchip all'+(sel.length===0?' on':'')+'" data-d="__all">全部</button>';
   Object.keys(DEPT_GROUPS).forEach(function(g){
-    html += '<optgroup label="'+g+'">';
-    DEPT_GROUPS[g].forEach(function(d){ const v=g+'／'+d; html += '<option value="'+esc(v)+'"'+(sel===v?' selected':'')+'>'+esc(d)+'</option>'; });
-    html += '</optgroup>';
+    html += '<span class="dgrp">'+esc(g)+'</span>';
+    DEPT_GROUPS[g].forEach(function(d){
+      const v=g+'／'+d;
+      html += '<button class="deptchip'+(sel.indexOf(v)>=0?' on':'')+'" data-d="'+esc(v)+'">'+esc(d)+'</button>';
+    });
   });
   return html;
 }
@@ -336,9 +348,9 @@ function rowHtml(r, firstOfReg, bandIdx){
 function fillTable(){
   if(!CURRENT) return;
   const q = (FILTER.q||"").trim().toLowerCase();
-  const dep = FILTER.dept||"";
+  const deps = FILTER.depts||[];
   const list = CURRENT.roster.filter(function(r){
-    if(dep && r.dept!==dep) return false;
+    if(deps.length && deps.indexOf(r.dept)<0) return false;
     if(q){
       const hay = ((r.name||"")+" "+(r.empId||"")+" "+(r.contact||"")+" "+(r.dept||"")).toLowerCase();
       if(hay.indexOf(q)<0) return false;
@@ -388,7 +400,9 @@ function render(res){
     <div class="section-t">報名名單（每人一列）</div>
     <div class="idnote">${ADMIN_MODE ? (SHOW_ID ? "⚠️ 已進入管理員模式，目前顯示完整身分證，請注意保密。" : "已進入管理員模式。可按右上「顯示身分證」、或在名單按 ✏️編輯／＋加人。") : "目前為唯讀檢視（身分證已遮蔽）。如需編輯／加人／看身分證，請按右上「🔐 進入管理員模式」。"}</div>
     <div class="filterbar">
-      <select id="fDept">${deptOptions(FILTER.dept)}</select>
+      <div class="deptfilter" id="fDept">${deptChips()}</div>
+    </div>
+    <div class="filterbar">
       <input id="fSearch" placeholder="搜尋 姓名／工號／聯絡窗口" value="${esc(FILTER.q)}" />
       <span class="fcount" id="fCount"></span>
     </div>
@@ -402,7 +416,14 @@ function render(res){
     </table></div>`;
 
   fillTable();
-  document.getElementById("fDept").addEventListener("change", function(e){ FILTER.dept=e.target.value; fillTable(); });
+  document.getElementById("fDept").addEventListener("click", function(e){
+    const b = e.target.closest && e.target.closest(".deptchip"); if(!b) return;
+    const d = b.dataset.d;
+    if(d==="__all"){ FILTER.depts=[]; }
+    else { const i=FILTER.depts.indexOf(d); if(i>=0) FILTER.depts.splice(i,1); else FILTER.depts.push(d); }
+    document.getElementById("fDept").innerHTML = deptChips();   // 更新 chip 選取狀態
+    fillTable();
+  });
   document.getElementById("fSearch").addEventListener("input", function(e){ FILTER.q=e.target.value; fillTable(); });
   document.getElementById("rosterTableWrap").addEventListener("click", function(e){
     const ab = e.target.closest && e.target.closest(".add-btn");
