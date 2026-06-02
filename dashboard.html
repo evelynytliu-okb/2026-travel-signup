@@ -142,6 +142,7 @@
       <button class="btn ghost" id="refreshBtn">↻ 重新整理</button>
       <button class="btn ghost admin-only" id="signupBtn">報名狀態…</button>
       <button class="btn ghost admin-only" id="subsidyBtn">💰 補助名單</button>
+      <button class="btn ghost admin-only" id="deptBtn">🏢 部門設定</button>
       <button class="btn ghost admin-only" id="roomBtn">🛏️ 房間分配</button>
       <button class="btn ghost admin-only" id="idBtn">👁 顯示身分證</button>
       <button class="btn gold" id="adminBtn">🔐 進入管理員模式</button>
@@ -222,14 +223,28 @@ const DEFAULT_SUBSIDY = 10000;
 let SHOW_ID = false;
 const fmt = n => Number(n||0).toLocaleString("en-US");
 
-/* 部門（與報名表同一份，部級・以「處」分組） */
-const DEPT_GROUPS = {
-  "業務處":["業務部","行銷設計部"],
-  "研發處":["研發一部","研發二部"],
-  "製造處":["生技設備部","生產部","資材部"],
-  "品保處":["品檢一課","品檢二課"],
-  "管理處":["行政部","財務部"],
-};
+/* 部門清單由後端「部門設定」分頁提供，載入後填入 DEPT_GROUPS。
+   結構：{ "業務處":["業務部",...], "獨立單位":["總經理室",...] } */
+let DEPT_GROUPS = {};
+async function loadDeptList(){
+  try{
+    const r = await fetch(ENDPOINT + "?action=deptList&_=" + Date.now(), {credentials:"omit"});
+    const j = await r.json();
+    if(j && j.ok && Array.isArray(j.depts)){
+      const g = {};
+      j.depts.forEach(function(d){ (g[d.group] = g[d.group] || []).push(d.name); });
+      DEPT_GROUPS = g;
+    }
+  }catch(e){ /* 失敗時 DEPT_GROUPS 保持空，篩選器仍可工作 */ }
+}
+/* 回傳全部部門「處／部門」格式字串清單（給篩選用） */
+function allDeptValues(){
+  const out = [];
+  Object.keys(DEPT_GROUPS).forEach(function(g){
+    DEPT_GROUPS[g].forEach(function(d){ out.push(g + '／' + d); });
+  });
+  return out;
+}
 /* 價目表／年齡分類／眷屬關係（與報名表一致，供「加人」計算費用）*/
 const PRICES = {
   "2": {adult:6725, student:6655, senior:6565, disabled:6525, child25:3000, baby:1500},
@@ -302,6 +317,12 @@ async function load(pw){
 function statCard(k,v,unit,money){
   return `<div class="stat${money?' money':''}"><div class="k">${k}</div><div class="v">${money?'NT$ ':''}${fmt(v)}${unit?`<small>${unit}</small>`:''}</div></div>`;
 }
+/* 主數字＋小字備註（房型分布用：主＝間數、小字＝人數） */
+function statCardDual(k, main, mainUnit, sub){
+  return '<div class="stat"><div class="k">'+k+'</div>'
+    + '<div class="v">'+fmt(main)+'<small>'+mainUnit+'</small></div>'
+    + '<div class="k" style="margin-top:2px;font-size:12px;">'+sub+'</div></div>';
+}
 
 function deptChips(){
   const sel = FILTER.depts || [];
@@ -323,8 +344,11 @@ function updateSignupBtn(){
   if(SIGNUP_OPEN){ b.textContent="🟢 報名開放中"; b.classList.add("openst"); }
   else { b.textContent="🔴 報名已關閉"; b.classList.add("closedst"); }
 }
-function rowHtml(r, firstOfReg, bandIdx){
+function rowHtml(r, firstOfReg, bandIdx, regBalance){
   const cls = 'reg-band-'+(bandIdx%2)+(firstOfReg?' reg-first':'');
+  const balCell = firstOfReg
+    ? '<td class="num" style="color:var(--rust);font-weight:700;">NT$ '+fmt(regBalance||0)+'</td>'
+    : '<td class="num" style="color:var(--muted);">↑</td>';
   return '<tr class="'+cls+'">'
     +'<td class="reg nowrap">'+esc(r.regId||"")+'</td>'
     +'<td class="nowrap">'+esc(r.dept||"")+'</td>'
@@ -340,6 +364,7 @@ function rowHtml(r, firstOfReg, bandIdx){
     +'<td class="nowrap">'+esc(occDisplay(r.occupancy, r.surcharge))+'</td>'
     +'<td class="num">'+fmt(r.price)+'</td>'
     +'<td class="num">'+(r.subsidy!==""&&r.subsidy!=null?fmt(r.subsidy):"—")+'</td>'
+    + balCell
     +'<td class="nowrap"><button class="btn ghost edit-btn admin-only" data-row="'+r.row+'">✏️ 編輯</button>'
       +(firstOfReg ? ' <button class="btn ghost edit-btn add-btn admin-only" data-row="'+r.row+'">＋ 加人</button>' : '')
     +'</td>'
@@ -360,12 +385,13 @@ function fillTable(){
   rosterIndex = {}; list.forEach(function(r){ rosterIndex[r.row]=r; });
   const tb = document.getElementById("rosterBody");
   const regBand = {}; let bandIdx = -1;
+  const balances = (CURRENT && CURRENT.regBalances) || {};
   const bodyHtml = list.map(function(r){
     const f = !(r.regId in regBand);
     if(f){ bandIdx++; regBand[r.regId] = bandIdx; }
-    return rowHtml(r, f, regBand[r.regId]);
+    return rowHtml(r, f, regBand[r.regId], balances[r.regId]);
   }).join("");
-  if(tb) tb.innerHTML = bodyHtml || '<tr><td colspan="15" class="loading">沒有符合條件的資料</td></tr>';
+  if(tb) tb.innerHTML = bodyHtml || '<tr><td colspan="16" class="loading">沒有符合條件的資料</td></tr>';
   const c = document.getElementById("fCount"); if(c) c.textContent = "顯示 "+list.length+" / "+CURRENT.roster.length+" 人";
 }
 
@@ -381,7 +407,9 @@ function render(res){
     statCard("報名單數", s.regCount, "筆") + statCard("總人數", s.totalPeople, "人") +
     statCard("員工", s.empCount, "人") + statCard("眷屬", s.famCount, "人");
   const rooms =
-    statCard("2 人房", s.room2, "人") + statCard("3 人房", s.room3, "人") + statCard("4 人房", s.room4, "人");
+    statCardDual("2 人房", s.rooms2||0, "間", fmt(s.room2||0)+" 人入住")
+    + statCardDual("3 人房", s.rooms3||0, "間", fmt(s.room3||0)+" 人入住")
+    + statCardDual("4 人房", s.rooms4||0, "間", fmt(s.room4||0)+" 人入住");
   const occ =
     statCard("公司安排合住", s.companyCount, "筆") + statCard("獨住加價", s.singleCount, "筆");
   const money =
@@ -391,7 +419,7 @@ function render(res){
   document.getElementById("content").innerHTML = `
     <div class="section-t">報名概況</div>
     <div class="grid g4">${overview}</div>
-    <div class="section-t">房型分布（人數）</div>
+    <div class="section-t">房型分布（房間數，含已分配與未分配估算）</div>
     <div class="grid g3">${rooms}</div>
     <div class="section-t">住宿安排</div>
     <div class="grid g3">${occ}</div>
@@ -410,7 +438,9 @@ function render(res){
       <thead><tr>
         <th>報名單</th><th>部門</th><th>聯絡窗口</th><th>身分別</th><th>姓名</th><th>關係</th><th>工號</th>
         <th>年齡身分</th><th>身分證</th><th>出生年月日</th><th>房型</th><th>住宿</th>
-        <th style="text-align:right">費用</th><th style="text-align:right">補助</th><th>操作</th>
+        <th style="text-align:right">費用</th><th style="text-align:right">補助</th>
+        <th style="text-align:right" title="此整張報名單的應補差額（含獨住加價）。同單成員列以箭頭表示，金額顯示於該單第一列。">自負額</th>
+        <th>操作</th>
       </tr></thead>
       <tbody id="rosterBody"></tbody>
     </table></div>`;
@@ -744,6 +774,109 @@ document.getElementById("addSave").addEventListener("click", function(){
     });
 });
 
+/* ===== 部門設定編輯 ===== */
+let DEPT_ROWS = [];   // [{group, name}]
+document.getElementById("deptBtn").addEventListener("click", function(){
+  if(ADMIN_MODE) enterDeptMode();
+});
+async function enterDeptMode(){
+  document.getElementById("content").innerHTML = '<div class="loading">載入部門清單…</div>';
+  let res;
+  try{
+    const r = await fetch(ENDPOINT + "?action=deptList&_=" + Date.now(), {credentials:"omit"});
+    res = await r.json();
+  }catch(e){ res = {ok:false, error:"連線失敗，請稍後再試。"}; }
+  if(!(res && res.ok)){ document.getElementById("content").innerHTML = '<div class="loading">'+((res&&res.error)||"讀取失敗")+'</div>'; return; }
+  DEPT_ROWS = (res.depts||[]).map(function(d){ return { group:d.group||'', name:d.name||'' }; });
+  renderDeptEditor();
+}
+function readDeptDOM(){
+  const rows = [];
+  document.querySelectorAll("#deptBody .deptrow").forEach(function(tr){
+    rows.push({ group: tr.querySelector(".d-grp").value.trim(),
+                name:  tr.querySelector(".d-nm").value.trim() });
+  });
+  return rows;
+}
+function renderDeptEditor(){
+  // 既有分組（含「獨立單位」）給 datalist 提示
+  const groups = {};
+  DEPT_ROWS.forEach(function(r){ if(r.group) groups[r.group] = 1; });
+  ['獨立單位','業務處','研發處','製造處','品保處','管理處'].forEach(function(g){ groups[g] = 1; });
+  const dlOpts = Object.keys(groups).map(function(g){ return '<option value="'+esc(g)+'">'; }).join('');
+  const body = DEPT_ROWS.map(function(r, i){
+    return '<tr class="deptrow">'
+      +'<td><input class="d-grp" list="deptGroupList" value="'+esc(r.group)+'" placeholder="例：管理處／獨立單位" /></td>'
+      +'<td><input class="d-nm" value="'+esc(r.name)+'" placeholder="例：法規文管部" /></td>'
+      +'<td class="nowrap">'
+        +'<button class="rdel d-up" data-i="'+i+'" title="上移">▲</button> '
+        +'<button class="rdel d-dn" data-i="'+i+'" title="下移">▼</button> '
+        +'<button class="rdel d-del" data-i="'+i+'">刪除</button>'
+      +'</td></tr>';
+  }).join("");
+  document.getElementById("content").innerHTML =
+      '<div class="roombar">'
+    +   '<button class="btn ghost" id="exitDept">← 返回統計</button>'
+    +   '<div class="rsum">部門共 <b>'+DEPT_ROWS.length+'</b> 個 ・ 順序＝報名表下拉選單顯示順序</div>'
+    +   '<button class="btn gold" id="saveDept">💾 儲存部門清單</button>'
+    + '</div>'
+    + '<div class="roomhint">'
+    + '說明：<br>'
+    + '・「處／群組」是分組標題（例如：業務處、研發處、管理處）；報名表會用它做下拉選單分組。<br>'
+    + '・不屬於某個「處」的單位（例如 <b>總經理室、稽核室、法規文管部</b>），請填「<b>獨立單位</b>」。<br>'
+    + '・「部門名稱」就是員工會看到的選項（例：行銷設計部、品檢一課）。<br>'
+    + '・儲存後，報名表與後台篩選都會即時改用新清單。已送出的舊資料不會被改動。'
+    + '</div>'
+    + '<datalist id="deptGroupList">'+dlOpts+'</datalist>'
+    + '<div class="tablewrap"><table>'
+    + '<thead><tr><th style="width:34%">處／群組</th><th>部門名稱</th><th style="width:170px">排序／刪除</th></tr></thead>'
+    + '<tbody id="deptBody">'+(body || '<tr><td colspan="3" class="muted2" style="padding:14px">目前沒有部門。按下方「＋ 新增一列」加入。</td></tr>')+'</tbody></table></div>'
+    + '<button class="btn ghost" id="addDept" style="margin-top:12px;">＋ 新增一列</button>'
+    + '<div id="deptMsg" class="roommsg"></div>';
+  document.getElementById("exitDept").onclick = function(){ load(ADMIN_MODE?ADMIN_PW:undefined); };
+  document.getElementById("addDept").onclick = function(){
+    DEPT_ROWS = readDeptDOM();
+    DEPT_ROWS.push({ group:'', name:'' });
+    renderDeptEditor();
+  };
+  document.getElementById("saveDept").onclick = saveDeptList;
+  document.querySelectorAll("#deptBody .d-del").forEach(function(b){
+    b.onclick = function(){ DEPT_ROWS = readDeptDOM(); DEPT_ROWS.splice(Number(b.dataset.i),1); renderDeptEditor(); };
+  });
+  document.querySelectorAll("#deptBody .d-up").forEach(function(b){
+    b.onclick = function(){ DEPT_ROWS = readDeptDOM(); const i = Number(b.dataset.i);
+      if(i>0){ const t=DEPT_ROWS[i-1]; DEPT_ROWS[i-1]=DEPT_ROWS[i]; DEPT_ROWS[i]=t; } renderDeptEditor(); };
+  });
+  document.querySelectorAll("#deptBody .d-dn").forEach(function(b){
+    b.onclick = function(){ DEPT_ROWS = readDeptDOM(); const i = Number(b.dataset.i);
+      if(i<DEPT_ROWS.length-1){ const t=DEPT_ROWS[i+1]; DEPT_ROWS[i+1]=DEPT_ROWS[i]; DEPT_ROWS[i]=t; } renderDeptEditor(); };
+  });
+}
+function deptMsg(t, ok){ var el=document.getElementById("deptMsg"); if(el){ el.textContent=t; el.style.color=ok?"var(--forest-700)":"var(--rust)"; } }
+async function saveDeptList(){
+  const rows = readDeptDOM().filter(function(r){ return r.name; }).map(function(r){
+    return { group: r.group || '獨立單位', name: r.name };
+  });
+  if(!rows.length){ deptMsg("至少要留 1 個部門。"); return; }
+  // 防呆：同一筆 group+name 不能重複
+  const seen = {};
+  for(let i=0;i<rows.length;i++){
+    const k = rows[i].group+'／'+rows[i].name;
+    if(seen[k]){ deptMsg("部門重複：「"+k+"」，請刪掉重複的列。"); return; }
+    seen[k] = 1;
+  }
+  deptMsg("儲存中…", true);
+  try{
+    await fetch(ENDPOINT, {method:"POST", mode:"no-cors", credentials:"omit",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({ action:"saveDepts", pw:ADMIN_PW, depts:rows })});
+    setTimeout(async function(){
+      await loadDeptList();   // 重新載入記憶體裡的 DEPT_GROUPS
+      deptMsg("✓ 已儲存部門清單（共 "+rows.length+" 個），報名表與後台篩選會用新清單。", true);
+    }, 1500);
+  }catch(e){ deptMsg("儲存失敗，請檢查網路後再試。"); }
+}
+
 /* ===== 補助名單編輯 ===== */
 document.getElementById("subsidyBtn").addEventListener("click", function(){
   if(ADMIN_MODE) enterSubsidyMode();
@@ -821,8 +954,11 @@ document.getElementById("signupBtn").addEventListener("click", function(){
     .finally(function(){ setTimeout(function(){ load(ADMIN_PW); }, 1400); });
 });
 
-/* 進入即載入（免密碼，遮蔽版） */
-load();
+/* 進入即載入（免密碼，遮蔽版）。先抓部門清單再渲染，避免 chips 抓不到分組。 */
+(async function(){
+  await loadDeptList();
+  load();
+})();
 </script>
 </body>
 </html>
