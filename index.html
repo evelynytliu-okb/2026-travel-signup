@@ -183,7 +183,7 @@
         </div>
         <div>
           <label class="f">工號<span class="req">*</span></label>
-          <input id="emp_id" placeholder="公司補助依工號帶入" />
+          <input id="emp_id" placeholder="公司補助依工號帶入；工號必須與公司名單一致" />
         </div>
         <div>
           <label class="f">部門<span class="req">*</span></label>
@@ -287,7 +287,7 @@
    ============================================================ */
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbzGE46TFzPMXlfBvT88mLjobexmgnpSlWf_U_Rl2PBzWMUca7_mUc5-pI64F75Kx8ymKg/exec";
 
-const DEFAULT_SUBSIDY = 10000;        // 查不到後端時的備援預設補助
+const DEFAULT_SUBSIDY = 10000;        // ★ 已棄用：補助名單視為正式名單，沒對到的工號 → 補助 0（不再用此預設值）
 const SUBSIDY_CAP = 10000;            // 每位員工補助上限（整筆再封頂在總費用）
 const SINGLE_SURCHARGE = 1600;        // 雙人房獨住加價（不列入補助）
 
@@ -365,21 +365,60 @@ function ageOptions(){ return Object.entries(AGE_LABELS).map(([v,l])=>`<option v
 const fmt = n => Number(n||0).toLocaleString("en-US");
 const peopleEl = document.getElementById("people");
 
-/* ---- 補助查詢（依工號，JSONP）---- */
-const subsidyCache = {};        // empId -> amount
-/* 用 credentials:"omit" 查補助：不送 Google cookie，避免多帳號被導去 /u/N 而失敗 */
+/* ---- 補助查詢（依工號）----
+ *  ★ 新政策：補助設定視為「正式名單」。工號沒對到 → 補助 0；且 UI 會顯示警示，提醒員工檢查工號是否輸入正確。 */
+const subsidyCache = {};        // empId(uppercased) -> { amount, found }
+function _normEmpId(s){ return String(s||"").trim().toUpperCase(); }
 function fetchSubsidy(empId){
-  const id = (empId||"").trim();
-  if(!id || !ENDPOINT.startsWith("http")) { recalc(); return; }
-  if(subsidyCache.hasOwnProperty(id)) { recalc(); return; }
+  const id = _normEmpId(empId);
+  if(!id || !ENDPOINT.startsWith("http")) { updateEmpIdWarnings(); recalc(); return; }
+  if(subsidyCache.hasOwnProperty(id)) { updateEmpIdWarnings(); recalc(); return; }
   fetch(ENDPOINT + "?empId=" + encodeURIComponent(id) + "&_=" + Date.now(), {credentials:"omit"})
     .then(r=>r.json())
-    .then(res=>{ if(res && res.ok && typeof res.subsidy === "number") subsidyCache[id] = res.subsidy; recalc(); })
-    .catch(()=>recalc());
+    .then(res=>{
+      if(res && res.ok && typeof res.subsidy === "number"){
+        subsidyCache[id] = { amount: res.subsidy, found: !!res.found };
+      }
+      updateEmpIdWarnings(); recalc();
+    })
+    .catch(()=>{ updateEmpIdWarnings(); recalc(); });
 }
 function subsidyOf(empId){
-  const id=(empId||"").trim();
-  return subsidyCache.hasOwnProperty(id) ? subsidyCache[id] : DEFAULT_SUBSIDY;
+  const id = _normEmpId(empId);
+  const c = subsidyCache[id];
+  return c ? Number(c.amount)||0 : 0;
+}
+function subsidyKnown(empId){
+  /* 工號查過，且 backend 回報 found=true，才算已知工號。沒查過或 found=false 都當未知。 */
+  const id = _normEmpId(empId);
+  const c = subsidyCache[id];
+  return !!(c && c.found);
+}
+/* 顯示／隱藏「工號未在補助名單」的紅字警示 */
+function setEmpIdWarning(inputEl, msg){
+  if(!inputEl) return;
+  let w = inputEl.parentElement.querySelector(".empid-warn");
+  if(!w){
+    w = document.createElement("div");
+    w.className = "empid-warn";
+    w.style.cssText = "color:#9a3414;background:#fbe6df;border:1px solid #e7a78f;border-radius:8px;padding:6px 10px;font-size:12.5px;margin-top:6px;line-height:1.55;";
+    inputEl.parentElement.appendChild(w);
+  }
+  if(msg){ w.textContent = msg; w.style.display = "block"; inputEl.style.borderColor = "#e7a78f"; }
+  else { w.style.display = "none"; inputEl.style.borderColor = ""; }
+}
+function checkOneEmpIdWarning(inputEl){
+  if(!inputEl) return;
+  const id = _normEmpId(inputEl.value);
+  if(!id){ setEmpIdWarning(inputEl, ""); return; }
+  const c = subsidyCache[id];
+  if(!c){ setEmpIdWarning(inputEl, ""); return; }                  // 還沒查到，先不警告
+  if(c.found){ setEmpIdWarning(inputEl, ""); return; }              // 在名單裡 ✓
+  setEmpIdWarning(inputEl, "⚠️ 工號「" + inputEl.value.trim() + "」不在補助名單中，請確認工號是否正確；若為新進人員、確定無誤，請聯絡承辦人加入名單，否則此筆補助會以 NT$ 0 計算。");
+}
+function updateEmpIdWarnings(){
+  checkOneEmpIdWarning(document.getElementById("emp_id"));
+  document.querySelectorAll(".p-empid").forEach(checkOneEmpIdWarning);
 }
 
 /* ---- 其他同行者卡片 ---- */
@@ -406,7 +445,7 @@ function addPerson(){
       </div>
       <div class="cond-emp" style="display:none;">
         <label class="f">工號<span class="req">*</span></label>
-        <input class="p-empid" placeholder="員工工號（計補助用）" />
+        <input class="p-empid" placeholder="工號（須與公司名單一致才計補助）" />
       </div>
       <div>
         <label class="f">身分證 / 居留證號<span class="req">*</span></label>
