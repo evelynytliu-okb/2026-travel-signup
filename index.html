@@ -59,6 +59,11 @@
   input:focus,select:focus{outline:none;border-color:var(--forest-600);box-shadow:0 0 0 4px rgba(0,48,87,.14);}
   select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ff5c39' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
 
+  /* 出生年月日 三選單：避免長者按月份倒退翻日曆 */
+  .dob-picker{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;}
+  .dob-picker select{padding:11px 8px 11px 11px;background-position:right 8px center;padding-right:24px;font-size:15px;}
+  .dob-hint{display:block;font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.4;}
+
   /* Room type */
   .rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
   @media(max-width:560px){.rooms{grid-template-columns:1fr;}}
@@ -194,7 +199,13 @@
         </div>
         <div>
           <label class="f">出生年月日<span class="req">*</span></label>
-          <input id="emp_dob" type="date" />
+          <div class="dob-picker">
+            <select id="emp_dob_y" aria-label="出生年"><option value="">年</option></select>
+            <select id="emp_dob_m" aria-label="出生月"><option value="">月</option></select>
+            <select id="emp_dob_d" aria-label="出生日"><option value="">日</option></select>
+          </div>
+          <input id="emp_dob" type="hidden" />
+          <span class="dob-hint">請依序選擇 西元年 → 月 → 日</span>
         </div>
         <div>
           <label class="f">年齡 / 身分<span class="req">*</span></label>
@@ -403,7 +414,13 @@ function addPerson(){
       </div>
       <div>
         <label class="f">出生年月日<span class="req">*</span></label>
-        <input class="p-dob" type="date" />
+        <div class="dob-picker">
+          <select class="p-dob-y" aria-label="出生年"><option value="">年</option></select>
+          <select class="p-dob-m" aria-label="出生月"><option value="">月</option></select>
+          <select class="p-dob-d" aria-label="出生日"><option value="">日</option></select>
+        </div>
+        <input class="p-dob" type="hidden" />
+        <span class="dob-hint">請依序選擇 西元年 → 月 → 日</span>
       </div>
       <div class="col-full">
         <label class="f">年齡 / 身分<span class="req">*</span></label>
@@ -426,11 +443,53 @@ function addPerson(){
   let t=null;
   div.querySelector(".p-empid").addEventListener("input", (e)=>{ clearTimeout(t); const v=e.target.value; t=setTimeout(()=>fetchSubsidy(v), 400); });
   wireIdInput(div.querySelector(".p-idno"));
+  setupDobPicker(div.querySelector(".p-dob-y"), div.querySelector(".p-dob-m"), div.querySelector(".p-dob-d"), div.querySelector(".p-dob"));
   div.querySelector(".rm").addEventListener("click", ()=>{ div.remove(); renumber(); recalc(); });
   renumber();
   recalc();
 }
 function renumber(){ [...peopleEl.children].forEach((p,i)=> p.querySelector(".ptag").textContent = `同行者 ${i+1}`); }
+
+/* 出生年月日 三選單：避免長者按月份倒退翻日曆。輸出 YYYY-MM-DD 到 hidden input，跟原本 <input type="date"> 同格式，不影響試算表結構。 */
+const DOB_YEAR_MAX = 2026, DOB_YEAR_MIN = 1930;
+function pad2(n){ n = String(n); return n.length<2 ? '0'+n : n; }
+function daysInMonth(y, m){
+  if(!y || !m) return 31;
+  return new Date(Number(y), Number(m), 0).getDate();
+}
+function setupDobPicker(ySel, mSel, dSel, hidden){
+  // 年（西元，新到舊）
+  let yh = '<option value="">年</option>';
+  for(let y=DOB_YEAR_MAX; y>=DOB_YEAR_MIN; y--) yh += '<option value="'+y+'">'+y+'</option>';
+  ySel.innerHTML = yh;
+  // 月
+  let mh = '<option value="">月</option>';
+  for(let m=1; m<=12; m++) mh += '<option value="'+pad2(m)+'">'+m+' 月</option>';
+  mSel.innerHTML = mh;
+  // 日（先放滿 31 天，月年確定後再調整）
+  refillDays(ySel, mSel, dSel);
+
+  function sync(){
+    const y = ySel.value, m = mSel.value, d = dSel.value;
+    hidden.value = (y && m && d) ? (y + '-' + m + '-' + d) : '';
+    hidden.dispatchEvent(new Event('input', {bubbles:true}));
+    hidden.dispatchEvent(new Event('change', {bubbles:true}));
+  }
+  ySel.addEventListener('change', function(){ refillDays(ySel, mSel, dSel); sync(); });
+  mSel.addEventListener('change', function(){ refillDays(ySel, mSel, dSel); sync(); });
+  dSel.addEventListener('change', sync);
+}
+function refillDays(ySel, mSel, dSel){
+  const dn = daysInMonth(ySel.value, mSel.value);
+  const prev = dSel.value;
+  let dh = '<option value="">日</option>';
+  for(let d=1; d<=dn; d++) dh += '<option value="'+pad2(d)+'">'+d+' 日</option>';
+  dSel.innerHTML = dh;
+  if(prev && Number(prev) <= dn) dSel.value = prev;
+}
+/* 本人（靜態 DOM）的出生年月日選單 */
+setupDobPicker(document.getElementById("emp_dob_y"), document.getElementById("emp_dob_m"),
+               document.getElementById("emp_dob_d"), document.getElementById("emp_dob"));
 
 function selectedRoom(){ const r=document.querySelector('input[name="room"]:checked'); return r?r.value:null; }
 
