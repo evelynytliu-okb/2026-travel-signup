@@ -297,23 +297,41 @@ const AGE_LABELS = {
 };
 const FAMILY_REL = ["配偶","子女（直系）","父母（直系）","兄弟姊妹","情侶"];
 
-/* 部門（依組織圖・部級，以「處」分組） */
-const DEPT_GROUPS = {
+/* 部門：由後端「部門設定」分頁動態載入（管理員可在後台 🏢 部門設定 直接編輯）。
+   後端失敗時用內建預設清單，避免報名表壞掉。 */
+const DEFAULT_DEPT_GROUPS = {
+  "獨立單位":["總經理室","稽核室","法規文管部"],
   "業務處":["業務部","行銷設計部"],
   "研發處":["研發一部","研發二部"],
   "製造處":["生技設備部","生產部","資材部"],
   "品保處":["品檢一課","品檢二課"],
   "管理處":["行政部","財務部"],
 };
-(function(){
+function renderDeptSelect(groups){
   const sel = document.getElementById("dept");
+  if(!sel) return;
   let html = '<option value="">請選擇部門</option>';
-  Object.keys(DEPT_GROUPS).forEach(function(g){
+  Object.keys(groups).forEach(function(g){
+    if(!groups[g] || !groups[g].length) return;
     html += '<optgroup label="'+g+'">';
-    DEPT_GROUPS[g].forEach(function(d){ html += '<option value="'+g+'／'+d+'">'+d+'</option>'; });
+    groups[g].forEach(function(d){ html += '<option value="'+g+'／'+d+'">'+d+'</option>'; });
     html += '</optgroup>';
   });
   sel.innerHTML = html;
+}
+renderDeptSelect(DEFAULT_DEPT_GROUPS);   // 先用預設清單，避免網路慢時表單沒選項
+(async function loadDeptsFromBackend(){
+  try{
+    const r = await fetch(ENDPOINT + "?action=deptList&_=" + Date.now(), {credentials:"omit"});
+    const j = await r.json();
+    if(j && j.ok && Array.isArray(j.depts) && j.depts.length){
+      const g = {};
+      j.depts.forEach(function(d){ (g[d.group] = g[d.group] || []).push(d.name); });
+      const prev = document.getElementById("dept").value;
+      renderDeptSelect(g);
+      if(prev) document.getElementById("dept").value = prev;
+    }
+  }catch(e){ /* 失敗時保留預設清單 */ }
 })();
 
 /* 報名截止日期（僅顯示，不自動關閉）＋ 報名開關狀態（由後台控制） */
