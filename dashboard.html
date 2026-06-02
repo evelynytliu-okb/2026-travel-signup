@@ -122,6 +122,41 @@
   .modal .ewho{text-align:left;background:#eef4fa;border-radius:10px;padding:9px 12px;font-size:13.5px;color:var(--forest-800);margin-bottom:2px;}
   /* 補助名單編輯 */
   #subBody input{padding:8px 10px;font-size:14px;}
+
+  /* 整張單編輯 modal */
+  .er-modal{max-width:680px;width:100%;text-align:left;max-height:92vh;overflow-y:auto;}
+  .er-modal h3{text-align:left;margin-bottom:4px;}
+  .er-warn{background:#fff4f0;border:1px solid #ffd9cb;color:#9a3414;font-size:12.5px;line-height:1.55;padding:9px 12px;border-radius:10px;margin:10px 0 14px;}
+  .er-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;}
+  @media(max-width:520px){.er-grid2{grid-template-columns:1fr;}}
+  .er-modal input, .er-modal select{padding:9px 11px;font-size:14px;}
+  .er-rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+  .er-rooms label{display:flex;flex-direction:column;align-items:center;border:1.5px solid var(--line);border-radius:10px;padding:7px 4px;cursor:pointer;font-size:13px;font-weight:700;color:var(--forest-800);background:#fff;}
+  .er-rooms label.on{border-color:var(--gold);background:#fff4f0;}
+  .er-rooms input{display:none;}
+  .er-rooms small{display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:2px;}
+  .er-person{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;background:#fff;}
+  .er-person.self{border-color:var(--forest-700);background:#f6fafd;}
+  .er-phead{display:flex;align-items:center;justify-content:space-between;font-weight:700;color:var(--forest-800);margin-bottom:6px;}
+  .er-phead .tag{font-size:12.5px;}
+  .er-phead .rm{border:none;background:none;color:var(--rust);font-family:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;padding:0;}
+  .er-ptoggle{display:flex;gap:6px;margin:6px 0 8px;}
+  .er-ptoggle label{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:13px;font-weight:700;background:#eef4fa;border-radius:9px;padding:6px 10px;cursor:pointer;}
+  .er-ptoggle label.on{background:var(--forest-700);color:#fff;}
+  .er-ptoggle input{display:none;}
+  .er-pgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;}
+  @media(max-width:520px){.er-pgrid{grid-template-columns:1fr;}}
+  .er-pgrid label.el{margin:6px 0 3px;font-size:12px;}
+  .er-dob{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:4px;}
+  .er-dob select{padding:9px 6px;font-size:13px;background-position:right 6px center;padding-right:20px;}
+  .er-price{text-align:right;font-size:13px;color:var(--bark);margin-top:6px;}
+  .er-price b{color:var(--forest-800);}
+  .er-summary{background:#eef4fa;border-radius:10px;padding:11px 14px;margin-top:14px;}
+  .er-line{display:flex;justify-content:space-between;font-size:14px;color:var(--bark);margin:2px 0;}
+  .er-line b{color:var(--forest-800);font-family:"Noto Serif TC";}
+  .er-line.big{font-size:17px;border-top:1px solid #c9d6e3;padding-top:6px;margin-top:6px;}
+  .er-line.big b{color:var(--rust);font-size:20px;}
+  .er-note{font-size:11.5px;color:var(--muted);margin-top:6px;}
 </style>
 </head>
 <body>
@@ -215,6 +250,43 @@
     <div class="row">
       <button class="btn ghost" id="addCancel">取消</button>
       <button class="btn gold" id="addSave">加入並重算</button>
+    </div>
+  </div>
+</div>
+
+<!-- 整張單編輯 modal -->
+<div class="overlay" id="editRegOverlay">
+  <div class="modal er-modal">
+    <h3>✏️ 編輯整張報名單</h3>
+    <div class="ewho" id="erWho"></div>
+    <div class="er-warn">⚠️ 儲存後此單的「分配房號」會被清空（人或順序可能變動）。如已併房，請儲存後重新到「🛏️ 房間分配」分配房間。費用、補助、獨住加價會由系統自動重算。</div>
+
+    <div class="er-grid2">
+      <div><label class="el">聯絡窗口</label><input id="erContact" autocomplete="off" /></div>
+      <div><label class="el">部門</label><select id="erDept"></select></div>
+      <div><label class="el">聯絡電話</label><input id="erPhone" autocomplete="off" /></div>
+      <div><label class="el">Email</label><input id="erEmail" autocomplete="off" /></div>
+    </div>
+
+    <label class="el" style="margin-top:14px;">房型</label>
+    <div class="er-rooms" id="erRooms"></div>
+
+    <label class="el" style="margin-top:14px;">成員</label>
+    <div id="erPeople"></div>
+    <button class="btn ghost" id="erAdd" type="button" style="margin-top:8px;">＋ 加同行者</button>
+
+    <div class="er-summary">
+      <div class="er-line"><span>總費用</span><b id="erTotal">NT$ 0</b></div>
+      <div class="er-line"><span>公司補助（預估）</span><b id="erSubsidy">NT$ 0</b></div>
+      <div class="er-line" id="erSurRow" style="display:none;"><span>獨住加價</span><b id="erSur">NT$ 0</b></div>
+      <div class="er-line big"><span>自負額</span><b id="erBalance">NT$ 0</b></div>
+      <div class="er-note">補助金額會在送出後依後端「補助設定」分頁重新計算，預估值僅供參考。</div>
+    </div>
+
+    <div class="merr" id="erErr"></div>
+    <div class="row">
+      <button class="btn ghost" id="erCancel">取消</button>
+      <button class="btn gold" id="erSave">💾 儲存整張單</button>
     </div>
   </div>
 </div>
@@ -367,8 +439,8 @@ function rowHtml(r, firstOfReg, bandIdx, regBalance){
     +'<td class="num">'+fmt(r.price)+'</td>'
     +'<td class="num">'+(r.subsidy!==""&&r.subsidy!=null?fmt(r.subsidy):"—")+'</td>'
     + balCell
-    +'<td class="nowrap"><button class="btn ghost edit-btn admin-only" data-row="'+r.row+'">✏️ 編輯</button>'
-      +(firstOfReg ? ' <button class="btn ghost edit-btn add-btn admin-only" data-row="'+r.row+'">＋ 加人</button>' : '')
+    +'<td class="nowrap">'
+      +(firstOfReg ? '<button class="btn ghost edit-btn editreg-btn admin-only" data-reg="'+esc(r.regId||"")+'">✏️ 編輯整張單</button>' : '<span style="color:var(--muted);font-size:11px;">同單↑</span>')
     +'</td>'
     +'</tr>';
 }
@@ -458,10 +530,8 @@ function render(res){
   });
   document.getElementById("fSearch").addEventListener("input", function(e){ FILTER.q=e.target.value; fillTable(); });
   document.getElementById("rosterTableWrap").addEventListener("click", function(e){
-    const ab = e.target.closest && e.target.closest(".add-btn");
-    if(ab){ const ra = rosterIndex[Number(ab.dataset.row)]; if(ra) startAddPerson(ra); return; }
-    const b = e.target.closest && e.target.closest(".edit-btn"); if(!b) return;
-    const r = rosterIndex[Number(b.dataset.row)]; if(r) startEdit(r);
+    const eb = e.target.closest && e.target.closest(".editreg-btn");
+    if(eb && ADMIN_MODE){ startEditReg(eb.dataset.reg); return; }
   });
 }
 
@@ -940,6 +1010,310 @@ async function saveSubsidyList(){
     setTimeout(function(){ subMsg("✓ 已儲存補助名單（共 "+rows.length+" 筆），已寫回試算表。", true); }, 1500);
   }catch(e){ subMsg("儲存失敗，請檢查網路後再試。"); }
 }
+
+/* ===== 整張單編輯 ===== */
+const SUBSIDY_CAP = 10000;
+const SINGLE_SURCHARGE = 1600;
+const erOverlay = document.getElementById("editRegOverlay");
+const erErr = document.getElementById("erErr");
+let ER = null;   // { regId, people:[{type,name,empId,relationship,idNumber,dob,age}], room, occupancy }
+
+function bedCap(room){ var m=String(room||"").match(/(\d)/); return m?Number(m[1]):0; }
+function ageKeyFromLabel(label){
+  if(!label) return "adult";
+  if(label.indexOf("成人")===0) return "adult";
+  if(label.indexOf("6-12")===0) return "student";
+  if(label.indexOf("65")===0) return "senior";
+  if(label.indexOf("身心")>=0) return "disabled";
+  if(label.indexOf("2-5")>=0) return "child25";
+  if(label.indexOf("未滿")>=0||label.indexOf("2 歲")>=0) return "baby";
+  return "adult";
+}
+function priceOf(roomKey, ageKey){ return (PRICES[roomKey] && PRICES[roomKey][ageKey]) || 0; }
+
+function startEditReg(regId){
+  if(!ADMIN_MODE) return;
+  const grp = ((CURRENT&&CURRENT.roster)||[]).filter(function(r){ return r.regId===regId; });
+  if(!grp.length){ alert("找不到這張單。"); return; }
+  const first = grp[0];
+  ER = {
+    regId: regId,
+    contactName: first.contact||"",
+    phone: first.phone||"",
+    email: first.email||"",
+    dept: first.dept||"",
+    room: bedCap(first.room) || 2,         // 2 / 3 / 4
+    occupancy: first.occupancy||"",
+    people: grp.map(function(r){
+      return {
+        self: false,
+        type: r.type==='員工' ? 'employee' : 'family',
+        name: r.name||"",
+        empId: r.empId||"",
+        relationship: r.relationship||"",
+        idNumber: (r.idNumber && !/\*/.test(r.idNumber)) ? r.idNumber : "",
+        dob: r.dob||"",
+        ageKey: ageKeyFromLabel(r.age),
+      };
+    })
+  };
+  // 把第一個人標為「本人」（不可移除、強制 employee）
+  if(ER.people.length){ ER.people[0].self = true; ER.people[0].type = 'employee'; }
+  renderEditReg();
+  erErr.classList.remove("show");
+  erOverlay.classList.add("show");
+}
+function closeEditReg(){ erOverlay.classList.remove("show"); ER = null; }
+
+function renderEditReg(){
+  // 標題＋識別資訊
+  document.getElementById("erWho").innerHTML =
+    '報名單 <b class="reg">'+esc(ER.regId)+'</b>　·　目前 '+ER.people.length+' 位';
+  // 表頭欄位
+  document.getElementById("erContact").value = ER.contactName;
+  document.getElementById("erPhone").value   = ER.phone;
+  document.getElementById("erEmail").value   = ER.email;
+  // 部門選單
+  const deptSel = document.getElementById("erDept");
+  let dh = '<option value="">未填／請選擇部門</option>';
+  Object.keys(DEPT_GROUPS).forEach(function(g){
+    dh += '<optgroup label="'+esc(g)+'">';
+    (DEPT_GROUPS[g]||[]).forEach(function(d){ dh += '<option value="'+esc(g+'／'+d)+'">'+esc(d)+'</option>'; });
+    dh += '</optgroup>';
+  });
+  deptSel.innerHTML = dh; deptSel.value = ER.dept || "";
+
+  // 房型
+  const room = ER.room;
+  let rh = '';
+  [[2,'2 人房','三人同享'], [3,'3 人房','分床住'], [4,'4 人房','適合家庭']].forEach(function(x){
+    rh += '<label class="'+(room===x[0]?'on':'')+'"><input type="radio" name="erRoom" value="'+x[0]+'" '+(room===x[0]?'checked':'')+' />'+x[1]+'<small>'+x[2]+'</small></label>';
+  });
+  document.getElementById("erRooms").innerHTML = rh;
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="erRoom"]'), function(r){
+    r.onchange = function(){ ER.room = Number(r.value); renderEditReg(); };
+  });
+
+  // 成員
+  const pe = document.getElementById("erPeople");
+  pe.innerHTML = ER.people.map(function(p,i){ return personCardHTML(p,i); }).join("");
+  // 綁定每張卡片事件
+  ER.people.forEach(function(p,i){ wirePersonCard(i); });
+
+  recalcEditReg();
+}
+
+function personCardHTML(p, i){
+  const isEmp = (p.type==='employee');
+  const tag = i===0 ? '報名人（本人）' : ('同行者 '+i);
+  const rmBtn = i===0 ? '' : '<button class="rm" data-rmi="'+i+'" type="button">移除此人</button>';
+  const empOnly = isEmp ? '' : 'style="display:none;"';
+  const famOnly = isEmp ? 'style="display:none;"' : '';
+  return ''
+    +'<div class="er-person'+(i===0?' self':'')+'" data-i="'+i+'">'
+    +  '<div class="er-phead"><span class="tag">'+tag+'</span>'+rmBtn+'</div>'
+    +  (i===0 ? '' :
+        '<div class="er-ptoggle">'
+        +'<label class="'+(isEmp?'on':'')+'"><input type="radio" name="erType_'+i+'" value="employee" '+(isEmp?'checked':'')+'>員工</label>'
+        +'<label class="'+(!isEmp?'on':'')+'"><input type="radio" name="erType_'+i+'" value="family"   '+(!isEmp?'checked':'')+'>眷屬</label>'
+        +'</div>'
+      )
+    +  '<div class="er-pgrid">'
+    +    '<div><label class="el">姓名</label><input class="pName" value="'+esc(p.name)+'" /></div>'
+    +    '<div class="empOnly" '+empOnly+'><label class="el">工號</label><input class="pEmpId" value="'+esc(p.empId)+'" placeholder="補助依工號計算" /></div>'
+    +    '<div class="famOnly" '+famOnly+'><label class="el">關係</label><select class="pRel">'
+    +       FAMILY_REL.map(function(x){ return '<option value="'+esc(x)+'" '+(x===p.relationship?'selected':'')+'>'+esc(x)+'</option>'; }).join("")
+    +    '</select></div>'
+    +    '<div><label class="el">身分證／居留證</label><input class="pIdno" value="'+esc(p.idNumber)+'" placeholder="投保用" /></div>'
+    +    '<div>'
+    +       '<label class="el">出生年月日</label>'
+    +       '<div class="er-dob">'
+    +         '<select class="pDobY"><option value="">年</option></select>'
+    +         '<select class="pDobM"><option value="">月</option></select>'
+    +         '<select class="pDobD"><option value="">日</option></select>'
+    +       '</div>'
+    +    '</div>'
+    +    '<div class="col-full" style="grid-column:1/-1;"><label class="el">年齡身分</label><select class="pAge">'
+    +       Object.keys(AGE_LABELS).map(function(k){ return '<option value="'+k+'" '+(k===p.ageKey?'selected':'')+'>'+esc(AGE_LABELS[k])+'</option>'; }).join("")
+    +    '</select></div>'
+    +  '</div>'
+    +  '<div class="er-price">費用 NT$ <b class="pPrice">0</b></div>'
+    +'</div>';
+}
+
+function setDobSelects(card, dobStr){
+  const ySel=card.querySelector(".pDobY"), mSel=card.querySelector(".pDobM"), dSel=card.querySelector(".pDobD");
+  // 年（2026→1930）
+  let yh = '<option value="">年</option>';
+  for(let y=2026; y>=1930; y--) yh += '<option value="'+y+'">'+y+'</option>';
+  ySel.innerHTML = yh;
+  let mh = '<option value="">月</option>';
+  for(let m=1; m<=12; m++) mh += '<option value="'+String(m).padStart(2,"0")+'">'+m+' 月</option>';
+  mSel.innerHTML = mh;
+  // 解析既有 dob (YYYY-MM-DD 或 YYYY/MM/DD)
+  const mm = String(dobStr||"").match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if(mm){
+    ySel.value = mm[1];
+    mSel.value = String(mm[2]).padStart(2,"0");
+  }
+  refillDayOptions(ySel, mSel, dSel, mm ? String(mm[3]).padStart(2,"0") : "");
+  ySel.onchange = function(){ refillDayOptions(ySel,mSel,dSel,dSel.value); recalcEditReg(); };
+  mSel.onchange = function(){ refillDayOptions(ySel,mSel,dSel,dSel.value); recalcEditReg(); };
+  dSel.onchange = recalcEditReg;
+}
+function refillDayOptions(ySel, mSel, dSel, want){
+  const y = ySel.value, m = mSel.value;
+  const dn = (y&&m) ? new Date(Number(y), Number(m), 0).getDate() : 31;
+  let dh = '<option value="">日</option>';
+  for(let d=1; d<=dn; d++) dh += '<option value="'+String(d).padStart(2,"0")+'">'+d+' 日</option>';
+  dSel.innerHTML = dh;
+  if(want && Number(want) <= dn) dSel.value = String(want).padStart(2,"0");
+}
+
+function wirePersonCard(i){
+  const card = document.querySelector('#erPeople .er-person[data-i="'+i+'"]');
+  if(!card) return;
+  // type toggle
+  if(i>0){
+    Array.prototype.forEach.call(card.querySelectorAll('input[name="erType_'+i+'"]'), function(r){
+      r.onchange = function(){
+        ER.people[i].type = r.value;
+        // 重畫 toggle 標籤
+        Array.prototype.forEach.call(card.querySelectorAll('.er-ptoggle label'), function(lb){
+          const inp = lb.querySelector("input"); lb.classList.toggle("on", inp.checked);
+        });
+        card.querySelector(".empOnly").style.display = (r.value==='employee') ? '' : 'none';
+        card.querySelector(".famOnly").style.display = (r.value==='employee') ? 'none' : '';
+        recalcEditReg();
+      };
+    });
+  }
+  // 移除
+  const rmBtn = card.querySelector(".rm");
+  if(rmBtn) rmBtn.onclick = function(){
+    if(!confirm("確定要從這張單移除「"+(ER.people[i].name||"此成員")+"」？")) return;
+    ER.people.splice(i,1); renderEditReg();
+  };
+  // 字段同步
+  card.querySelector(".pName").oninput  = function(e){ ER.people[i].name = e.target.value; };
+  const empInp = card.querySelector(".pEmpId");
+  if(empInp) empInp.oninput = function(e){ ER.people[i].empId = e.target.value; };
+  const relSel = card.querySelector(".pRel");
+  if(relSel) relSel.onchange = function(e){ ER.people[i].relationship = e.target.value; };
+  card.querySelector(".pIdno").oninput  = function(e){ ER.people[i].idNumber = e.target.value; };
+  card.querySelector(".pAge").onchange  = function(e){ ER.people[i].ageKey = e.target.value; recalcEditReg(); };
+  // DOB 選單
+  setDobSelects(card, ER.people[i].dob);
+}
+
+function recalcEditReg(){
+  if(!ER) return;
+  const roomKey = String(ER.room||2);
+  let total = 0, empCount = 0;
+  ER.people.forEach(function(p,i){
+    const price = priceOf(roomKey, p.ageKey);
+    total += price;
+    if(p.type==='employee') empCount++;
+    const card = document.querySelector('#erPeople .er-person[data-i="'+i+'"]');
+    if(card){ const pp = card.querySelector(".pPrice"); if(pp) pp.textContent = fmt(price); }
+  });
+  // 住宿安排
+  const cap = ER.room, n = ER.people.length;
+  let occ;
+  if(n >= cap){ occ = '住滿'; ER.occupancy = '住滿'; }
+  else if(cap===2 && n===1){ occ = '獨住加價'; ER.occupancy = '獨住加價'; }
+  else { occ = '公司安排合住人'; ER.occupancy = '公司安排合住人'; }
+  // 補助預估：min(員工數 * SUBSIDY_CAP, totalCost)
+  const subsidyEst = Math.min(empCount * SUBSIDY_CAP, total);
+  // 獨住加價
+  const surcharge = (occ === '獨住加價') ? SINGLE_SURCHARGE : 0;
+  const balance = Math.max(0, total - subsidyEst) + surcharge;
+  document.getElementById("erTotal").textContent    = 'NT$ ' + fmt(total);
+  document.getElementById("erSubsidy").textContent  = 'NT$ ' + fmt(subsidyEst);
+  document.getElementById("erSur").textContent      = 'NT$ ' + fmt(surcharge);
+  document.getElementById("erSurRow").style.display = surcharge>0 ? '' : 'none';
+  document.getElementById("erBalance").textContent  = 'NT$ ' + fmt(balance);
+  document.getElementById("erWho").innerHTML        = '報名單 <b class="reg">'+esc(ER.regId)+'</b>　·　目前 '+n+' 位　·　住宿：'+occ;
+}
+
+document.getElementById("erAdd").addEventListener("click", function(){
+  if(!ER) return;
+  if(ER.people.length >= ER.room){
+    if(!confirm("已達 "+ER.room+" 人房上限，繼續加人會自動變成「住滿」並可能跨房型。確定？")) return;
+  }
+  ER.people.push({ self:false, type:'family', name:'', empId:'', relationship:'配偶',
+                   idNumber:'', dob:'', ageKey:'adult' });
+  renderEditReg();
+});
+document.getElementById("erCancel").addEventListener("click", closeEditReg);
+document.getElementById("erContact").addEventListener("input", function(e){ if(ER) ER.contactName = e.target.value; });
+document.getElementById("erPhone").addEventListener("input",   function(e){ if(ER) ER.phone = e.target.value; });
+document.getElementById("erEmail").addEventListener("input",   function(e){ if(ER) ER.email = e.target.value; });
+document.getElementById("erDept").addEventListener("change",   function(e){ if(ER) ER.dept = e.target.value; });
+
+document.getElementById("erSave").addEventListener("click", function(){
+  if(!ER) return;
+  if(!ER.contactName.trim()){ erErr.textContent="請填聯絡窗口姓名。"; erErr.classList.add("show"); return; }
+  if(!ER.people.length){ erErr.textContent="這張單沒有任何成員。"; erErr.classList.add("show"); return; }
+  if(ER.people[0].type !== 'employee' || !ER.people[0].empId.trim()){
+    erErr.textContent="第 1 位（本人）必須是員工且填工號。"; erErr.classList.add("show"); return;
+  }
+  for(let i=0; i<ER.people.length; i++){
+    const p = ER.people[i];
+    if(!p.name.trim()){ erErr.textContent="第 "+(i+1)+" 位未填姓名。"; erErr.classList.add("show"); return; }
+    if(!p.idNumber.trim()){ erErr.textContent="第 "+(i+1)+" 位未填身分證／居留證號（投保用）。"; erErr.classList.add("show"); return; }
+    if(!p.dob){
+      // 從 DOM 取得最新 dob（dob 字串在卡片裡組）
+      const card = document.querySelector('#erPeople .er-person[data-i="'+i+'"]');
+      const y = card.querySelector(".pDobY").value, m = card.querySelector(".pDobM").value, d = card.querySelector(".pDobD").value;
+      if(!(y&&m&&d)){ erErr.textContent="第 "+(i+1)+" 位未選擇完整出生年月日。"; erErr.classList.add("show"); return; }
+      p.dob = y + '-' + m + '-' + d;
+    }
+    if(p.type==='employee' && !p.empId.trim()){
+      erErr.textContent="第 "+(i+1)+" 位（員工）未填工號。"; erErr.classList.add("show"); return;
+    }
+  }
+  // 重抓每張卡片的 DOB（避免使用者改完未失焦）
+  ER.people.forEach(function(p,i){
+    const card = document.querySelector('#erPeople .er-person[data-i="'+i+'"]');
+    if(!card) return;
+    const y = card.querySelector(".pDobY").value, m = card.querySelector(".pDobM").value, d = card.querySelector(".pDobD").value;
+    if(y && m && d) p.dob = y + '-' + m + '-' + d;
+  });
+
+  const roomKey = String(ER.room||2);
+  const roomLabel = roomKey + " 人房";
+  const cap = ER.room, n = ER.people.length;
+  const occ = (n >= cap) ? '住滿' : ((cap===2 && n===1) ? '獨住加價' : '公司安排合住人');
+  const surcharge = (occ === '獨住加價') ? SINGLE_SURCHARGE : 0;
+
+  const payloadPeople = ER.people.map(function(p){
+    return {
+      type: p.type,
+      name: p.name.trim(),
+      empId: p.type==='employee' ? p.empId.trim() : '',
+      relationship: p.type==='employee' ? '' : (p.relationship||''),
+      idNumber: p.idNumber.trim(),
+      dob: p.dob,
+      ageLabel: AGE_LABELS[p.ageKey] || '成人',
+      price: priceOf(roomKey, p.ageKey)
+    };
+  });
+
+  const btn = document.getElementById("erSave");
+  btn.disabled = true; btn.textContent="儲存中…"; erErr.classList.remove("show");
+  fetch(ENDPOINT, {method:"POST", mode:"no-cors", credentials:"omit",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({
+        action:"editReg", pw:ADMIN_PW, regId:ER.regId,
+        contactName: ER.contactName, phone: ER.phone, email: ER.email, dept: ER.dept || '',
+        roomLabel: roomLabel, occupancy: occ, surcharge: surcharge,
+        people: payloadPeople
+      })})
+    .finally(function(){
+      setTimeout(function(){ btn.disabled=false; btn.textContent="💾 儲存整張單"; closeEditReg(); load(ADMIN_PW); }, 1800);
+    });
+});
 
 /* ===== 下載 Excel ===== */
 document.getElementById("excelBtn").addEventListener("click", function(){
