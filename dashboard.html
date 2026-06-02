@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root{--forest-800:#003057;--forest-700:#0c3a63;--forest-600:#1a4a73;--moss:#3f7fb0;--cream:#eef3f8;--paper:#ffffff;--bark:#39495a;--gold:#ff5c39;--rust:#e0492a;--line:#d6e0ea;--ink:#1c2b3a;--muted:#6b7a89;--shadow:0 12px 40px -18px rgba(0,31,58,.55);}
   *{box-sizing:border-box;}
@@ -140,6 +141,7 @@
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
       <button class="btn ghost" id="refreshBtn">↻ 重新整理</button>
+      <button class="btn ghost admin-only" id="excelBtn">📥 下載 Excel</button>
       <button class="btn ghost admin-only" id="signupBtn">報名狀態…</button>
       <button class="btn ghost admin-only" id="subsidyBtn">💰 補助名單</button>
       <button class="btn ghost admin-only" id="deptBtn">🏢 部門設定</button>
@@ -937,6 +939,113 @@ async function saveSubsidyList(){
       body: JSON.stringify({ action:"saveSubsidy", pw:ADMIN_PW, rows:rows })});
     setTimeout(function(){ subMsg("✓ 已儲存補助名單（共 "+rows.length+" 筆），已寫回試算表。", true); }, 1500);
   }catch(e){ subMsg("儲存失敗，請檢查網路後再試。"); }
+}
+
+/* ===== 下載 Excel ===== */
+document.getElementById("excelBtn").addEventListener("click", function(){
+  if(!ADMIN_MODE) return;
+  if(!CURRENT || !Array.isArray(CURRENT.roster)){ alert("資料尚未載入，請稍候再試。"); return; }
+  if(typeof XLSX === "undefined"){ alert("Excel 函式庫尚未載入，請重新整理頁面再試。"); return; }
+  exportExcel();
+});
+function exportExcel(){
+  const s = (CURRENT && CURRENT.stats) || {};
+  const balances = (CURRENT && CURRENT.regBalances) || {};
+  const roster = (CURRENT && CURRENT.roster) || [];
+
+  // 1) 名單分頁：一人一列，與後台名單同欄位＋自負額（每張單第一列才有金額，方便加總不重複）
+  const seenReg = {};
+  const rosterRows = roster.map(function(r){
+    const isFirst = !(r.regId in seenReg);
+    if(isFirst) seenReg[r.regId] = 1;
+    return {
+      "報名單編號": r.regId || "",
+      "送出時間": r.time || "",
+      "部門": r.dept || "",
+      "聯絡窗口": r.contact || "",
+      "聯絡電話": r.phone || "",
+      "Email": r.email || "",
+      "身分別": r.type || "",
+      "姓名": r.name || "",
+      "關係": r.relationship || "",
+      "工號": r.empId || "",
+      "年齡身分": r.age || "",
+      "身分證／居留證": r.idNumber || "",
+      "出生年月日": r.dob || "",
+      "房型": r.room || "",
+      "住宿安排": r.occupancy || "",
+      "分配房號": r.assignedRoom || "",
+      "個人費用": Number(r.price)||0,
+      "個人補助": (r.subsidy===""||r.subsidy==null) ? "" : Number(r.subsidy),
+      "獨住加價": Number(r.surcharge)||0,
+      "自負額（每張單）": isFirst ? (Number(balances[r.regId])||0) : ""
+    };
+  });
+
+  // 2) 統計分頁
+  const statRows = [
+    {"項目":"報名單數",     "數值": s.regCount||0,     "單位":"筆"},
+    {"項目":"總人數",       "數值": s.totalPeople||0,  "單位":"人"},
+    {"項目":"員工",         "數值": s.empCount||0,     "單位":"人"},
+    {"項目":"眷屬",         "數值": s.famCount||0,     "單位":"人"},
+    {"項目":"2 人房（房間）","數值": s.rooms2||0,       "單位":"間"},
+    {"項目":"3 人房（房間）","數值": s.rooms3||0,       "單位":"間"},
+    {"項目":"4 人房（房間）","數值": s.rooms4||0,       "單位":"間"},
+    {"項目":"2 人房（人數）","數值": s.room2||0,        "單位":"人"},
+    {"項目":"3 人房（人數）","數值": s.room3||0,        "單位":"人"},
+    {"項目":"4 人房（人數）","數值": s.room4||0,        "單位":"人"},
+    {"項目":"公司安排合住", "數值": s.companyCount||0,  "單位":"筆"},
+    {"項目":"獨住加價",     "數值": s.singleCount||0,   "單位":"筆"},
+    {"項目":"總費用",       "數值": s.totalCost||0,     "單位":"NT$"},
+    {"項目":"公司補助合計", "數值": s.totalSubsidy||0,  "單位":"NT$"},
+    {"項目":"獨住加價合計", "數值": s.totalSurcharge||0,"單位":"NT$"},
+    {"項目":"應補差額合計", "數值": s.totalBalance||0,  "單位":"NT$"}
+  ];
+
+  // 3) 各單彙總分頁（一張報名單一列）
+  const regAgg = {};
+  roster.forEach(function(r){
+    const k = r.regId || "";
+    if(!regAgg[k]){
+      regAgg[k] = { 報名單編號:k, 送出時間:r.time||"", 部門:r.dept||"", 聯絡窗口:r.contact||"",
+                    聯絡電話:r.phone||"", Email:r.email||"", 房型:r.room||"", 住宿安排:r.occupancy||"",
+                    人數:0, 員工數:0, 眷屬數:0, 總費用:0, 公司補助:0, 獨住加價:0,
+                    自負額: Number(balances[k])||0 };
+    }
+    const a = regAgg[k];
+    a.人數++;
+    if(r.type==="員工") a.員工數++; else a.眷屬數++;
+    a.總費用 += Number(r.price)||0;
+    a.公司補助 += Number(r.subsidy)||0;
+    a.獨住加價 += Number(r.surcharge)||0;
+  });
+  const regRows = Object.values(regAgg);
+
+  // 建立 workbook
+  const wb = XLSX.utils.book_new();
+  const ws1 = XLSX.utils.json_to_sheet(rosterRows);
+  const ws2 = XLSX.utils.json_to_sheet(regRows);
+  const ws3 = XLSX.utils.json_to_sheet(statRows);
+
+  // 欄寬（依欄位內容粗估）
+  ws1["!cols"] = [
+    {wch:12},{wch:12},{wch:18},{wch:10},{wch:12},{wch:22},
+    {wch:7},{wch:10},{wch:10},{wch:8},{wch:14},{wch:14},
+    {wch:12},{wch:8},{wch:14},{wch:10},{wch:9},{wch:9},{wch:9},{wch:14}
+  ];
+  ws2["!cols"] = [{wch:12},{wch:12},{wch:18},{wch:10},{wch:12},{wch:22},{wch:8},{wch:14},
+                  {wch:6},{wch:7},{wch:7},{wch:9},{wch:9},{wch:9},{wch:11}];
+  ws3["!cols"] = [{wch:18},{wch:12},{wch:8}];
+
+  XLSX.utils.book_append_sheet(wb, ws1, "名單");
+  XLSX.utils.book_append_sheet(wb, ws2, "各單彙總");
+  XLSX.utils.book_append_sheet(wb, ws3, "統計");
+
+  const now = new Date();
+  const stamp = now.getFullYear() + String(now.getMonth()+1).padStart(2,"0") + String(now.getDate()).padStart(2,"0")
+              + "_" + String(now.getHours()).padStart(2,"0") + String(now.getMinutes()).padStart(2,"0");
+  const fname = "2026員工旅遊報名_" + stamp + (SHOW_ID ? "_含身分證" : "_身分證遮蔽") + ".xlsx";
+  XLSX.writeFile(wb, fname);
 }
 
 /* ===== 報名開關（手動截止／重新開放）===== */
