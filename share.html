@@ -85,7 +85,7 @@
       <div class="meta">
         📅 出發 <b>115/10/17（六）～10/18（日）</b><br/>
         🚆 含遊覽車・住宿・二日保險<br/>
-        ⏰ 報名截止 <b id="deadlineLbl">2026/06/10</b>
+        <span id="deadlineSpan" style="visibility:hidden">⏰ 報名截止 <b id="deadlineLbl"></b></span>
       </div>
     </div>
 
@@ -117,7 +117,7 @@
   var ENDPOINT = "https://script.google.com/macros/s/AKfycbzGE46TFzPMXlfBvT88mLjobexmgnpSlWf_U_Rl2PBzWMUca7_mUc5-pI64F75Kx8ymKg/exec";
   var box = document.getElementById("qr");
 
-  // 從後台讀截止日（管理員可在後台修改），失敗時保留 HTML 預設值
+  // 從後台讀截止日（管理員可在後台修改）。預設隱藏，等到 server 回應才顯示，避免閃爍。
   try {
     fetch(ENDPOINT + "?action=status&_=" + Date.now(), {credentials:"omit"})
       .then(function(r){ return r.json(); })
@@ -125,6 +125,8 @@
         if(res && res.ok && res.deadline){
           var el = document.getElementById("deadlineLbl");
           if(el) el.textContent = res.deadline;
+          var sp = document.getElementById("deadlineSpan");
+          if(sp) sp.style.visibility = "visible";
         }
       })
       .catch(function(){});
