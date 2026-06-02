@@ -1031,9 +1031,22 @@ function ageKeyFromLabel(label){
 }
 function priceOf(roomKey, ageKey){ return (PRICES[roomKey] && PRICES[roomKey][ageKey]) || 0; }
 
-function startEditReg(regId){
+async function startEditReg(regId){
   if(!ADMIN_MODE) return;
-  const grp = ((CURRENT&&CURRENT.roster)||[]).filter(function(r){ return r.regId===regId; });
+  // 若目前的 CURRENT 是「遮蔽身分證」版本，先重新抓含完整身分證的資料，避免 admin 開啟編輯後身分證欄一片空白
+  let grp = ((CURRENT&&CURRENT.roster)||[]).filter(function(r){ return r.regId===regId; });
+  const anyMasked = grp.some(function(r){ return /\*/.test(String(r.idNumber||'')); });
+  if(anyMasked && ADMIN_PW){
+    try{
+      const r = await fetch(ENDPOINT + "?action=dashboard&showId=1&pw=" + encodeURIComponent(ADMIN_PW) + "&_=" + Date.now(), {credentials:"omit"});
+      const res = await r.json();
+      if(res && res.ok){
+        CURRENT = res;
+        SHOW_ID = !!res.showId;
+        grp = res.roster.filter(function(x){ return x.regId===regId; });
+      }
+    }catch(e){ /* 忽略，使用原本資料 */ }
+  }
   if(!grp.length){ alert("找不到這張單。"); return; }
   const first = grp[0];
   ER = {
@@ -1062,6 +1075,23 @@ function startEditReg(regId){
   renderEditReg();
   erErr.classList.remove("show");
   erOverlay.classList.add("show");
+  // 確保 modal 從頭開始捲動，並把 modal 內部往上
+  setTimeout(function(){
+    const m = erOverlay.querySelector(".modal"); if(m) m.scrollTop = 0;
+  }, 30);
+}
+/* 顯示錯誤訊息並讓使用者看得到（捲到錯誤訊息位置、加上短暫高亮） */
+function erShowErr(msg){
+  erErr.textContent = msg;
+  erErr.classList.add("show");
+  // 捲到錯誤訊息附近
+  setTimeout(function(){
+    erErr.scrollIntoView({behavior:"smooth", block:"center"});
+    erErr.style.transition = "background .3s";
+    const orig = erErr.style.background;
+    erErr.style.background = "#ffc4b3";
+    setTimeout(function(){ erErr.style.background = orig; }, 600);
+  }, 30);
 }
 function closeEditReg(){ erOverlay.classList.remove("show"); ER = null; }
 
@@ -1252,67 +1282,80 @@ document.getElementById("erEmail").addEventListener("input",   function(e){ if(E
 document.getElementById("erDept").addEventListener("change",   function(e){ if(ER) ER.dept = e.target.value; });
 
 document.getElementById("erSave").addEventListener("click", function(){
-  if(!ER) return;
-  if(!ER.contactName.trim()){ erErr.textContent="請填聯絡窗口姓名。"; erErr.classList.add("show"); return; }
-  if(!ER.people.length){ erErr.textContent="這張單沒有任何成員。"; erErr.classList.add("show"); return; }
-  if(ER.people[0].type !== 'employee' || !ER.people[0].empId.trim()){
-    erErr.textContent="第 1 位（本人）必須是員工且填工號。"; erErr.classList.add("show"); return;
-  }
-  for(let i=0; i<ER.people.length; i++){
-    const p = ER.people[i];
-    if(!p.name.trim()){ erErr.textContent="第 "+(i+1)+" 位未填姓名。"; erErr.classList.add("show"); return; }
-    if(!p.idNumber.trim()){ erErr.textContent="第 "+(i+1)+" 位未填身分證／居留證號（投保用）。"; erErr.classList.add("show"); return; }
-    if(!p.dob){
-      // 從 DOM 取得最新 dob（dob 字串在卡片裡組）
+  try{
+    if(!ER){ erShowErr("資料尚未載入，請重新點「✏️ 編輯整張單」。"); return; }
+    // 先把現場每位的 name/empId/idNumber/DOB 從 DOM 重抓一次，避免 input 未失焦造成資料不一致
+    ER.people.forEach(function(p,i){
       const card = document.querySelector('#erPeople .er-person[data-i="'+i+'"]');
+      if(!card) return;
+      const nameInp = card.querySelector(".pName");
+      const empInp  = card.querySelector(".pEmpId");
+      const idnoInp = card.querySelector(".pIdno");
       const y = card.querySelector(".pDobY").value, m = card.querySelector(".pDobM").value, d = card.querySelector(".pDobD").value;
-      if(!(y&&m&&d)){ erErr.textContent="第 "+(i+1)+" 位未選擇完整出生年月日。"; erErr.classList.add("show"); return; }
-      p.dob = y + '-' + m + '-' + d;
-    }
-    if(p.type==='employee' && !p.empId.trim()){
-      erErr.textContent="第 "+(i+1)+" 位（員工）未填工號。"; erErr.classList.add("show"); return;
-    }
-  }
-  // 重抓每張卡片的 DOB（避免使用者改完未失焦）
-  ER.people.forEach(function(p,i){
-    const card = document.querySelector('#erPeople .er-person[data-i="'+i+'"]');
-    if(!card) return;
-    const y = card.querySelector(".pDobY").value, m = card.querySelector(".pDobM").value, d = card.querySelector(".pDobD").value;
-    if(y && m && d) p.dob = y + '-' + m + '-' + d;
-  });
-
-  const roomKey = String(ER.room||2);
-  const roomLabel = roomKey + " 人房";
-  const cap = ER.room, n = ER.people.length;
-  const occ = (n >= cap) ? '住滿' : ((cap===2 && n===1) ? '獨住加價' : '公司安排合住人');
-  const surcharge = (occ === '獨住加價') ? SINGLE_SURCHARGE : 0;
-
-  const payloadPeople = ER.people.map(function(p){
-    return {
-      type: p.type,
-      name: p.name.trim(),
-      empId: p.type==='employee' ? p.empId.trim() : '',
-      relationship: p.type==='employee' ? '' : (p.relationship||''),
-      idNumber: p.idNumber.trim(),
-      dob: p.dob,
-      ageLabel: AGE_LABELS[p.ageKey] || '成人',
-      price: priceOf(roomKey, p.ageKey)
-    };
-  });
-
-  const btn = document.getElementById("erSave");
-  btn.disabled = true; btn.textContent="儲存中…"; erErr.classList.remove("show");
-  fetch(ENDPOINT, {method:"POST", mode:"no-cors", credentials:"omit",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body: JSON.stringify({
-        action:"editReg", pw:ADMIN_PW, regId:ER.regId,
-        contactName: ER.contactName, phone: ER.phone, email: ER.email, dept: ER.dept || '',
-        roomLabel: roomLabel, occupancy: occ, surcharge: surcharge,
-        people: payloadPeople
-      })})
-    .finally(function(){
-      setTimeout(function(){ btn.disabled=false; btn.textContent="💾 儲存整張單"; closeEditReg(); load(ADMIN_PW); }, 1800);
+      if(nameInp) p.name = nameInp.value;
+      if(empInp && empInp.offsetParent !== null) p.empId = empInp.value;   // 只在員工 input 顯示時讀
+      if(idnoInp) p.idNumber = idnoInp.value;
+      if(y && m && d) p.dob = y + '-' + m + '-' + d;
     });
+    // 同步表頭欄位
+    ER.contactName = document.getElementById("erContact").value || ER.contactName || '';
+    ER.phone       = document.getElementById("erPhone").value   || ER.phone || '';
+    ER.email       = document.getElementById("erEmail").value   || ER.email || '';
+    ER.dept        = document.getElementById("erDept").value    || ER.dept || '';
+
+    if(!String(ER.contactName||'').trim()){ erShowErr("請填聯絡窗口姓名。"); return; }
+    if(!ER.people.length){ erShowErr("這張單沒有任何成員。"); return; }
+    if(ER.people[0].type !== 'employee'){ erShowErr("第 1 位（本人）必須是員工。請在第 1 位的身分別切到「員工」。"); return; }
+    if(!String(ER.people[0].empId||'').trim()){ erShowErr("第 1 位（本人）未填工號。"); return; }
+    for(let i=0; i<ER.people.length; i++){
+      const p = ER.people[i];
+      if(!String(p.name||'').trim()){ erShowErr("第 "+(i+1)+" 位未填姓名。"); return; }
+      if(!String(p.idNumber||'').trim()){ erShowErr("第 "+(i+1)+" 位（"+(p.name||'').trim()+"）未填身分證／居留證號（投保用）。"); return; }
+      if(!String(p.dob||'').trim()){ erShowErr("第 "+(i+1)+" 位（"+(p.name||'').trim()+"）未選擇完整出生年月日（年/月/日 都要選）。"); return; }
+      if(p.type==='employee' && !String(p.empId||'').trim()){ erShowErr("第 "+(i+1)+" 位（員工）未填工號。"); return; }
+    }
+
+    const roomKey = String(ER.room||2);
+    const roomLabel = roomKey + " 人房";
+    const cap = ER.room, n = ER.people.length;
+    const occ = (n >= cap) ? '住滿' : ((cap===2 && n===1) ? '獨住加價' : '公司安排合住人');
+    const surcharge = (occ === '獨住加價') ? SINGLE_SURCHARGE : 0;
+
+    const payloadPeople = ER.people.map(function(p){
+      return {
+        type: p.type,
+        name: String(p.name||'').trim(),
+        empId: p.type==='employee' ? String(p.empId||'').trim() : '',
+        relationship: p.type==='employee' ? '' : (p.relationship||''),
+        idNumber: String(p.idNumber||'').trim(),
+        dob: p.dob,
+        ageLabel: AGE_LABELS[p.ageKey] || '成人',
+        price: priceOf(roomKey, p.ageKey)
+      };
+    });
+
+    const btn = document.getElementById("erSave");
+    btn.disabled = true; btn.textContent="儲存中…"; erErr.classList.remove("show");
+    fetch(ENDPOINT, {method:"POST", mode:"no-cors", credentials:"omit",
+        headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body: JSON.stringify({
+          action:"editReg", pw:ADMIN_PW, regId:ER.regId,
+          contactName: ER.contactName, phone: ER.phone, email: ER.email, dept: ER.dept || '',
+          roomLabel: roomLabel, occupancy: occ, surcharge: surcharge,
+          people: payloadPeople
+        })})
+      .catch(function(e){ console.error("editReg fetch error", e); })
+      .finally(function(){
+        setTimeout(function(){
+          btn.disabled=false; btn.textContent="💾 儲存整張單";
+          closeEditReg();
+          load(ADMIN_PW);
+        }, 1800);
+      });
+  }catch(e){
+    console.error("editReg save handler error", e);
+    erShowErr("儲存時發生錯誤：" + (e && e.message || e));
+  }
 });
 
 /* ===== 下載 Excel ===== */
