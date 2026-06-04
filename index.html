@@ -124,6 +124,8 @@
 
   .notes{font-size:13px;color:var(--bark);background:#fff1ec;border:1px solid #ffd9cb;border-radius:14px;padding:14px 16px;margin-top:16px;}
   .notes b{color:var(--rust);}
+  .warn-inline{font-size:12.5px;line-height:1.65;color:#9a3414;background:#fff1ec;border:1px solid #ffd9cb;border-radius:12px;padding:11px 14px;margin:0 0 14px;}
+  .warn-inline b{font-weight:700;}
   .notes ul{margin:8px 0 0;padding-left:20px;}
   .notes li{margin-bottom:5px;}
   .foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:26px;}
@@ -240,7 +242,8 @@
     <!-- 3 其他同行者 -->
     <section class="card">
       <h2><span class="num">3</span>其他同行者（眷屬／同住同事）</h2>
-      <p class="hint">每位請選「眷屬」或「員工」。同住的另一位員工也請新增並選「員工」，系統會各自計算補助。只有本人時可不新增。</p>
+      <p class="hint">每位請選「眷屬」或「員工」。夫妻或可一起報名的同事，請新增並選「員工」，系統會各自依工號計算補助。只有本人時可不新增。</p>
+      <div class="warn-inline">⚠️ <b>同一位員工只報名一次</b>：在這裡選「員工」加入的同事，就請該同事不要再自己單獨報名（反之亦然），以免重複投保與重複計費。不方便一起報名的同事，請各自報名，再於下方「住宿安排 → 指定同住同事」填寫想同住的對象。</div>
       <div id="people"></div>
       <button type="button" class="add" id="addBtn">＋ 新增同行者</button>
 
