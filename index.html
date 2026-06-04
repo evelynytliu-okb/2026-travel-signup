@@ -188,7 +188,7 @@
       </svg>
       <span class="ribbon">🌲 2026 員工旅遊・歡渡員工親子逍遙遊</span>
       <h1>溪頭森林遊樂區<br/>車埕火車站 二日遊</h1>
-      <div class="sub">訊映光電 ｜ 報名費用分攤表</div>
+      <div class="sub"><span translate="no" class="notranslate">訊映光電</span> ｜ 報名費用分攤表</div>
       <div class="meta">
         <span><svg class="leaf" viewBox="0 0 24 24" fill="none"><path d="M3 12c0-5 4-9 9-9 5 0 9 4 9 9 0 5-4 9-9 9-5 0-9-4-9-9Z" stroke="#fff" stroke-opacity=".6"/><path d="M8 13c2-3 5-4 8-4" stroke="#fff" stroke-linecap="round"/></svg> 出發日期 <b translate="no">115/10/17（六）～10/18（日）</b></span>
         <span>🚆 含遊覽車・住宿・二日保險</span>
@@ -282,11 +282,11 @@
     <!-- 4 住宿安排 -->
     <section class="card" id="roomingCard" style="display:none;">
       <h2><span class="num">4</span>住宿安排</h2>
-      <p class="hint" id="roomingHint"></p>
+      <p class="hint notranslate" id="roomingHint" translate="no"></p>
       <div id="roomingBody"></div>
     </section>
 
-    <div class="err" id="err"></div>
+    <div class="err notranslate" id="err" translate="no"></div>
 
     <div class="totalbar">
       <div class="breakdown">
@@ -296,11 +296,11 @@
         <div class="brow main"><span>應補差額</span><span class="amt">NT$ <span id="balance">0</span><small>元</small></span></div>
         <div class="bnote" id="occNote" style="display:none;">※ 此為依您所選房型的試算金額。選擇「公司安排合住人／指定同住同事」者，最終金額將依公司實際併房結果為準，可能與此略有不同，正確金額以後續通知為準。</div>
       </div>
-      <button type="submit" class="submit" id="submitBtn">送出報名</button>
+      <button type="submit" class="submit notranslate" id="submitBtn" translate="no">送出報名</button>
     </div>
   </form>
 
-  <p class="foot">訊映光電股份有限公司 ｜ 2026 員工旅遊報名系統</p>
+  <p class="foot"><span translate="no" class="notranslate">訊映光電股份有限公司</span> ｜ 2026 員工旅遊報名系統</p>
 </div>
 
 <div class="overlay" id="overlay">
@@ -314,6 +314,72 @@
 </div>
 
 <script>
+/* ============================================================
+   介面語言字典：給「JavaScript 動態跳出」的文字（錯誤提示、按鈕、
+   住宿提示、工號警示）用。靜態內容與動態插入的卡片/視窗由 Google
+   翻譯處理；這些 .textContent 設定的文字 Google 抓不到，故在此手動翻。
+   LANG 由 Google 翻譯 cookie 同步（id=印尼、vi=越南、空=中文）。
+   ============================================================ */
+var LANG = (function(){ var m=document.cookie.match(/googtrans=\/[^/]*\/(\w+)/); return m?m[1]:''; })();
+var I18N = {
+  id:{
+    '報名已截止':'Pendaftaran ditutup',
+    '報名已截止，如需補報或修改資料，請聯絡承辦人員。':'Pendaftaran telah ditutup. Untuk mendaftar susulan atau mengubah data, silakan hubungi petugas.',
+    '請填寫員工姓名。':'Silakan isi nama karyawan.',
+    '請填寫工號。':'Silakan isi ID karyawan.',
+    '請選擇部門。':'Silakan pilih departemen.',
+    '請填寫聯絡手機。':'Silakan isi nomor ponsel.',
+    '請填寫本人出生年月日。':'Silakan isi tanggal lahir Anda.',
+    '請選擇房型。':'Silakan pilih tipe kamar.',
+    '請在「住宿安排」選擇空床如何處理。':'Silakan pilih cara penanganan tempat tidur kosong di bagian "Pengaturan akomodasi".',
+    '送出中…':'Mengirim…',
+    '送出報名':'Kirim pendaftaran',
+    '送出失敗，請檢查網路後再試一次，或聯絡承辦人員。':'Pengiriman gagal. Periksa koneksi internet lalu coba lagi, atau hubungi petugas.',
+    '請填寫身分證字號（投保用）。':'Silakan isi nomor KTP/izin tinggal (untuk asuransi).',
+    '身分證字號檢查碼不符，請確認是否輸入正確。':'Nomor identitas tidak valid, mohon periksa kembali.',
+    '身分證字號格式不正確（應為 1 個英文字母加 9 碼數字）。':'Format nomor identitas salah (harus 1 huruf diikuti 9 angka).',
+    '本人':'Diri sendiri: ',
+    '同行者 {i}':'Pendamping {i}',
+    '{n}：{reason}':'{n}: {reason}',
+    '請填寫{n}的姓名。':'Silakan isi nama {n}.',
+    '請填寫{n}的工號。':'Silakan isi ID karyawan {n}.',
+    '請填寫{n}的出生年月日。':'Silakan isi tanggal lahir {n}.',
+    '目前 {people} 人超過所選 {room} 人房（最多 {cap} 人），請改選較大房型或分兩筆報名。':'Saat ini {people} orang melebihi kapasitas kamar {room} orang (maks. {cap}). Pilih tipe kamar lebih besar atau daftar dalam dua formulir.',
+    '所選 {room} 人房尚有 {empty} 個空床，請選擇空床如何處理。':'Kamar {room} orang yang dipilih masih ada {empty} tempat tidur kosong. Silakan pilih cara penanganannya.',
+    '⚠️ 工號「{x}」不在補助名單中，請確認工號是否正確；若為新進人員、確定無誤，請聯絡承辦人加入名單，否則此筆補助會以 NT$ 0 計算。':'⚠️ ID karyawan "{x}" tidak ada dalam daftar subsidi. Mohon periksa apakah sudah benar; jika karyawan baru dan sudah benar, hubungi petugas untuk menambahkannya, jika tidak subsidi dihitung NT$ 0.'
+  },
+  vi:{
+    '報名已截止':'Đã đóng đăng ký',
+    '報名已截止，如需補報或修改資料，請聯絡承辦人員。':'Đã hết hạn đăng ký. Nếu cần đăng ký bổ sung hoặc sửa thông tin, vui lòng liên hệ người phụ trách.',
+    '請填寫員工姓名。':'Vui lòng điền tên nhân viên.',
+    '請填寫工號。':'Vui lòng điền mã số nhân viên.',
+    '請選擇部門。':'Vui lòng chọn bộ phận.',
+    '請填寫聯絡手機。':'Vui lòng điền số điện thoại.',
+    '請填寫本人出生年月日。':'Vui lòng điền ngày sinh của bạn.',
+    '請選擇房型。':'Vui lòng chọn loại phòng.',
+    '請在「住宿安排」選擇空床如何處理。':'Vui lòng chọn cách xử lý giường trống ở mục "Sắp xếp chỗ ở".',
+    '送出中…':'Đang gửi…',
+    '送出報名':'Gửi đăng ký',
+    '送出失敗，請檢查網路後再試一次，或聯絡承辦人員。':'Gửi thất bại. Vui lòng kiểm tra mạng rồi thử lại, hoặc liên hệ người phụ trách.',
+    '請填寫身分證字號（投保用）。':'Vui lòng điền số CMND/giấy phép cư trú (để mua bảo hiểm).',
+    '身分證字號檢查碼不符，請確認是否輸入正確。':'Số giấy tờ tùy thân không hợp lệ, vui lòng kiểm tra lại.',
+    '身分證字號格式不正確（應為 1 個英文字母加 9 碼數字）。':'Định dạng số giấy tờ không đúng (gồm 1 chữ cái và 9 chữ số).',
+    '本人':'Bản thân: ',
+    '同行者 {i}':'Người đi cùng {i}',
+    '{n}：{reason}':'{n}: {reason}',
+    '請填寫{n}的姓名。':'Vui lòng điền tên {n}.',
+    '請填寫{n}的工號。':'Vui lòng điền mã số nhân viên {n}.',
+    '請填寫{n}的出生年月日。':'Vui lòng điền ngày sinh {n}.',
+    '目前 {people} 人超過所選 {room} 人房（最多 {cap} 人），請改選較大房型或分兩筆報名。':'Hiện có {people} người, vượt quá phòng {room} người (tối đa {cap}). Hãy chọn phòng lớn hơn hoặc đăng ký thành hai phiếu.',
+    '所選 {room} 人房尚有 {empty} 個空床，請選擇空床如何處理。':'Phòng {room} người đã chọn còn {empty} giường trống. Vui lòng chọn cách xử lý.',
+    '⚠️ 工號「{x}」不在補助名單中，請確認工號是否正確；若為新進人員、確定無誤，請聯絡承辦人加入名單，否則此筆補助會以 NT$ 0 計算。':'⚠️ Mã số nhân viên "{x}" không có trong danh sách trợ cấp. Vui lòng kiểm tra lại; nếu là nhân viên mới và chắc chắn đúng, hãy liên hệ người phụ trách để thêm vào, nếu không khoản trợ cấp sẽ tính là NT$ 0.'
+  }
+};
+function T(s){ return (I18N[LANG] && I18N[LANG][s]) || s; }
+function tf(s, vars){ var t=T(s); for(var k in vars){ t=t.split('{'+k+'}').join(vars[k]); } return t; }
+/* 送出按鈕標題：因標記 translate="no"，於載入時依語言設定文字 */
+(function(){ var b=document.getElementById("submitBtn"); if(b) b.textContent=T("送出報名"); })();
+
 /* ============================================================
    部署後請填入你的 Google Apps Script 網址
    ============================================================ */
@@ -390,7 +456,7 @@ function applyDeadline(s){
 }
 function applyClosed(){
   const b = document.getElementById("closedBanner"); if(b) b.style.display="block";
-  const btn = document.getElementById("submitBtn"); if(btn){ btn.disabled=true; btn.textContent="報名已截止"; }
+  const btn = document.getElementById("submitBtn"); if(btn){ btn.disabled=true; btn.textContent=T("報名已截止"); }
 }
 (async function checkStatus(){
   if(!ENDPOINT.startsWith("http")) return;
@@ -445,6 +511,7 @@ function setEmpIdWarning(inputEl, msg){
     w = document.createElement("div");
     w.className = "empid-warn";
     w.style.cssText = "color:#9a3414;background:#fbe6df;border:1px solid #e7a78f;border-radius:8px;padding:6px 10px;font-size:12.5px;margin-top:6px;line-height:1.55;";
+    w.setAttribute("translate","no"); w.className += " notranslate";
     inputEl.parentElement.appendChild(w);
   }
   if(msg){ w.textContent = msg; w.style.display = "block"; inputEl.style.borderColor = "#e7a78f"; }
@@ -457,7 +524,7 @@ function checkOneEmpIdWarning(inputEl){
   const c = subsidyCache[id];
   if(!c){ setEmpIdWarning(inputEl, ""); return; }                  // 還沒查到，先不警告
   if(c.found){ setEmpIdWarning(inputEl, ""); return; }              // 在名單裡 ✓
-  setEmpIdWarning(inputEl, "⚠️ 工號「" + inputEl.value.trim() + "」不在補助名單中，請確認工號是否正確；若為新進人員、確定無誤，請聯絡承辦人加入名單，否則此筆補助會以 NT$ 0 計算。");
+  setEmpIdWarning(inputEl, tf("⚠️ 工號「{x}」不在補助名單中，請確認工號是否正確；若為新進人員、確定無誤，請聯絡承辦人加入名單，否則此筆補助會以 NT$ 0 計算。", {x:inputEl.value.trim()}));
 }
 function updateEmpIdWarnings(){
   checkOneEmpIdWarning(document.getElementById("emp_id"));
@@ -625,7 +692,7 @@ function renderRooming(headcount){
     return 0;
   }
   // empty >= 1
-  hint.textContent = `所選 ${room} 人房尚有 ${empty} 個空床，請選擇空床如何處理。`;
+  hint.textContent = tf("所選 {room} 人房尚有 {empty} 個空床，請選擇空床如何處理。", {room:room, empty:empty});
   let opts = `
     <label class="roomopt" data-v="company">
       <input type="radio" name="occ" value="company" />
@@ -755,33 +822,33 @@ function wireIdInput(el){
 
 document.getElementById("form").addEventListener("submit", async (e)=>{
   e.preventDefault(); clearErr();
-  if(!SIGNUP_OPEN) return showErr("報名已截止，如需補報或修改資料，請聯絡承辦人員。");
+  if(!SIGNUP_OPEN) return showErr(T("報名已截止，如需補報或修改資料，請聯絡承辦人員。"));
   const room = selectedRoom();
   const people = readPeople();
   const emp = people[0];
 
-  if(!emp.name) return showErr("請填寫員工姓名。");
-  if(!emp.empId) return showErr("請填寫工號。");
-  if(!document.getElementById("dept").value.trim()) return showErr("請選擇部門。");
-  if(!document.getElementById("phone").value.trim()) return showErr("請填寫聯絡手機。");
+  if(!emp.name) return showErr(T("請填寫員工姓名。"));
+  if(!emp.empId) return showErr(T("請填寫工號。"));
+  if(!document.getElementById("dept").value.trim()) return showErr(T("請選擇部門。"));
+  if(!document.getElementById("phone").value.trim()) return showErr(T("請填寫聯絡手機。"));
   const empId = checkTwId(emp.idNumber);
-  if(!empId.ok) return showErr("本人" + empId.reason);
-  if(!emp.dob) return showErr("請填寫本人出生年月日。");
-  if(!room) return showErr("請選擇房型。");
+  if(!empId.ok) return showErr(T("本人") + T(empId.reason));
+  if(!emp.dob) return showErr(T("請填寫本人出生年月日。"));
+  if(!room) return showErr(T("請選擇房型。"));
 
   for(let i=1;i<people.length;i++){
-    const p=people[i], n=`同行者 ${i}`;
-    if(!p.name) return showErr(`請填寫${n}的姓名。`);
-    if(p.type==="employee" && !p.empId) return showErr(`請填寫${n}的工號。`);
+    const p=people[i], n=tf("同行者 {i}", {i:i});
+    if(!p.name) return showErr(tf("請填寫{n}的姓名。", {n:n}));
+    if(p.type==="employee" && !p.empId) return showErr(tf("請填寫{n}的工號。", {n:n}));
     const idChk = checkTwId(p.idNumber);
-    if(!idChk.ok) return showErr(`${n}：${idChk.reason}`);
-    if(!p.dob) return showErr(`請填寫${n}的出生年月日。`);
+    if(!idChk.ok) return showErr(tf("{n}：{reason}", {n:n, reason:T(idChk.reason)}));
+    if(!p.dob) return showErr(tf("請填寫{n}的出生年月日。", {n:n}));
   }
 
   const cap = CAP[room];
-  if(people.length > cap) return showErr(`目前 ${people.length} 人超過所選 ${room} 人房（最多 ${cap} 人），請改選較大房型或分兩筆報名。`);
+  if(people.length > cap) return showErr(tf("目前 {people} 人超過所選 {room} 人房（最多 {cap} 人），請改選較大房型或分兩筆報名。", {people:people.length, room:room, cap:cap}));
   const empty = cap - people.length;
-  if(empty >= 1 && !occupancy) return showErr("請在「住宿安排」選擇空床如何處理。");
+  if(empty >= 1 && !occupancy) return showErr(T("請在「住宿安排」選擇空床如何處理。"));
 
   const surcharge = occupancy==="single" ? SINGLE_SURCHARGE : 0;
   let occLabel = occupancy==="single" ? "獨住加價" : (occupancy==="company" ? "公司安排合住人" : "住滿");
@@ -816,7 +883,7 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
   };
 
   const btn=document.getElementById("submitBtn");
-  btn.disabled=true; btn.textContent="送出中…";
+  btn.disabled=true; btn.textContent=T("送出中…");
   try{
     if(ENDPOINT.startsWith("http")){
       await fetch(ENDPOINT,{method:"POST",mode:"no-cors",credentials:"omit",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
@@ -837,8 +904,8 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     document.querySelectorAll(".room").forEach(x=>x.classList.remove("on"));
     document.getElementById("emp_age").innerHTML = ageOptions();
     peopleEl.innerHTML=""; occupancy=null; roommate=""; recalc();
-  }catch(err){ showErr("送出失敗，請檢查網路後再試一次，或聯絡承辦人員。"); }
-  finally{ btn.disabled=false; btn.textContent="送出報名"; }
+  }catch(err){ showErr(T("送出失敗，請檢查網路後再試一次，或聯絡承辦人員。")); }
+  finally{ btn.disabled=false; btn.textContent=T("送出報名"); }
 });
 </script>
 
