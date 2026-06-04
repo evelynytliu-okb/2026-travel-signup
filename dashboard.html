@@ -364,7 +364,10 @@ function ageShort(a){
   return a;
 }
 function occDisplay(o, surcharge){
-  if(o==="公司安排合住人") return "公司合住";
+  if(o && o.indexOf("公司安排合住人")===0){
+    var m=o.match(/（指定同住：(.+)）/);
+    return m ? "公司合住・指定 "+m[1] : "公司合住";
+  }
   if(o==="獨住加價") return "獨住 +" + fmt(surcharge||0);
   return o||"";
 }
@@ -492,8 +495,13 @@ function render(res){
     statCardDual("2 人房", s.rooms2||0, "間", fmt(s.room2||0)+" 人入住")
     + statCardDual("3 人房", s.rooms3||0, "間", fmt(s.room3||0)+" 人入住")
     + statCardDual("4 人房", s.rooms4||0, "間", fmt(s.room4||0)+" 人入住");
+  // 住宿安排筆數改由前端從名單重算，確保「（指定同住：…）」字尾不影響計數
+  var _occByReg = {};
+  (CURRENT.roster||[]).forEach(function(p){ if(!(p.regId in _occByReg)) _occByReg[p.regId] = p.occupancy||''; });
+  var _companyCount = 0, _singleCount = 0;
+  Object.keys(_occByReg).forEach(function(k){ var o=_occByReg[k]||''; if(o.indexOf('公司安排合住人')===0) _companyCount++; else if(o==='獨住加價') _singleCount++; });
   const occ =
-    statCard("公司安排合住", s.companyCount, "筆") + statCard("獨住加價", s.singleCount, "筆");
+    statCard("公司安排合住", _companyCount, "筆") + statCard("獨住加價", _singleCount, "筆");
   const money =
     statCard("總費用", s.totalCost, "", true) + statCard("公司補助合計", s.totalSubsidy, "", true) +
     statCard("獨住加價合計", s.totalSurcharge, "", true) + statCard("應補差額合計", s.totalBalance, "", true);
@@ -626,7 +634,7 @@ function buildRoomData(roster){
   var locked=[], companyPeople=[];
   Object.keys(byReg).forEach(function(rid){
     var grp=byReg[rid], occ=grp[0].occupancy;
-    if(occ==='公司安排合住人'){ grp.forEach(function(p){ companyPeople.push(p); }); }
+    if(occ && occ.indexOf('公司安排合住人')===0){ grp.forEach(function(p){ companyPeople.push(p); }); }
     else locked.push({contact:grp[0].contact, room:grp[0].room, occupancy:occ, members:grp});
   });
   var rooms=[], map={};

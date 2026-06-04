@@ -218,7 +218,7 @@
         </div>
         <div>
           <label class="f">Email（選填）</label>
-          <input id="email" type="email" placeholder="非必要，填寫可收報名回條" />
+          <input id="email" type="email" placeholder="沒有 Email 也沒關係，一樣可以報名。" />
         </div>
       </div>
       <div class="price" style="margin-top:14px;"><span>本人費用</span><span><b class="p-amt" id="emp_amt">—</b> 元</span></div>
@@ -576,6 +576,7 @@ function readPeople(){
 
 /* ---- 住宿安排 ---- */
 let occupancy = null;   // 'company' | 'single' | 'full' | null
+let roommate = "";      // 指定同住同事姓名（選填，僅 company 時送出）
 function renderRooming(headcount){
   const room = selectedRoom();
   const card = document.getElementById("roomingCard");
@@ -601,7 +602,7 @@ function renderRooming(headcount){
   let opts = `
     <label class="roomopt" data-v="company">
       <input type="radio" name="occ" value="company" />
-      <div><div class="ot">公司安排合住人</div><div class="od">空床由公司安排其他同仁同住（不指定人選），不加價。如有指定合住人，請在此報名表一起報名。</div></div>
+      <div><div class="ot">公司安排合住人</div><div class="od">空床由公司安排同仁同住，不加價。若想指定同住的同事，請於下方填寫姓名；不填則由公司安排（不指定人選）。</div></div>
     </label>`;
   if(room === "2" && headcount === 1){
     opts += `
@@ -610,6 +611,12 @@ function renderRooming(headcount){
       <div><div class="ot">我要獨住整間雙人房</div><div class="od">加價 NT$ ${fmt(SINGLE_SURCHARGE)}（不列入公司補助）。</div></div>
     </label>`;
   }
+  opts += `
+    <div id="roommateWrap" style="display:none;margin-top:6px;">
+      <label class="f" style="margin-bottom:4px;">指定同住同事姓名（選填）</label>
+      <input id="roommateName" placeholder="想同住的同事姓名，多位請以、分隔" />
+      <span class="dob-hint">填寫本欄時，請<b style="color:var(--rust)">提醒被指定的同事務必自行另外報名、填寫個人資料</b>，公司再依此安排同房。實際房間人數若有出入，承辦會再與您確認。</span>
+    </div>`;
   body.innerHTML = opts;
   // restore / wire
   body.querySelectorAll('input[name="occ"]').forEach(r=>{
@@ -622,6 +629,13 @@ function renderRooming(headcount){
   });
   if(occupancy==="full" || occupancy===null || (occupancy==="single" && !(room==="2"&&headcount===1))) occupancy = null;
   body.querySelectorAll(".roomopt").forEach(o=>o.classList.toggle("on", o.dataset.v===occupancy));
+  const rmWrap = body.querySelector("#roommateWrap");
+  const rmInput = body.querySelector("#roommateName");
+  if(rmWrap && rmInput){
+    rmWrap.style.display = (occupancy==="company") ? "" : "none";
+    rmInput.value = roommate;
+    rmInput.addEventListener("input", e=>{ roommate = e.target.value; });
+  }
   return occupancy==="single" ? SINGLE_SURCHARGE : 0;
 }
 
@@ -742,7 +756,9 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
   if(empty >= 1 && !occupancy) return showErr("請在「住宿安排」選擇空床如何處理。");
 
   const surcharge = occupancy==="single" ? SINGLE_SURCHARGE : 0;
-  const occLabel = occupancy==="single" ? "獨住加價" : (occupancy==="company" ? "公司安排合住人" : "住滿");
+  let occLabel = occupancy==="single" ? "獨住加價" : (occupancy==="company" ? "公司安排合住人" : "住滿");
+  const roommateName = (occupancy==="company") ? roommate.trim() : "";
+  if(roommateName) occLabel += `（指定同住：${roommateName}）`;
   let total=0;
   people.forEach(p=>{ total += PRICES[room][p.age]; });
   // 每位員工上限 SUBSIDY_CAP，整筆封頂在總費用（與後端一致）
@@ -766,7 +782,7 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     timestamp:new Date().toISOString(),
     contactName:emp.name, dept:document.getElementById("dept").value.trim(),
     phone:document.getElementById("phone").value.trim(), email:document.getElementById("email").value.trim(),
-    room, roomLabel:room+"人房", occupancy:occLabel, surcharge,
+    room, roomLabel:room+"人房", occupancy:occLabel, roommate:roommateName, surcharge,
     headcount:people.length, total, subsidy, balance,
     people:outPeople,
   };
@@ -791,7 +807,7 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     document.getElementById("form").reset();
     document.querySelectorAll(".room").forEach(x=>x.classList.remove("on"));
     document.getElementById("emp_age").innerHTML = ageOptions();
-    peopleEl.innerHTML=""; occupancy=null; recalc();
+    peopleEl.innerHTML=""; occupancy=null; roommate=""; recalc();
   }catch(err){ showErr("送出失敗，請檢查網路後再試一次，或聯絡承辦人員。"); }
   finally{ btn.disabled=false; btn.textContent="送出報名"; }
 });
