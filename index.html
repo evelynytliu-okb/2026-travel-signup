@@ -32,7 +32,7 @@
 
   /* Hero */
   .hero{margin:22px 0 26px;border-radius:26px;overflow:hidden;background:linear-gradient(160deg,var(--forest-800),var(--forest-600) 130%);color:#eaf1f8;box-shadow:var(--shadow);position:relative;}
-  .hero::after{content:"";position:absolute;inset:0;opacity:.18;mix-blend-mode:soft-light;background:radial-gradient(closest-side, rgba(255,255,255,.7), transparent) 12% 120%/220px 220px no-repeat,radial-gradient(closest-side, rgba(255,255,255,.5), transparent) 95% -20%/260px 260px no-repeat;}
+  .hero::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;mix-blend-mode:soft-light;background:radial-gradient(closest-side, rgba(255,255,255,.7), transparent) 12% 120%/220px 220px no-repeat,radial-gradient(closest-side, rgba(255,255,255,.5), transparent) 95% -20%/260px 260px no-repeat;}
   .hero-inner{position:relative;padding:30px 26px 28px;}
   .okb-logo{height:44px;width:auto;display:block;margin-bottom:16px;}
   .ribbon{display:inline-flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.14em;font-weight:700;background:rgba(255,253,248,.14);border:1px solid rgba(255,253,248,.28);padding:6px 14px;border-radius:999px;backdrop-filter:blur(4px);}
@@ -42,6 +42,10 @@
   .hero .meta span{display:inline-flex;align-items:center;gap:7px;}
   .hero .meta b{font-weight:700;color:#fff;}
   .leaf{width:18px;height:18px;flex:none;}
+  .hero-cta{display:inline-flex;align-items:center;gap:8px;margin-top:18px;background:rgba(255,253,248,.16);border:1.5px solid rgba(255,253,248,.5);color:#fff;font-family:inherit;font-weight:700;font-size:15px;padding:10px 20px;border-radius:999px;text-decoration:none;backdrop-filter:blur(4px);transition:.16s;}
+  .hero-cta:hover{background:#fff;color:var(--forest-800);border-color:#fff;transform:translateY(-2px);}
+  .hero-cta .arr{transition:transform .16s;}
+  .hero-cta:hover .arr{transform:translateX(3px);}
 
   /* Cards */
   .card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:22px 20px;margin:16px 0;box-shadow:0 6px 24px -20px rgba(0,31,58,.5);}
@@ -165,6 +169,7 @@
         <span>🚆 含遊覽車・住宿・二日保險</span>
         <span id="deadlineSpan" style="visibility:hidden">⏰ 報名截止 <b id="deadlineLbl"></b></span>
       </div>
+      <a class="hero-cta" href="itinerary.html">🗺️ 查看詳細行程 <span class="arr">→</span></a>
     </div>
   </header>
 
@@ -213,7 +218,7 @@
         </div>
         <div>
           <label class="f">Email（選填）</label>
-          <input id="email" type="email" placeholder="收報名確認用" />
+          <input id="email" type="email" placeholder="非必要，填寫可收報名回條" />
         </div>
       </div>
       <div class="price" style="margin-top:14px;"><span>本人費用</span><span><b class="p-amt" id="emp_amt">—</b> 元</span></div>
@@ -596,7 +601,7 @@ function renderRooming(headcount){
   let opts = `
     <label class="roomopt" data-v="company">
       <input type="radio" name="occ" value="company" />
-      <div><div class="ot">公司安排合住人</div><div class="od">空床由公司安排其他同仁同住，不加價。</div></div>
+      <div><div class="ot">公司安排合住人</div><div class="od">空床由公司安排其他同仁同住（不指定人選），不加價。如有指定合住人，請在此報名表一起報名。</div></div>
     </label>`;
   if(room === "2" && headcount === 1){
     opts += `
