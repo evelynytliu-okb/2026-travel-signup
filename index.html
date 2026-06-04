@@ -117,6 +117,7 @@
   .totalbar .brow.main{margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.25);align-items:baseline;font-size:15px;opacity:1;font-weight:700;}
   .totalbar .amt{font-family:"Noto Serif TC";font-size:28px;font-weight:900;line-height:1;}
   .totalbar .amt small{font-size:14px;font-weight:500;opacity:.85;margin-left:3px;}
+  .totalbar .bnote{font-size:11.5px;line-height:1.55;color:#ffe3d8;opacity:.95;margin-top:9px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.28);}
   .submit{background:var(--gold);color:#23200f;border:none;font-family:inherit;font-weight:900;font-size:16px;padding:13px 26px;border-radius:12px;cursor:pointer;letter-spacing:.04em;transition:.15s;box-shadow:0 6px 16px -8px rgba(0,0,0,.5);}
   .submit:hover{transform:translateY(-2px);background:#e64a28;}
   .submit:disabled{opacity:.55;cursor:not-allowed;transform:none;}
@@ -142,6 +143,7 @@
   .modal .mp{display:flex;justify-content:space-between;gap:10px;padding:2px 0;font-size:13.5px;}
   .modal .mp.tot{padding-top:6px;font-weight:700;}
   .modal .mp.bal{margin-top:4px;padding-top:6px;border-top:1px solid var(--line);font-weight:900;color:var(--rust);font-size:16px;}
+  .modal .mnote{font-size:12px;color:#9a3414;background:#fff1ec;border:1px solid #ffd9cb;border-radius:9px;padding:9px 11px;margin-top:12px;text-align:left;line-height:1.6;}
   .modal button{background:var(--forest-700);color:#fff;border:none;font-family:inherit;font-weight:700;font-size:15px;padding:11px 22px;border-radius:11px;cursor:pointer;}
 
   .err{display:none;background:#fbe6df;border:1px solid #e7a78f;color:#9a3414;border-radius:12px;padding:11px 14px;font-size:14px;margin-top:12px;font-weight:600;}
@@ -268,6 +270,7 @@
         <div class="brow sub"><span>公司補助（員工合計）</span><span>− NT$ <b id="subsidy">0</b></span></div>
         <div class="brow sur" id="surRow" style="display:none;"><span>獨住加價</span><span>+ NT$ <b id="surcharge">0</b></span></div>
         <div class="brow main"><span>應補差額</span><span class="amt">NT$ <span id="balance">0</span><small>元</small></span></div>
+        <div class="bnote" id="occNote" style="display:none;">※ 此為依您所選房型的試算金額。選擇「公司安排合住人／指定同住同事」者，最終金額將依公司實際併房結果為準，可能與此略有不同，正確金額以後續通知為準。</div>
       </div>
       <button type="submit" class="submit" id="submitBtn">送出報名</button>
     </div>
@@ -672,6 +675,7 @@ function recalc(){
   document.getElementById("subsidy").textContent = fmt(subsidy);
   document.getElementById("surcharge").textContent = fmt(surcharge);
   document.getElementById("surRow").style.display = surcharge>0 ? "" : "none";
+  document.getElementById("occNote").style.display = (occupancy==="company") ? "" : "none";
   document.getElementById("balance").textContent = fmt(balance);
 }
 
@@ -801,7 +805,8 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
        <div class="mp tot"><span>總金額</span><span>NT$ ${fmt(total)}</span></div>
        <div class="mp"><span>公司補助（員工合計）</span><span>− NT$ ${fmt(subsidy)}</span></div>
        ${surcharge>0?`<div class="mp"><span>獨住加價</span><span>+ NT$ ${fmt(surcharge)}</span></div>`:""}
-       <div class="mp bal"><span>應補差額</span><span>NT$ ${fmt(balance)} 元</span></div>`;
+       <div class="mp bal"><span>應補差額</span><span>NT$ ${fmt(balance)} 元</span></div>
+       ${occupancy==="company"?`<div class="mnote">※ 此金額依您所選房型試算。您選擇「公司安排合住人／指定同住同事」，最終金額將依實際併房結果為準，可能與此略有不同，正確金額以後續通知為準。</div>`:""}`;
     document.getElementById("overlay").classList.add("show");
     // reset
     document.getElementById("form").reset();
