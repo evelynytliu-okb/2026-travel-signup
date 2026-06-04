@@ -283,7 +283,7 @@
     <section class="card" id="roomingCard" style="display:none;">
       <h2><span class="num">4</span>住宿安排</h2>
       <p class="hint notranslate" id="roomingHint" translate="no"></p>
-      <div id="roomingBody"></div>
+      <div id="roomingBody" class="notranslate" translate="no"></div>
     </section>
 
     <div class="err notranslate" id="err" translate="no"></div>
@@ -332,6 +332,18 @@ var I18N = {
     '請填寫本人出生年月日。':'Silakan isi tanggal lahir Anda.',
     '請選擇房型。':'Silakan pilih tipe kamar.',
     '請在「住宿安排」選擇空床如何處理。':'Silakan pilih cara penanganan tempat tidur kosong di bagian "Pengaturan akomodasi".',
+    '請填寫指定同住同事的姓名。':'Silakan isi nama rekan kerja yang ingin sekamar.',
+    '公司安排合住人':'Perusahaan mengatur teman sekamar',
+    '指定同住人':'Tentukan teman sekamar sendiri',
+    '空床由公司安排其他同仁同住（不指定人選），不加價。':'Tempat tidur kosong akan diisi rekan kerja yang diatur perusahaan (tanpa menentukan orang), tanpa biaya tambahan.',
+    '我要自己指定同住的同事，不加價。選此項後，請在下方填寫對方姓名。':'Saya ingin menentukan sendiri rekan sekamar, tanpa biaya tambahan. Setelah memilih ini, isi nama orangnya di bawah.',
+    '我要獨住整間雙人房':'Saya mau menempati sendiri kamar untuk 2 orang',
+    '加價 NT$ {s}（不列入公司補助）。':'Tambah biaya NT$ {s} (tidak termasuk subsidi perusahaan).',
+    '指定同住同事姓名':'Nama rekan kerja yang ingin sekamar',
+    '想同住的同事姓名，多位請以、分隔':'Nama rekan yang ingin sekamar; pisahkan dengan 、 bila lebih dari satu',
+    '填寫本欄時，請<b style="color:var(--rust)">提醒被指定的同事務必自行另外報名、填寫個人資料</b>，公司再依此安排同房。實際房間人數若有出入，承辦會再與您確認。':'Saat mengisi kolom ini, <b style="color:var(--rust)">ingatkan rekan yang Anda sebut untuk tetap mendaftar sendiri dan mengisi data pribadinya</b>. Perusahaan akan mengatur sekamar berdasarkan ini. Bila jumlah orang di kamar berbeda, petugas akan mengonfirmasi kembali.',
+    '目前 {headcount} 人超過所選 {room} 人房（最多 {cap} 人），請改選較大房型，或分成兩筆報名。':'Saat ini {headcount} orang melebihi kapasitas kamar {room} orang (maks. {cap}). Pilih tipe kamar lebih besar atau daftar dalam dua formulir.',
+    '✓ 此 {room} 人房剛好住滿 {cap} 人，無需加購。':'✓ Kamar {room} orang ini tepat terisi {cap} orang, tanpa biaya tambahan.',
     '送出中…':'Mengirim…',
     '送出報名':'Kirim pendaftaran',
     '送出失敗，請檢查網路後再試一次，或聯絡承辦人員。':'Pengiriman gagal. Periksa koneksi internet lalu coba lagi, atau hubungi petugas.',
@@ -358,6 +370,18 @@ var I18N = {
     '請填寫本人出生年月日。':'Vui lòng điền ngày sinh của bạn.',
     '請選擇房型。':'Vui lòng chọn loại phòng.',
     '請在「住宿安排」選擇空床如何處理。':'Vui lòng chọn cách xử lý giường trống ở mục "Sắp xếp chỗ ở".',
+    '請填寫指定同住同事的姓名。':'Vui lòng điền tên đồng nghiệp muốn ở cùng.',
+    '公司安排合住人':'Công ty sắp xếp người ở ghép',
+    '指定同住人':'Tự chỉ định người ở cùng',
+    '空床由公司安排其他同仁同住（不指定人選），不加價。':'Giường trống sẽ do công ty sắp xếp đồng nghiệp khác ở ghép (không chỉ định người), không phụ phí.',
+    '我要自己指定同住的同事，不加價。選此項後，請在下方填寫對方姓名。':'Tôi muốn tự chỉ định đồng nghiệp ở cùng, không phụ phí. Sau khi chọn mục này, hãy điền tên người đó bên dưới.',
+    '我要獨住整間雙人房':'Tôi muốn ở riêng cả phòng đôi',
+    '加價 NT$ {s}（不列入公司補助）。':'Phụ thu NT$ {s} (không tính vào trợ cấp công ty).',
+    '指定同住同事姓名':'Tên đồng nghiệp muốn ở cùng',
+    '想同住的同事姓名，多位請以、分隔':'Tên đồng nghiệp muốn ở cùng; nhiều người ngăn cách bằng 、',
+    '填寫本欄時，請<b style="color:var(--rust)">提醒被指定的同事務必自行另外報名、填寫個人資料</b>，公司再依此安排同房。實際房間人數若有出入，承辦會再與您確認。':'Khi điền mục này, <b style="color:var(--rust)">hãy nhắc đồng nghiệp được chỉ định tự đăng ký riêng và điền thông tin cá nhân</b>. Công ty sẽ sắp xếp ở ghép theo đó. Nếu số người trong phòng chênh lệch, người phụ trách sẽ xác nhận lại với bạn.',
+    '目前 {headcount} 人超過所選 {room} 人房（最多 {cap} 人），請改選較大房型，或分成兩筆報名。':'Hiện có {headcount} người, vượt quá phòng {room} người (tối đa {cap}). Hãy chọn phòng lớn hơn hoặc đăng ký thành hai phiếu.',
+    '✓ 此 {room} 人房剛好住滿 {cap} 人，無需加購。':'✓ Phòng {room} người này vừa đủ {cap} người, không cần phụ thu.',
     '送出中…':'Đang gửi…',
     '送出報名':'Gửi đăng ký',
     '送出失敗，請檢查網路後再試一次，或聯絡承辦人員。':'Gửi thất bại. Vui lòng kiểm tra mạng rồi thử lại, hoặc liên hệ người phụ trách.',
@@ -682,13 +706,13 @@ function renderRooming(headcount){
   if(headcount > cap){
     occupancy = null;
     hint.textContent = "";
-    body.innerHTML = `<div class="roominfo over">目前 ${headcount} 人超過所選 ${room} 人房（最多 ${cap} 人），請改選較大房型，或分成兩筆報名。</div>`;
+    body.innerHTML = `<div class="roominfo over">${tf("目前 {headcount} 人超過所選 {room} 人房（最多 {cap} 人），請改選較大房型，或分成兩筆報名。", {headcount:headcount, room:room, cap:cap})}</div>`;
     return 0;
   }
   if(empty === 0){
     occupancy = "full";
     hint.textContent = "";
-    body.innerHTML = `<div class="roominfo full">✓ 此 ${room} 人房剛好住滿 ${cap} 人，無需加購。</div>`;
+    body.innerHTML = `<div class="roominfo full">${tf("✓ 此 {room} 人房剛好住滿 {cap} 人，無需加購。", {room:room, cap:cap})}</div>`;
     return 0;
   }
   // empty >= 1
@@ -696,20 +720,24 @@ function renderRooming(headcount){
   let opts = `
     <label class="roomopt" data-v="company">
       <input type="radio" name="occ" value="company" />
-      <div><div class="ot">公司安排合住人</div><div class="od">空床由公司安排同仁同住，不加價。若想指定同住的同事，請於下方填寫姓名；不填則由公司安排（不指定人選）。</div></div>
+      <div><div class="ot">${T("公司安排合住人")}</div><div class="od">${T("空床由公司安排其他同仁同住（不指定人選），不加價。")}</div></div>
+    </label>
+    <label class="roomopt" data-v="assign">
+      <input type="radio" name="occ" value="assign" />
+      <div><div class="ot">${T("指定同住人")}</div><div class="od">${T("我要自己指定同住的同事，不加價。選此項後，請在下方填寫對方姓名。")}</div></div>
     </label>`;
   if(room === "2" && headcount === 1){
     opts += `
     <label class="roomopt" data-v="single">
       <input type="radio" name="occ" value="single" />
-      <div><div class="ot">我要獨住整間雙人房</div><div class="od">加價 NT$ ${fmt(SINGLE_SURCHARGE)}（不列入公司補助）。</div></div>
+      <div><div class="ot">${T("我要獨住整間雙人房")}</div><div class="od">${tf("加價 NT$ {s}（不列入公司補助）。", {s:fmt(SINGLE_SURCHARGE)})}</div></div>
     </label>`;
   }
   opts += `
     <div id="roommateWrap" style="display:none;margin-top:6px;">
-      <label class="f" style="margin-bottom:4px;">指定同住同事姓名（選填）</label>
-      <input id="roommateName" placeholder="想同住的同事姓名，多位請以、分隔" />
-      <span class="dob-hint">填寫本欄時，請<b style="color:var(--rust)">提醒被指定的同事務必自行另外報名、填寫個人資料</b>，公司再依此安排同房。實際房間人數若有出入，承辦會再與您確認。</span>
+      <label class="f" style="margin-bottom:4px;">${T("指定同住同事姓名")}</label>
+      <input id="roommateName" placeholder="${T("想同住的同事姓名，多位請以、分隔")}" />
+      <span class="dob-hint">${T('填寫本欄時，請<b style="color:var(--rust)">提醒被指定的同事務必自行另外報名、填寫個人資料</b>，公司再依此安排同房。實際房間人數若有出入，承辦會再與您確認。')}</span>
     </div>`;
   body.innerHTML = opts;
   // restore / wire
@@ -726,7 +754,7 @@ function renderRooming(headcount){
   const rmWrap = body.querySelector("#roommateWrap");
   const rmInput = body.querySelector("#roommateName");
   if(rmWrap && rmInput){
-    rmWrap.style.display = (occupancy==="company") ? "" : "none";
+    rmWrap.style.display = (occupancy==="assign") ? "" : "none";
     rmInput.value = roommate;
     rmInput.addEventListener("input", e=>{ roommate = e.target.value; });
   }
@@ -766,7 +794,7 @@ function recalc(){
   document.getElementById("subsidy").textContent = fmt(subsidy);
   document.getElementById("surcharge").textContent = fmt(surcharge);
   document.getElementById("surRow").style.display = surcharge>0 ? "" : "none";
-  document.getElementById("occNote").style.display = (occupancy==="company") ? "" : "none";
+  document.getElementById("occNote").style.display = (occupancy==="company"||occupancy==="assign") ? "" : "none";
   document.getElementById("balance").textContent = fmt(balance);
 }
 
@@ -849,10 +877,12 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
   if(people.length > cap) return showErr(tf("目前 {people} 人超過所選 {room} 人房（最多 {cap} 人），請改選較大房型或分兩筆報名。", {people:people.length, room:room, cap:cap}));
   const empty = cap - people.length;
   if(empty >= 1 && !occupancy) return showErr(T("請在「住宿安排」選擇空床如何處理。"));
+  const roommateName = (occupancy==="assign") ? roommate.trim() : "";
+  if(occupancy==="assign" && !roommateName) return showErr(T("請填寫指定同住同事的姓名。"));
 
   const surcharge = occupancy==="single" ? SINGLE_SURCHARGE : 0;
-  let occLabel = occupancy==="single" ? "獨住加價" : (occupancy==="company" ? "公司安排合住人" : "住滿");
-  const roommateName = (occupancy==="company") ? roommate.trim() : "";
+  // 後端／看板沿用「公司安排合住人」前綴；指定者加上姓名（不需更動 Google 試算表欄位）
+  let occLabel = occupancy==="single" ? "獨住加價" : ((occupancy==="company"||occupancy==="assign") ? "公司安排合住人" : "住滿");
   if(roommateName) occLabel += `（指定同住：${roommateName}）`;
   let total=0;
   people.forEach(p=>{ total += PRICES[room][p.age]; });
@@ -897,7 +927,7 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
        <div class="mp"><span>公司補助（員工合計）</span><span>− NT$ ${fmt(subsidy)}</span></div>
        ${surcharge>0?`<div class="mp"><span>獨住加價</span><span>+ NT$ ${fmt(surcharge)}</span></div>`:""}
        <div class="mp bal"><span>應補差額</span><span>NT$ ${fmt(balance)} 元</span></div>
-       ${occupancy==="company"?`<div class="mnote">※ 此金額依您所選房型試算。您選擇「公司安排合住人／指定同住同事」，最終金額將依實際併房結果為準，可能與此略有不同，正確金額以後續通知為準。</div>`:""}`;
+       ${(occupancy==="company"||occupancy==="assign")?`<div class="mnote">※ 此金額依您所選房型試算。您選擇「公司安排合住人／指定同住人」，最終金額將依實際併房結果為準，可能與此略有不同，正確金額以後續通知為準。</div>`:""}`;
     document.getElementById("overlay").classList.add("show");
     // reset
     document.getElementById("form").reset();
