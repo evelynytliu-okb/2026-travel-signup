@@ -30,6 +30,17 @@
   }
   .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 18px 64px;}
 
+  /* 語言切換 */
+  .langbar{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:16px 0 0;}
+  .langbar .lg-ic{font-size:15px;margin-right:1px;}
+  .langbtn{border:1.5px solid var(--line);background:#fff;color:var(--forest-700);font-family:inherit;font-weight:700;font-size:13px;padding:6px 13px;border-radius:999px;cursor:pointer;transition:.15s;line-height:1.2;}
+  .langbtn:hover{border-color:var(--moss);}
+  .langbtn.on{background:var(--forest-700);color:#fff;border-color:var(--forest-700);}
+  .goog-te-banner-frame,.goog-te-gadget,#goog-te-banner-frame,iframe.skiptranslate,.VIpgJd-ZVi9od-ORHb-OEVmcd{display:none !important;}
+  body{top:0 !important;position:static !important;}
+  #goog-gt-tt,.goog-te-balloon-frame{display:none !important;}
+  font[style]{background:none !important;box-shadow:none !important;}
+
   /* Top back link */
   .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 2px 0;}
   .back{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--forest-700);text-decoration:none;background:#fff;border:1px solid var(--line);padding:8px 14px;border-radius:999px;box-shadow:0 6px 24px -20px rgba(0,31,58,.5);transition:.15s;}
@@ -119,6 +130,14 @@
     <span style="font-size:12.5px;color:var(--muted);font-weight:700;">訊映光電 員工旅遊</span>
   </div>
 
+  <div class="langbar notranslate" translate="no">
+    <span class="lg-ic">🌐</span>
+    <button type="button" class="langbtn on" data-lang="" onclick="setLang('')">中文</button>
+    <button type="button" class="langbtn" data-lang="id" onclick="setLang('id')">Bahasa Indonesia</button>
+    <button type="button" class="langbtn" data-lang="vi" onclick="setLang('vi')">Tiếng Việt</button>
+  </div>
+  <div id="google_translate_element" style="display:none"></div>
+
   <header class="hero">
     <div class="hero-inner">
       <svg class="okb-logo" viewBox="0 0 313.25 167.46" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="OKB 歐克">
@@ -132,7 +151,7 @@
       <h1>溪頭森林遊樂區<br/>車埕火車站 二日遊</h1>
       <div class="sub">訊映光電 ｜ 詳細行程</div>
       <div class="meta">
-        <span><svg class="leaf" viewBox="0 0 24 24" fill="none"><path d="M3 12c0-5 4-9 9-9 5 0 9 4 9 9 0 5-4 9-9 9-5 0-9-4-9-9Z" stroke="#fff" stroke-opacity=".6"/><path d="M8 13c2-3 5-4 8-4" stroke="#fff" stroke-linecap="round"/></svg> 出發日期 <b>115/10/17（六）～10/18（日）</b></span>
+        <span><svg class="leaf" viewBox="0 0 24 24" fill="none"><path d="M3 12c0-5 4-9 9-9 5 0 9 4 9 9 0 5-4 9-9 9-5 0-9-4-9-9Z" stroke="#fff" stroke-opacity=".6"/><path d="M8 13c2-3 5-4 8-4" stroke="#fff" stroke-linecap="round"/></svg> 出發日期 <b translate="no">115/10/17（六）～10/18（日）</b></span>
         <span>🏢 主辦：訊映光電股份有限公司</span>
       </div>
     </div>
@@ -142,7 +161,7 @@
   <section class="card">
     <h2><span class="ic">🧭</span>出發資訊</h2>
     <div class="facts">
-      <div class="fact"><div class="fi">📅</div><div><div class="fl">出發日期</div><div class="fv">115/10/17（六）～10/18（日）</div></div></div>
+      <div class="fact"><div class="fi">📅</div><div><div class="fl">出發日期</div><div class="fv" translate="no">115/10/17（六）～10/18（日）</div></div></div>
       <div class="fact"><div class="fi">🕗</div><div><div class="fl">集合・出發</div><div class="fv">08:30　公司門口</div></div></div>
       <div class="fact"><div class="fi">🏨</div><div><div class="fl">住宿</div><div class="fv">日月潭・魚池瑞居渡假大飯店</div></div></div>
       <div class="fact"><div class="fi">🎟️</div><div><div class="fl">費用內容</div><div class="fv">車資・三餐・住宿・門票・保險・活動費</div></div></div>
@@ -291,5 +310,29 @@
   </div>
 
 </div>
+<!-- Google 網頁翻譯（印尼文／越南文，供外籍移工閱讀） -->
+<script>
+function googleTranslateElementInit(){
+  new google.translate.TranslateElement({pageLanguage:'zh-CN', includedLanguages:'id,vi,en', autoDisplay:false}, 'google_translate_element');
+}
+function setLang(lang){
+  var ex='=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+  document.cookie='googtrans'+ex;
+  document.cookie='googtrans'+ex+';domain='+location.hostname;
+  document.cookie='googtrans'+ex+';domain=.'+location.hostname;
+  if(lang){
+    var val='/zh-CN/'+lang;
+    document.cookie='googtrans='+val+';path=/';
+    document.cookie='googtrans='+val+';path=/;domain='+location.hostname;
+  }
+  location.reload();
+}
+(function(){
+  var m=document.cookie.match(/googtrans=([^;]+)/);
+  var cur=m?decodeURIComponent(m[1]).split('/').filter(Boolean).pop():'';
+  if(cur && cur!=='zh-CN'){ document.querySelectorAll('.langbtn').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-lang')===cur); }); }
+})();
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
