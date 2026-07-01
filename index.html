@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>2026 員工旅遊報名表 ｜ 溪頭森林遊樂區・車埕二日遊</title>
+<title>2026 員工旅遊報名表 ｜ 溪頭森林遊樂區・五星級米堤大飯店 二日遊</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet" />
@@ -187,7 +187,7 @@
         <circle fill="#ff5c39" cx="253.08" cy="133.3" r="13.95"/>
       </svg>
       <span class="ribbon">🌲 2026 員工旅遊・歡渡員工親子逍遙遊</span>
-      <h1>溪頭森林遊樂區<br/>車埕火車站 二日遊</h1>
+      <h1>溪頭森林遊樂區<br/>五星級米堤大飯店 二日遊</h1>
       <div class="sub"><span translate="no" class="notranslate">訊映光電</span> ｜ 報名費用分攤表</div>
       <div class="meta">
         <span><svg class="leaf" viewBox="0 0 24 24" fill="none"><path d="M3 12c0-5 4-9 9-9 5 0 9 4 9 9 0 5-4 9-9 9-5 0-9-4-9-9Z" stroke="#fff" stroke-opacity=".6"/><path d="M8 13c2-3 5-4 8-4" stroke="#fff" stroke-linecap="round"/></svg> 出發日期 <b translate="no">115/10/17（六）～10/18（日）</b></span>
@@ -273,8 +273,8 @@
         <ul>
           <li>有補助資格的眷屬：父母（直系）、子女（直系）、配偶、兄弟姊妹、情侶。</li>
           <li>每位「員工」各自依工號計一份補助；眷屬不另計補助。</li>
-          <li>持證件貴賓（長者榮譽志工證／身心障礙手冊／學生證），<b>當天需攜帶正本驗證</b>；未帶正本視同成人全票。</li>
-          <li>2-5 歲不佔床、均含餐；未滿 2 歲不含餐及住宿。投保需提供每位身分證字號與出生年月日；外籍人士／移工請填居留證統一證號。</li>
+          <li>持證件貴賓（長者敬老志工證／身心障礙手冊／學生證），<b>當天需攜帶正本驗證</b>；未帶正本視同成人全票。</li>
+          <li>2-5 歲不佔床、均含餐；2 歲以下不佔床、不含餐及住宿。投保需提供每位身分證字號與出生年月日；外籍人士／移工請填居留證統一證號。</li>
         </ul>
       </div>
     </section>
@@ -411,22 +411,22 @@ const ENDPOINT = "https://script.google.com/macros/s/AKfycbzGE46TFzPMXlfBvT88mLj
 
 const DEFAULT_SUBSIDY = 10000;        // ★ 已棄用：補助名單視為正式名單，沒對到的工號 → 補助 0（不再用此預設值）
 const SUBSIDY_CAP = 10000;            // 每位員工補助上限（整筆再封頂在總費用）
-const SINGLE_SURCHARGE = 1600;        // 雙人房獨住加價（不列入補助）
+const SINGLE_SURCHARGE = 2900;        // 雙人房獨住加價（不列入補助）
 
-/* 費用表：房型 → 身分 → 金額 */
+/* 費用表：房型 → 身分 → 金額（附件二 報名費用分攤表） */
 const PRICES = {
-  "2": {adult:6725, student:6655, senior:6565, disabled:6525, child25:3000, baby:1500},
-  "3": {adult:6525, student:6455, senior:6365, disabled:6325, child25:2800, baby:1500},
-  "4": {adult:6325, student:6255, senior:6165, disabled:6125, child25:2600, baby:1500},
+  "2": {adult:7035, student:6785, senior:6695, disabled:6655, child25:2000, baby:1500},
+  "3": {adult:5635, student:5385, senior:5295, disabled:5255, child25:1800, baby:1500},
+  "4": {adult:5235, student:4985, senior:4895, disabled:4855, child25:1600, baby:1500},
 };
 const CAP = {"2":2, "3":3, "4":4};
 const AGE_LABELS = {
   adult:"成人",
   student:"6-12歲 學生及兒童",
-  senior:"65歲以上長者（持榮譽志工證）",
+  senior:"65歲以上長者（持敬老志工證）",
   disabled:"持身心障礙手冊（含一位陪同）",
   child25:"2-5歲（不佔床・含餐）",
-  baby:"未滿 2 歲（不足2歲）",
+  baby:"2歲以下（不佔床・不含餐）",
 };
 const FAMILY_REL = ["配偶","子女（直系）","父母（直系）","兄弟姊妹","情侶"];
 

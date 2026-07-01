@@ -322,17 +322,17 @@ function allDeptValues(){
 }
 /* 價目表／年齡分類／眷屬關係（與報名表一致，供「加人」計算費用）*/
 const PRICES = {
-  "2": {adult:6725, student:6655, senior:6565, disabled:6525, child25:3000, baby:1500},
-  "3": {adult:6525, student:6455, senior:6365, disabled:6325, child25:2800, baby:1500},
-  "4": {adult:6325, student:6255, senior:6165, disabled:6125, child25:2600, baby:1500},
+  "2": {adult:7035, student:6785, senior:6695, disabled:6655, child25:2000, baby:1500},
+  "3": {adult:5635, student:5385, senior:5295, disabled:5255, child25:1800, baby:1500},
+  "4": {adult:5235, student:4985, senior:4895, disabled:4855, child25:1600, baby:1500},
 };
 const AGE_LABELS = {
   adult:"成人",
   student:"6-12歲 學生及兒童",
-  senior:"65歲以上長者（持榮譽志工證）",
+  senior:"65歲以上長者（持敬老志工證）",
   disabled:"持身心障礙手冊（含一位陪同）",
   child25:"2-5歲（不佔床・含餐）",
-  baby:"未滿 2 歲（不足2歲）",
+  baby:"2歲以下（不佔床・不含餐）",
 };
 const FAMILY_REL = ["配偶","子女（直系）","父母（直系）","兄弟姊妹","情侶"];
 /* 後台可編輯欄位（key 要與 Code.gs 的 EDIT_COLS 一致） */
@@ -360,7 +360,7 @@ function ageShort(a){
   if(a.indexOf("65")===0) return "長者";
   if(a.indexOf("身心")>=0||a.indexOf("障")>=0) return "身障";
   if(a.indexOf("2-5")===0||a.indexOf("2-5")>=0) return "2-5歲";
-  if(a.indexOf("未滿")>=0||a.indexOf("2 歲")>=0) return "未滿2歲";
+  if(a.indexOf("2歲以下")>=0||a.indexOf("未滿")>=0||a.indexOf("2 歲")>=0) return "2歲以下";
   return a;
 }
 function occDisplay(o, surcharge){
@@ -1003,7 +1003,7 @@ function renderSubsidy(){
     +   '<div class="rsum">補助名單共 <b>'+SUBSIDY_ROWS.length+'</b> 筆 ・ 未列出的工號 → 補助 <b>0</b> 元</div>'
     +   '<button class="btn gold" id="saveSub">💾 儲存補助名單</button>'
     + '</div>'
-    + '<div class="roomhint">★ 新政策：補助名單視為「正式名單」，請列出<b>所有可申請補助的員工工號</b>與對應金額。<br>沒列在這裡的工號 → 補助 <b>0</b> 元（避免新進人員把工號打錯卻拿到預設一萬元）。<br>金額可填 10000、5000、0 等。工號比對為大小寫不拘。改完按右上「儲存補助名單」即生效。</div>'
+    + '<div class="roomhint">★ 補助名單視為「正式名單」，請列出<b>所有可申請補助的員工工號</b>與對應金額。<br>沒列在這裡的工號 → 補助 <b>0</b> 元（避免新進人員把工號打錯卻拿到預設一萬元）。<br>金額可填 10000、5000、0 等。工號比對為大小寫不拘。改完按右上「儲存補助名單」即生效。</div>'
     + '<div class="tablewrap"><table><thead><tr><th>工號</th><th style="width:150px">補助金額</th><th>備註</th><th style="width:70px"></th></tr></thead>'
     + '<tbody id="subBody">'+(body || '<tr><td colspan="4" class="muted2" style="padding:14px">目前沒有特例工號（全部都補助全額）。按下方「＋ 新增一列」加入。</td></tr>')+'</tbody></table></div>'
     + '<button class="btn ghost" id="addSub" style="margin-top:12px;">＋ 新增一列</button>'
@@ -1029,7 +1029,7 @@ async function saveSubsidyList(){
 
 /* ===== 整張單編輯 ===== */
 const SUBSIDY_CAP = 10000;
-const SINGLE_SURCHARGE = 1600;
+const SINGLE_SURCHARGE = 2900;
 const erOverlay = document.getElementById("editRegOverlay");
 const erErr = document.getElementById("erErr");
 let ER = null;   // { regId, people:[{type,name,empId,relationship,idNumber,dob,age}], room, occupancy }
@@ -1042,7 +1042,7 @@ function ageKeyFromLabel(label){
   if(label.indexOf("65")===0) return "senior";
   if(label.indexOf("身心")>=0) return "disabled";
   if(label.indexOf("2-5")>=0) return "child25";
-  if(label.indexOf("未滿")>=0||label.indexOf("2 歲")>=0) return "baby";
+  if(label.indexOf("2歲以下")>=0||label.indexOf("未滿")>=0||label.indexOf("2 歲")>=0) return "baby";
   return "adult";
 }
 function priceOf(roomKey, ageKey){ return (PRICES[roomKey] && PRICES[roomKey][ageKey]) || 0; }
