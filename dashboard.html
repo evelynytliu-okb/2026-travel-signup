@@ -179,7 +179,7 @@
       <button class="btn ghost admin-only" id="excelBtn">📥 下載 Excel</button>
       <button class="btn ghost admin-only" id="signupBtn">報名狀態…</button>
       <button class="btn ghost admin-only" id="deadlineBtn">📅 截止日…</button>
-      <button class="btn ghost admin-only" id="subsidyBtn">💰 補助名單</button>
+      <button class="btn ghost admin-only" id="subsidyBtn">💰 員工名單（自付額）</button>
       <button class="btn ghost admin-only" id="deptBtn">🏢 部門設定</button>
       <button class="btn ghost admin-only" id="roomBtn">🛏️ 房間分配</button>
       <button class="btn ghost admin-only" id="idBtn">👁 顯示身分證</button>
@@ -281,7 +281,7 @@
       <div class="er-line"><span>公司補助（預估）</span><b id="erSubsidy">NT$ 0</b></div>
       <div class="er-line" id="erSurRow" style="display:none;"><span>獨住加價</span><b id="erSur">NT$ 0</b></div>
       <div class="er-line big"><span>自負額</span><b id="erBalance">NT$ 0</b></div>
-      <div class="er-note">補助金額會在送出後依後端「補助設定」分頁重新計算，預估值僅供參考。</div>
+      <div class="er-note">自付額會在送出後依後端「補助設定」分頁（員工名單）重新計算，預估值僅供參考。</div>
     </div>
 
     <div class="merr" id="erErr"></div>
@@ -984,7 +984,7 @@ function readSubsidyDOM(){
   const rows=[];
   document.querySelectorAll("#subBody .subrow").forEach(function(tr){
     rows.push({ empId:tr.querySelector(".s-emp").value.trim(),
-                amount:tr.querySelector(".s-amt").value,
+                amount:tr.querySelector(".s-amt").value,  /* 員工自付額：0=滿半年 / 5000=未滿半年 */
                 note:tr.querySelector(".s-note").value });
   });
   return rows;
@@ -993,19 +993,19 @@ function renderSubsidy(){
   const body = SUBSIDY_ROWS.map(function(r,i){
     return '<tr class="subrow">'
       +'<td><input class="s-emp" value="'+esc(r.empId)+'" placeholder="工號" /></td>'
-      +'<td><input class="s-amt" type="number" value="'+esc(r.amount)+'" placeholder="例 5000" /></td>'
+      +'<td><input class="s-amt" type="number" value="'+esc(r.amount)+'" placeholder="0 或 5000" /></td>'
       +'<td><input class="s-note" value="'+esc(r.note)+'" placeholder="備註（選填）" /></td>'
       +'<td class="nowrap"><button class="rdel s-del" data-i="'+i+'">刪除</button></td></tr>';
   }).join("");
   document.getElementById("content").innerHTML =
       '<div class="roombar">'
     +   '<button class="btn ghost" id="exitSub">← 返回統計</button>'
-    +   '<div class="rsum">補助名單共 <b>'+SUBSIDY_ROWS.length+'</b> 筆 ・ 未列出的工號 → 補助 <b>0</b> 元</div>'
-    +   '<button class="btn gold" id="saveSub">💾 儲存補助名單</button>'
+    +   '<div class="rsum">員工名單共 <b>'+SUBSIDY_ROWS.length+'</b> 筆 ・ 未列出的工號 → <b>無法報名</b></div>'
+    +   '<button class="btn gold" id="saveSub">💾 儲存員工名單</button>'
     + '</div>'
-    + '<div class="roomhint">★ 補助名單視為「正式名單」，請列出<b>所有可申請補助的員工工號</b>與對應金額。<br>沒列在這裡的工號 → 補助 <b>0</b> 元（避免新進人員把工號打錯卻拿到預設一萬元）。<br>金額可填 10000、5000、0 等。工號比對為大小寫不拘。改完按右上「儲存補助名單」即生效。</div>'
-    + '<div class="tablewrap"><table><thead><tr><th>工號</th><th style="width:150px">補助金額</th><th>備註</th><th style="width:70px"></th></tr></thead>'
-    + '<tbody id="subBody">'+(body || '<tr><td colspan="4" class="muted2" style="padding:14px">目前沒有特例工號（全部都補助全額）。按下方「＋ 新增一列」加入。</td></tr>')+'</tbody></table></div>'
+    + '<div class="roomhint">★ 此為「正式員工名單」（新版：依原案・人頭計）。<b>「自付額」欄＝該員工本人自付</b>：任職滿半年填 <b>0</b>（免費）、未滿半年新進填 <b>5000</b>。<br>請列出<b>所有員工工號</b>；沒列在這裡的工號 → <b>無法送出報名</b>（用來擋工號打錯）。工號比對大小寫不拘。改完按右上「儲存員工名單」即生效。</div>'
+    + '<div class="tablewrap"><table><thead><tr><th>工號</th><th style="width:150px">自付額（0＝滿半年／5000＝未滿半年）</th><th>備註</th><th style="width:70px"></th></tr></thead>'
+    + '<tbody id="subBody">'+(body || '<tr><td colspan="4" class="muted2" style="padding:14px">名單目前是空的。按下方「＋ 新增一列」把員工工號加進來。</td></tr>')+'</tbody></table></div>'
     + '<button class="btn ghost" id="addSub" style="margin-top:12px;">＋ 新增一列</button>'
     + '<div id="subMsg" class="roommsg"></div>';
   document.getElementById("exitSub").onclick = function(){ load(ADMIN_MODE?ADMIN_PW:undefined); };
