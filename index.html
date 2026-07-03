@@ -213,7 +213,7 @@
         </div>
         <div>
           <label class="f">工號<span class="req">*</span></label>
-          <input id="emp_id" placeholder="公司補助依工號帶入；工號必須與公司名單一致" />
+          <input id="emp_id" placeholder="工號必須與公司名單一致才能報名" />
         </div>
         <div>
           <label class="f">部門<span class="req">*</span></label>
@@ -246,34 +246,41 @@
           <input id="email" type="email" placeholder="沒有 Email 也沒關係，一樣可以報名。" />
         </div>
       </div>
-      <div class="price" style="margin-top:14px;"><span>本人費用</span><span><b class="p-amt" id="emp_amt">—</b> 元</span></div>
+      <div class="price" style="margin-top:14px;"><span>本人自付</span><span><b class="p-amt" id="emp_amt">—</b> 元</span></div>
     </section>
 
     <!-- 2 房型 -->
     <section class="card">
       <h2><span class="num">2</span>選擇房型</h2>
-      <p class="hint">房型會影響每人費用。若房間有空床，下方「住宿安排」會再請你選擇。</p>
+      <p class="hint">房型決定同房人數。補助範圍內眷屬自付<b>不分房型</b>；僅「其他（非親屬）」依房型計原價。若房間有空床，下方「住宿安排」會再請你選擇。</p>
       <div class="rooms" id="rooms">
-        <label class="room"><input type="radio" name="room" value="2" /><div class="big">2 人房</div><div class="small">每人費用較高</div></label>
-        <label class="room"><input type="radio" name="room" value="3" /><div class="big">3 人房</div><div class="small">適合小家庭</div></label>
-        <label class="room"><input type="radio" name="room" value="4" /><div class="big">4 人房</div><div class="small">最划算</div></label>
+        <label class="room"><input type="radio" name="room" value="2" /><div class="big">2 人房</div><div class="small">2 人一間</div></label>
+        <label class="room"><input type="radio" name="room" value="3" /><div class="big">3 人房</div><div class="small">3 人一間</div></label>
+        <label class="room"><input type="radio" name="room" value="4" /><div class="big">4 人房</div><div class="small">4 人一間</div></label>
       </div>
     </section>
 
     <!-- 3 其他同行者 -->
     <section class="card">
       <h2><span class="num">3</span>其他同行者（眷屬／同住同事）</h2>
-      <p class="hint">每位請選「眷屬」或「員工」；員工各自依工號計算補助，只有本人可不新增。</p>
+      <p class="hint">每位請選「眷屬」或「員工」。眷屬請選對關係（直系／旁系／其他），系統會自動帶出自付額；只有本人可不新增。</p>
       <div class="warn-inline">⚠️ <b>每位員工只能報名一次</b>：選「員工」加入的同事請<b>勿再自行報名</b>（避免重複投保、計費）；無法一起報名的同事請各自報名，再到下方 <b>「指定同住同事」</b> 註明想同住的人。</div>
       <div id="people"></div>
       <button type="button" class="add" id="addBtn">＋ 新增同行者</button>
 
       <div class="notes">
-        <b>注意事項：</b>
+        <b>費用說明（公司補助後・每人自付額，不分房型）：</b>
         <ul>
-          <li>有補助資格的眷屬：父母（直系）、子女（直系）、配偶、兄弟姊妹、情侶。</li>
-          <li>每位「員工」各自依工號計一份補助；眷屬不另計補助。</li>
-          <li>持證件貴賓（長者敬老志工證／身心障礙手冊／學生證），<b>當天需攜帶正本驗證</b>；未帶正本視同成人全票。</li>
+          <li><b>員工本人：免費</b>（未滿半年之新進同仁，本人自付 5,000 元）。</li>
+          <li><b>直系眷屬</b>（父母、配偶、子女）：每人 <b>2,000 元</b>。</li>
+          <li><b>旁系眷屬</b>（兄弟姊妹、情侶）：每人 <b>5,000 元</b>。</li>
+          <li><b>幼童（2-5 歲不佔床）、2 歲以下：免費</b>（限上述補助範圍內眷屬）。</li>
+          <li><b>其他（非親屬）</b>：不在補助範圍，<b>依旅行社原價</b>計費（金額依房型與年齡，報名時自動試算）。</li>
+          <li>單人獨住雙人房，另加 2,900 元（不列入補助）。</li>
+        </ul>
+        <b>其他注意：</b>
+        <ul>
+          <li>持證件貴賓（長者敬老志工證／身心障礙手冊／學生證）<b>當天需攜帶正本驗證</b>；未帶正本視同成人全票（僅影響「其他（非親屬）」的原價計費）。</li>
           <li>2-5 歲不佔床、均含餐；2 歲以下不佔床、不含餐及住宿。投保需提供每位身分證字號與出生年月日；外籍人士／移工請填居留證統一證號。</li>
         </ul>
       </div>
@@ -290,11 +297,10 @@
 
     <div class="totalbar">
       <div class="breakdown">
-        <div class="brow"><span>合計 <b id="cnt">1</b> 位 · 總金額</span><span>NT$ <b id="total">0</b></span></div>
-        <div class="brow sub"><span>公司補助（員工合計）</span><span>− NT$ <b id="subsidy">0</b></span></div>
+        <div class="brow"><span>合計 <b id="cnt">1</b> 位 · 自付小計</span><span>NT$ <b id="total">0</b></span></div>
         <div class="brow sur" id="surRow" style="display:none;"><span>獨住加價</span><span>+ NT$ <b id="surcharge">0</b></span></div>
-        <div class="brow main"><span>應補差額</span><span class="amt">NT$ <span id="balance">0</span><small>元</small></span></div>
-        <div class="bnote" id="occNote" style="display:none;">※ 此為依您所選房型的試算金額。選擇「公司安排合住人／指定同住同事」者，最終金額將依公司實際併房結果為準，可能與此略有不同，正確金額以後續通知為準。</div>
+        <div class="brow main"><span>應付金額</span><span class="amt">NT$ <span id="balance">0</span><small>元</small></span></div>
+        <div class="bnote" id="occNote" style="display:none;">※ 補助範圍內眷屬自付不分房型，此即為最終金額；僅「其他（非親屬）」的原價會依最終併房房型計算，可能略有不同，以後續通知為準。</div>
       </div>
       <button type="submit" class="submit notranslate" id="submitBtn" translate="no">送出報名</button>
     </div>
@@ -358,7 +364,7 @@ var I18N = {
     '請填寫{n}的出生年月日。':'Silakan isi tanggal lahir {n}.',
     '目前 {people} 人超過所選 {room} 人房（最多 {cap} 人），請改選較大房型或分兩筆報名。':'Saat ini {people} orang melebihi kapasitas kamar {room} orang (maks. {cap}). Pilih tipe kamar lebih besar atau daftar dalam dua formulir.',
     '所選 {room} 人房尚有 {empty} 個空床，請選擇空床如何處理。':'Kamar {room} orang yang dipilih masih ada {empty} tempat tidur kosong. Silakan pilih cara penanganannya.',
-    '⚠️ 工號「{x}」不在補助名單中，請確認工號是否正確；若為新進人員、確定無誤，請聯絡承辦人加入名單，否則此筆補助會以 NT$ 0 計算。':'⚠️ ID karyawan "{x}" tidak ada dalam daftar subsidi. Mohon periksa apakah sudah benar; jika karyawan baru dan sudah benar, hubungi petugas untuk menambahkannya, jika tidak subsidi dihitung NT$ 0.'
+    '⚠️ 工號「{x}」不在公司名單中，請確認工號是否正確；未在名單者無法送出報名，若確定無誤請聯絡承辦人加入名單。':'⚠️ ID karyawan "{x}" tidak ada dalam daftar perusahaan. Mohon periksa apakah sudah benar; yang tidak terdaftar tidak dapat mengirim pendaftaran. Jika sudah benar, hubungi petugas untuk menambahkannya.'
   },
   vi:{
     '報名已截止':'Đã đóng đăng ký',
@@ -396,7 +402,7 @@ var I18N = {
     '請填寫{n}的出生年月日。':'Vui lòng điền ngày sinh {n}.',
     '目前 {people} 人超過所選 {room} 人房（最多 {cap} 人），請改選較大房型或分兩筆報名。':'Hiện có {people} người, vượt quá phòng {room} người (tối đa {cap}). Hãy chọn phòng lớn hơn hoặc đăng ký thành hai phiếu.',
     '所選 {room} 人房尚有 {empty} 個空床，請選擇空床如何處理。':'Phòng {room} người đã chọn còn {empty} giường trống. Vui lòng chọn cách xử lý.',
-    '⚠️ 工號「{x}」不在補助名單中，請確認工號是否正確；若為新進人員、確定無誤，請聯絡承辦人加入名單，否則此筆補助會以 NT$ 0 計算。':'⚠️ Mã số nhân viên "{x}" không có trong danh sách trợ cấp. Vui lòng kiểm tra lại; nếu là nhân viên mới và chắc chắn đúng, hãy liên hệ người phụ trách để thêm vào, nếu không khoản trợ cấp sẽ tính là NT$ 0.'
+    '⚠️ 工號「{x}」不在公司名單中，請確認工號是否正確；未在名單者無法送出報名，若確定無誤請聯絡承辦人加入名單。':'⚠️ Mã số nhân viên "{x}" không có trong danh sách công ty. Vui lòng kiểm tra lại; người không có trong danh sách không thể gửi đăng ký. Nếu chắc chắn đúng, hãy liên hệ người phụ trách để thêm vào.'
   }
 };
 function T(s){ return (I18N[LANG] && I18N[LANG][s]) || s; }
@@ -409,11 +415,20 @@ function tf(s, vars){ var t=T(s); for(var k in vars){ t=t.split('{'+k+'}').join(
    ============================================================ */
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbzGE46TFzPMXlfBvT88mLjobexmgnpSlWf_U_Rl2PBzWMUca7_mUc5-pI64F75Kx8ymKg/exec";
 
-const DEFAULT_SUBSIDY = 10000;        // ★ 已棄用：補助名單視為正式名單，沒對到的工號 → 補助 0（不再用此預設值）
-const SUBSIDY_CAP = 10000;            // 每位員工補助上限（整筆再封頂在總費用）
+/* ── 補助方案（依原案・人頭計，不分房型）──
+   ‧ 滿半年員工：免費；未滿半年員工：本人自付 5,000（由後台工號名單控制）
+   ‧ 直系眷屬（父母／配偶／子女）：每人 2,000
+   ‧ 旁系眷屬（兄弟姊妹／情侶）：每人 5,000
+   ‧ 幼童（2-5 不佔床）、2 歲以下：補助範圍內一律免費
+   ‧ 「其他（非親屬）」：不在補助範圍，依旅行社原價（附件二）計費
+   工號名單（後台「補助設定」分頁）amount 欄＝該員工自付額：0＝滿半年、5000＝未滿半年。 */
+const LINEAL_SELF     = 2000;         // 直系眷屬每人自付
+const COLLATERAL_SELF = 5000;         // 旁系眷屬每人自付
+const LINEAL_REL      = ["配偶","子女（直系）","父母（直系）"];   // 直系
+const OTHER_REL       = "其他（非親屬）";                        // 非補助範圍 → 旅行社原價
 const SINGLE_SURCHARGE = 2900;        // 雙人房獨住加價（不列入補助）
 
-/* 費用表：房型 → 身分 → 金額（附件二 報名費用分攤表） */
+/* 旅行社原價表：房型 → 身分 → 金額（附件二 報名費用分攤表・新版）。僅「其他（非親屬）」按此計費。 */
 const PRICES = {
   "2": {adult:7035, student:6785, senior:6695, disabled:6655, child25:2000, baby:1500},
   "3": {adult:5635, student:5385, senior:5295, disabled:5255, child25:1800, baby:1500},
@@ -428,7 +443,7 @@ const AGE_LABELS = {
   child25:"2-5歲（不佔床・含餐）",
   baby:"2歲以下（不佔床・不含餐）",
 };
-const FAMILY_REL = ["配偶","子女（直系）","父母（直系）","兄弟姊妹","情侶"];
+const FAMILY_REL = ["配偶","子女（直系）","父母（直系）","兄弟姊妹","情侶","其他（非親屬）"];
 
 /* 部門：由後端「部門設定」分頁動態載入（管理員可在後台 🏢 部門設定 直接編輯）。
    後端失敗時用內建預設清單，避免報名表壞掉。 */
@@ -498,8 +513,9 @@ function ageOptions(){ return Object.entries(AGE_LABELS).map(([v,l])=>`<option v
 const fmt = n => Number(n||0).toLocaleString("en-US");
 const peopleEl = document.getElementById("people");
 
-/* ---- 補助查詢（依工號）----
- *  ★ 新政策：補助設定視為「正式名單」。工號沒對到 → 補助 0；且 UI 會顯示警示，提醒員工檢查工號是否輸入正確。 */
+/* ---- 工號查詢（任職身分／自付額，依工號）----
+ *  「補助設定」分頁＝正式員工名單；amount 欄現為員工自付額（0＝滿半年免費、5000＝未滿半年）。
+ *  工號沒對到 → 送出時擋下（無法報名）；輸入時 UI 也會顯示紅字警示。 */
 const subsidyCache = {};        // empId(uppercased) -> { amount, found }
 function _normEmpId(s){ return String(s||"").trim().toUpperCase(); }
 function fetchSubsidy(empId){
@@ -548,7 +564,7 @@ function checkOneEmpIdWarning(inputEl){
   const c = subsidyCache[id];
   if(!c){ setEmpIdWarning(inputEl, ""); return; }                  // 還沒查到，先不警告
   if(c.found){ setEmpIdWarning(inputEl, ""); return; }              // 在名單裡 ✓
-  setEmpIdWarning(inputEl, tf("⚠️ 工號「{x}」不在補助名單中，請確認工號是否正確；若為新進人員、確定無誤，請聯絡承辦人加入名單，否則此筆補助會以 NT$ 0 計算。", {x:inputEl.value.trim()}));
+  setEmpIdWarning(inputEl, tf("⚠️ 工號「{x}」不在公司名單中，請確認工號是否正確；未在名單者無法送出報名，若確定無誤請聯絡承辦人加入名單。", {x:inputEl.value.trim()}));
 }
 function updateEmpIdWarnings(){
   checkOneEmpIdWarning(document.getElementById("emp_id"));
@@ -579,7 +595,7 @@ function addPerson(){
       </div>
       <div class="cond-emp" style="display:none;">
         <label class="f">工號<span class="req">*</span></label>
-        <input class="p-empid" placeholder="工號（須與公司名單一致才計補助）" />
+        <input class="p-empid" placeholder="工號（須與公司名單一致）" />
       </div>
       <div>
         <label class="f">身分證 / 居留證號<span class="req">*</span></label>
@@ -600,7 +616,7 @@ function addPerson(){
         <select class="p-age">${ageOptions()}</select>
       </div>
     </div>
-    <div class="price"><span>費用</span><span><b class="p-amt">—</b> 元</span></div>
+    <div class="price"><span>自付</span><span><b class="p-amt">—</b> 元</span></div>
   `;
   peopleEl.appendChild(div);
 
@@ -761,37 +777,41 @@ function renderRooming(headcount){
   return occupancy==="single" ? SINGLE_SURCHARGE : 0;
 }
 
-/* 公司補助：每位員工上限 SUBSIDY_CAP，整筆封頂在總費用（與後端一致） */
-function computeSubsidy(people, total){
-  let remaining = total, subsidy = 0;
-  people.forEach(p=>{
-    if(p.type==="employee"){
-      const ent = Math.min(SUBSIDY_CAP, subsidyOf(p.empId));
-      const give = Math.max(0, Math.min(ent, remaining));
-      subsidy += give; remaining -= give;
-    }
-  });
-  return subsidy;
+/* 每人自付額（依原案・人頭計，不分房型）。price=旅行社原價、self=自付、subsidy=公司補助 */
+function personCost(p, room){
+  const price = PRICES[room][p.age];               // 旅行社原價（附件二）
+  let self;
+  if(p.type!=="employee" && p.relationship===OTHER_REL){
+    self = price;                                  // 其他（非親屬）→ 旅行社原價全額自費
+  } else if(p.age==="child25" || p.age==="baby"){
+    self = 0;                                       // 補助範圍內：幼童（2-5）／2歲以下免費
+  } else if(p.type==="employee"){
+    self = subsidyOf(p.empId);                      // 名單金額：0＝滿半年免費、5000＝未滿半年
+  } else if(LINEAL_REL.indexOf(p.relationship)>=0){
+    self = LINEAL_SELF;                             // 直系眷屬 2,000
+  } else {
+    self = COLLATERAL_SELF;                         // 旁系（兄弟姊妹／情侶）5,000
+  }
+  self = Math.max(0, Math.min(self, price));        // 自付不超過原價
+  return {price, self, subsidy: price - self};
 }
 
 /* ---- 計算 ---- */
 function recalc(){
   const room = selectedRoom();
   const people = readPeople();
-  let total=0;
+  let selfTotal=0;
   people.forEach(p=>{
     if(room){
-      const v = PRICES[room][p.age];
-      total += v;
-      if(p.el) p.el.textContent = fmt(v);
+      const c = personCost(p, room);
+      selfTotal += c.self;
+      if(p.el) p.el.textContent = fmt(c.self);
     } else if(p.el){ p.el.textContent = "—"; }
   });
-  const subsidy = room ? computeSubsidy(people, total) : 0;
   const surcharge = renderRooming(people.length);
-  const balance = Math.max(0, total - subsidy) + surcharge;
+  const balance = selfTotal + surcharge;
   document.getElementById("cnt").textContent = people.length;
-  document.getElementById("total").textContent = fmt(total);
-  document.getElementById("subsidy").textContent = fmt(subsidy);
+  document.getElementById("total").textContent = fmt(selfTotal);
   document.getElementById("surcharge").textContent = fmt(surcharge);
   document.getElementById("surRow").style.display = surcharge>0 ? "" : "none";
   document.getElementById("occNote").style.display = (occupancy==="company"||occupancy==="assign") ? "" : "none";
@@ -857,6 +877,7 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
 
   if(!emp.name) return showErr(T("請填寫員工姓名。"));
   if(!emp.empId) return showErr(T("請填寫工號。"));
+  if(!subsidyKnown(emp.empId)) return showErr(tf("工號「{x}」不在公司名單中，請確認工號是否正確（若剛輸入，請稍候 1～2 秒再送出）。", {x:emp.empId}));
   if(!document.getElementById("dept").value.trim()) return showErr(T("請選擇部門。"));
   if(!document.getElementById("phone").value.trim()) return showErr(T("請填寫聯絡手機。"));
   const empId = checkTwId(emp.idNumber);
@@ -868,6 +889,7 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     const p=people[i], n=tf("同行者 {i}", {i:i});
     if(!p.name) return showErr(tf("請填寫{n}的姓名。", {n:n}));
     if(p.type==="employee" && !p.empId) return showErr(tf("請填寫{n}的工號。", {n:n}));
+    if(p.type==="employee" && !subsidyKnown(p.empId)) return showErr(tf("{n}：工號「{x}」不在公司名單中，請確認工號是否正確。", {n:n, x:p.empId}));
     const idChk = checkTwId(p.idNumber);
     if(!idChk.ok) return showErr(tf("{n}：{reason}", {n:n, reason:T(idChk.reason)}));
     if(!p.dob) return showErr(tf("請填寫{n}的出生年月日。", {n:n}));
@@ -884,23 +906,17 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
   // 後端／看板沿用「公司安排合住人」前綴；指定者加上姓名（不需更動 Google 試算表欄位）
   let occLabel = occupancy==="single" ? "獨住加價" : ((occupancy==="company"||occupancy==="assign") ? "公司安排合住人" : "住滿");
   if(roommateName) occLabel += `（指定同住：${roommateName}）`;
-  let total=0;
-  people.forEach(p=>{ total += PRICES[room][p.age]; });
-  // 每位員工上限 SUBSIDY_CAP，整筆封頂在總費用（與後端一致）
-  let remaining = total, subsidy = 0;
+  // 依原案・人頭計：每人自付＝personCost().self；price＝旅行社原價；subsidy＝price−self（供後台財務欄）
+  let total=0, subsidy=0;
   const outPeople = people.map(p=>{
-    const price = PRICES[room][p.age];
-    let psub = "";
-    if(p.type==="employee"){
-      const ent = Math.min(SUBSIDY_CAP, subsidyOf(p.empId));
-      psub = Math.max(0, Math.min(ent, remaining));
-      subsidy += psub; remaining -= psub;
-    }
+    const c = personCost(p, room);
+    total += c.price; subsidy += c.subsidy;
     return {type:p.type, name:p.name, relationship:p.relationship, empId:p.empId,
             age:p.age, ageLabel:AGE_LABELS[p.age], idNumber:p.idNumber, dob:p.dob,
-            price, subsidy:psub};
+            price:c.price, self:c.self, subsidy:c.subsidy};
   });
-  const balance = Math.max(0, total - subsidy) + surcharge;
+  const selfTotal = total - subsidy;
+  const balance = selfTotal + surcharge;
 
   const payload = {
     regId: "R" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2,5).toUpperCase(),
@@ -918,16 +934,15 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     if(ENDPOINT.startsWith("http")){
       await fetch(ENDPOINT,{method:"POST",mode:"no-cors",credentials:"omit",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
     } else { await new Promise(r=>setTimeout(r,400)); }
-    const rows = outPeople.map(p=>`<div class="mp"><span>${p.name}（${p.type==="employee"?"員工":p.relationship}・${p.ageLabel}）</span><span>${fmt(p.price)}</span></div>`).join("");
+    const rows = outPeople.map(p=>`<div class="mp"><span>${p.name}（${p.type==="employee"?"員工":p.relationship}・${p.ageLabel}）</span><span>${fmt(p.self)}</span></div>`).join("");
     document.getElementById("modalSum").innerHTML =
       `<div class="mhead"><b>${emp.name}</b> ・ ${document.getElementById("dept").value.trim()}<br/>
         <span style="color:#6b7a89">${room} 人房 ｜ 共 ${people.length} 位 ｜ ${occLabel}</span></div>
        <div class="mlist">${rows}</div>
-       <div class="mp tot"><span>總金額</span><span>NT$ ${fmt(total)}</span></div>
-       <div class="mp"><span>公司補助（員工合計）</span><span>− NT$ ${fmt(subsidy)}</span></div>
+       <div class="mp tot"><span>自付小計</span><span>NT$ ${fmt(selfTotal)}</span></div>
        ${surcharge>0?`<div class="mp"><span>獨住加價</span><span>+ NT$ ${fmt(surcharge)}</span></div>`:""}
-       <div class="mp bal"><span>應補差額</span><span>NT$ ${fmt(balance)} 元</span></div>
-       ${(occupancy==="company"||occupancy==="assign")?`<div class="mnote">※ 此金額依您所選房型試算。您選擇「公司安排合住人／指定同住人」，最終金額將依實際併房結果為準，可能與此略有不同，正確金額以後續通知為準。</div>`:""}`;
+       <div class="mp bal"><span>應付金額</span><span>NT$ ${fmt(balance)} 元</span></div>
+       ${(occupancy==="company"||occupancy==="assign")?`<div class="mnote">※ 補助範圍內眷屬自付不分房型，此即為最終金額；僅「其他（非親屬）」的原價會依最終併房房型計算，可能略有不同，以後續通知為準。</div>`:""}`;
     document.getElementById("overlay").classList.add("show");
     // reset
     document.getElementById("form").reset();
