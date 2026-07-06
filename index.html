@@ -74,6 +74,9 @@
   label.f .req{color:var(--rust);margin-left:3px;}
   input,select{width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;transition:border-color .15s, box-shadow .15s;}
   input:focus,select:focus{outline:none;border-color:var(--forest-600);box-shadow:0 0 0 4px rgba(0,48,87,.14);}
+  /* 身分證/居留證號：顯示大寫（實際值於讀取時 normId 轉大寫），不在輸入時改寫 value 以免字元重複 */
+  #emp_idno,.p-idno{text-transform:uppercase;}
+  #emp_idno::placeholder,.p-idno::placeholder{text-transform:none;}
   select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ff5c39' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
 
   /* 出生年月日 三選單：避免長者按月份倒退翻日曆 */
@@ -225,7 +228,7 @@
         </div>
         <div>
           <label class="f">身分證 / 居留證號<span class="req">*</span></label>
-          <input id="emp_idno" placeholder="投保用。外籍/移工請填居留證統一證號" />
+          <input id="emp_idno" class="notranslate" translate="no" placeholder="投保用。外籍/移工請填居留證統一證號" />
         </div>
         <div>
           <label class="f">出生年月日<span class="req">*</span></label>
@@ -599,7 +602,7 @@ function addPerson(){
       </div>
       <div>
         <label class="f">身分證 / 居留證號<span class="req">*</span></label>
-        <input class="p-idno" placeholder="投保用。外籍請填居留證號" />
+        <input class="p-idno notranslate" translate="no" placeholder="投保用。外籍請填居留證號" />
       </div>
       <div>
         <label class="f">出生年月日<span class="req">*</span></label>
@@ -859,9 +862,10 @@ function checkTwId(raw){
   if(/^[A-Z][A-D]\d{8}$/.test(v)) return {ok:true}; // 舊式外僑居留證
   return {ok:false, reason:"身分證字號格式不正確（應為 1 個英文字母加 9 碼數字）。"};
 }
-/* 即時防呆：自動轉大寫、失焦時顯示紅框 */
+/* 即時防呆：失焦時顯示紅框。
+   顯示大寫改由 CSS text-transform 處理、實際值於讀取時以 normId() 轉大寫；
+   不在 input 事件重寫 el.value，避免（尤其含 Google 翻譯觀察器時）出現「打一個字母變兩個」的字元重複。 */
 function wireIdInput(el){
-  el.addEventListener("input", ()=>{ const p=el.selectionStart; el.value=el.value.toUpperCase(); try{el.setSelectionRange(p,p);}catch(e){} });
   el.addEventListener("blur", ()=>{
     const v=el.value.trim();
     el.style.borderColor = (!v || checkTwId(v).ok) ? "" : "var(--rust)";
