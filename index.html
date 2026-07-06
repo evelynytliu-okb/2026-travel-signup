@@ -639,6 +639,7 @@ function addPerson(){
     recalc();
   }));
   div.querySelector(".p-age").addEventListener("change", recalc);
+  div.querySelector(".p-rel").addEventListener("change", recalc);
   div.querySelector(".p-name").addEventListener("input", ()=>{});
   let t=null;
   div.querySelector(".p-empid").addEventListener("input", (e)=>{ clearTimeout(t); const v=e.target.value; t=setTimeout(()=>fetchSubsidy(v), 400); });
