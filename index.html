@@ -868,8 +868,25 @@ function checkTwId(raw){
 function wireIdInput(el){
   el.addEventListener("blur", ()=>{
     const v=el.value.trim();
-    el.style.borderColor = (!v || checkTwId(v).ok) ? "" : "var(--rust)";
+    const chk = v ? checkTwId(v) : {ok:true};
+    el.style.borderColor = chk.ok ? "" : "var(--rust)";
+    setIdError(el, chk.ok ? "" : T(chk.reason));
   });
+  // 重新輸入時先清掉紅框與錯誤說明（此監聽器不改寫 value，不會造成字元重複）
+  el.addEventListener("input", ()=>{ el.style.borderColor = ""; setIdError(el, ""); });
+}
+/* 在身分證欄位下方顯示／隱藏一行紅色錯誤說明 */
+function setIdError(el, msg){
+  let w = el.parentElement.querySelector(".idno-err");
+  if(!w){
+    w = document.createElement("div");
+    w.className = "idno-err notranslate";
+    w.setAttribute("translate","no");
+    w.style.cssText = "color:var(--rust);font-size:12px;margin-top:5px;line-height:1.5;";
+    el.parentElement.appendChild(w);
+  }
+  if(msg){ w.textContent = msg; w.style.display = "block"; }
+  else { w.textContent = ""; w.style.display = "none"; }
 }
 
 document.getElementById("form").addEventListener("submit", async (e)=>{
