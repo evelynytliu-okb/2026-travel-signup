@@ -77,6 +77,9 @@
   /* 身分證/居留證號：顯示大寫（實際值於讀取時 normId 轉大寫），不在輸入時改寫 value 以免字元重複 */
   #emp_idno,.p-idno{text-transform:uppercase;}
   #emp_idno::placeholder,.p-idno::placeholder{text-transform:none;}
+  .drafthint{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;background:#eef4fa;border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--bark);}
+  .draftclear{flex:none;border:1.5px solid var(--line);background:#fff;color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:9px;cursor:pointer;}
+  .draftclear:hover{border-color:var(--rust);color:var(--rust);}
   select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ff5c39' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
 
   /* 出生年月日 三選單：避免長者按月份倒退翻日曆 */
@@ -204,6 +207,11 @@
   <div class="closed-banner" id="closedBanner">本次報名已截止 ── 目前暫停線上報名，如需補報或修改資料，請聯絡承辦人員。</div>
 
   <form id="form" novalidate>
+
+    <div id="draftHint" class="drafthint" style="display:none;">
+      <span>📝 系統已自動保留您填寫的內容於<b>本裝置</b>，可放心離開、稍後再回來繼續填。</span>
+      <button type="button" id="draftClear" class="draftclear">清除已填內容</button>
+    </div>
 
     <!-- 1 報名人(本人) -->
     <section class="card">
@@ -970,9 +978,83 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     document.querySelectorAll(".room").forEach(x=>x.classList.remove("on"));
     document.getElementById("emp_age").innerHTML = ageOptions();
     peopleEl.innerHTML=""; occupancy=null; roommate=""; recalc();
+    clearDraft(); showDraftHint(false);   // 送出成功 → 清掉草稿
   }catch(err){ showErr(T("送出失敗，請檢查網路後再試一次，或聯絡承辦人員。")); }
   finally{ btn.disabled=false; btn.textContent=T("送出報名"); }
 });
+
+/* ===== 自動儲存草稿（localStorage・此裝置）===== */
+const DRAFT_KEY = "okb_travel_draft_v1";
+const DRAFT_TTL = 21*24*3600*1000;   // 21 天後過期
+let _restoring = false, _draftTimer = null;
+function _v(id){ const e=document.getElementById(id); return e?e.value:""; }
+function _sv(id,val){ const e=document.getElementById(id); if(e) e.value = (val==null?"":val); }
+function showDraftHint(show){ const h=document.getElementById("draftHint"); if(h) h.style.display = show?"":"none"; }
+function serializeDraft(){
+  return {
+    t: Date.now(),
+    emp:{ name:_v("emp_name"), empId:_v("emp_id"), dept:_v("dept"), phone:_v("phone"),
+          idno:_v("emp_idno"), email:_v("email"), age:_v("emp_age"),
+          dy:_v("emp_dob_y"), dm:_v("emp_dob_m"), dd:_v("emp_dob_d") },
+    room: selectedRoom(), occupancy: occupancy, roommate: roommate,
+    people: [...peopleEl.children].map(function(p){
+      return { type:p.querySelector(".p-type:checked").value,
+               name:p.querySelector(".p-name").value, rel:p.querySelector(".p-rel").value,
+               empid:p.querySelector(".p-empid").value, idno:p.querySelector(".p-idno").value,
+               age:p.querySelector(".p-age").value,
+               dy:p.querySelector(".p-dob-y").value, dm:p.querySelector(".p-dob-m").value, dd:p.querySelector(".p-dob-d").value };
+    })
+  };
+}
+function saveDraft(){ if(_restoring) return; try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(serializeDraft())); showDraftHint(true); }catch(e){} }
+function scheduleSave(){ clearTimeout(_draftTimer); _draftTimer=setTimeout(saveDraft, 600); }
+function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+function _setDob(y,m,d, ys,ms,ds){
+  if(!ys) return;
+  if(y){ ys.value=y; ys.dispatchEvent(new Event("change",{bubbles:true})); }
+  if(m){ ms.value=m; ms.dispatchEvent(new Event("change",{bubbles:true})); }
+  if(d){ ds.value=d; ds.dispatchEvent(new Event("change",{bubbles:true})); }
+}
+function restoreDraft(){
+  let d=null; try{ d=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null"); }catch(e){}
+  if(!d || (d.t && Date.now()-d.t > DRAFT_TTL)){ if(d) clearDraft(); return; }
+  _restoring = true;
+  try{
+    _sv("emp_name",d.emp.name); _sv("emp_id",d.emp.empId); _sv("dept",d.emp.dept);
+    _sv("phone",d.emp.phone); _sv("emp_idno",d.emp.idno); _sv("email",d.emp.email); _sv("emp_age",d.emp.age);
+    _setDob(d.emp.dy,d.emp.dm,d.emp.dd, document.getElementById("emp_dob_y"),document.getElementById("emp_dob_m"),document.getElementById("emp_dob_d"));
+    if(d.emp.empId) fetchSubsidy(d.emp.empId);
+    if(d.room){ const r=document.querySelector('input[name="room"][value="'+d.room+'"]'); if(r){ r.checked=true; document.querySelectorAll(".room").forEach(x=>x.classList.remove("on")); r.closest(".room").classList.add("on"); } }
+    (d.people||[]).forEach(function(pd){
+      addPerson();
+      const card = peopleEl.lastElementChild;
+      if(pd.type==="employee"){ const er=card.querySelector('.p-type[value="employee"]'); er.checked=true; er.dispatchEvent(new Event("change",{bubbles:true})); }
+      card.querySelector(".p-name").value = pd.name||"";
+      card.querySelector(".p-rel").value = pd.rel||"";
+      card.querySelector(".p-empid").value = pd.empid||"";
+      card.querySelector(".p-idno").value = pd.idno||"";
+      card.querySelector(".p-age").value = pd.age||"";
+      _setDob(pd.dy,pd.dm,pd.dd, card.querySelector(".p-dob-y"),card.querySelector(".p-dob-m"),card.querySelector(".p-dob-d"));
+      if(pd.type==="employee" && pd.empid) fetchSubsidy(pd.empid);
+    });
+    occupancy = d.occupancy || null; roommate = d.roommate || "";
+  }catch(e){}
+  _restoring = false;
+  recalc();
+  showDraftHint(true);
+}
+document.getElementById("form").addEventListener("input", scheduleSave);
+document.getElementById("form").addEventListener("change", scheduleSave);
+document.getElementById("draftClear").addEventListener("click", function(){
+  if(!confirm(T("確定要清除已填寫的內容並重新開始嗎？"))) return;
+  clearDraft();
+  document.getElementById("form").reset();
+  document.querySelectorAll(".room").forEach(x=>x.classList.remove("on"));
+  document.getElementById("emp_age").innerHTML = ageOptions();
+  peopleEl.innerHTML=""; occupancy=null; roommate=""; recalc();
+  showDraftHint(false);
+});
+restoreDraft();
 </script>
 
 <!-- Google 網頁翻譯（印尼文／越南文，供外籍移工閱讀） -->
